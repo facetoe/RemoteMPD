@@ -1,6 +1,5 @@
 package org.a0z.mpdlocal;
 
-import static android.text.TextUtils.isEmpty;
 import static org.a0z.mpdlocal.StringsUtils.getHashFromString;
 
 public class AlbumInfo {
@@ -100,7 +99,7 @@ public class AlbumInfo {
     }
 
     public boolean isValid() {
-        return !isEmpty(artist) && !isEmpty(album) &&
+        return !artist.isEmpty() && !album.isEmpty() &&
                 !artist.equals(UnknownArtist.instance.getName()) && !album.equals(UnknownAlbum.instance.getName());
     }
 }
