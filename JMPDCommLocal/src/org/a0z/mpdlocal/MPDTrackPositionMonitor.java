@@ -8,6 +8,8 @@ import org.a0z.mpdlocal.exception.MPDServerException;
  */
 public class MPDTrackPositionMonitor extends MPDMonitor {
 
+    private boolean paused = false;
+
     public MPDTrackPositionMonitor(MPD mpd, int delay) {
         super(mpd, delay);
         setName("MPDTrackPositionMonitor");
@@ -18,8 +20,8 @@ public class MPDTrackPositionMonitor extends MPDMonitor {
         long oldElapsedTime = -1;
 
         while (!giveup) {
-            Boolean connectionState = Boolean.valueOf(mpd.isConnected());
-            if (connectionState == Boolean.TRUE) {
+            Boolean mpdConnectionState = Boolean.valueOf(mpd.isConnected());
+            if (mpdConnectionState == Boolean.TRUE && !paused) {
                 try {
                     MPDStatus status = mpd.getStatus(true);
                     if (oldElapsedTime != status.getElapsedTime()) {
@@ -39,5 +41,13 @@ public class MPDTrackPositionMonitor extends MPDMonitor {
                 e.printStackTrace();
             }
         }
+    }
+
+    public boolean isPaused() {
+        return paused;
+    }
+
+    public void setPaused(boolean paused) {
+        this.paused = paused;
     }
 }

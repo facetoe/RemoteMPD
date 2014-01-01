@@ -20,6 +20,8 @@ import java.util.List;
  */
 public class MPDStatusMonitor extends MPDMonitor {
 
+    private boolean paused = false;
+
 	/**
 	 * Constructs a MPDStatusMonitor.
 	 * 
@@ -61,7 +63,7 @@ public class MPDStatusMonitor extends MPDMonitor {
 				connectionStateChanged = true;
 			}
 
-			if (connectionState == Boolean.TRUE) {
+			if (connectionState == Boolean.TRUE && !paused) {
 				// playlist
 				try {
 					boolean dbChanged=false;
@@ -174,4 +176,12 @@ public class MPDStatusMonitor extends MPDMonitor {
 		}
 
 	}
+
+    public boolean isPaused() {
+        return paused;
+    }
+
+    public void setPaused(boolean paused) {
+        this.paused = paused;
+    }
 }
