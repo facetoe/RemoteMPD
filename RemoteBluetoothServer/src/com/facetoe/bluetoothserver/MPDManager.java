@@ -53,8 +53,14 @@ public class MPDManager implements TrackPositionListener, StatusChangeListener {
         if(!trackPositionMonitor.isAlive())
             trackPositionMonitor.start();
 
+        if(trackPositionMonitor.isPaused())
+            trackPositionMonitor.setPaused(false);
+
         if(!statusMonitor.isAlive())
             statusMonitor.start();
+
+        if(statusMonitor.isPaused())
+            statusMonitor.setPaused(false);
 
         this.inputStream = new BufferedInputStream(connection.openInputStream(), 1024);
         this.outputStream = new BufferedOutputStream(connection.openOutputStream(), 1024);
@@ -107,6 +113,8 @@ public class MPDManager implements TrackPositionListener, StatusChangeListener {
         inputStream.close();
         outputStream.close();
         connection.close();
+        trackPositionMonitor.setPaused(true);
+        statusMonitor.setPaused(true);
     }
 
     private int extractInt(String str) {
@@ -155,10 +163,19 @@ public class MPDManager implements TrackPositionListener, StatusChangeListener {
         updatePlaylist();
     }
 
+    private void updatePlaylist() {
+        System.out.println("Refreshing playlist");
+        mpdComm.getPlaylist().playlistChanged(null, -1);
+        System.out.println("Sending playlist");
+        MPDPlaylist playlist = mpdComm.getPlaylist();
+        write(new MPDResponse(MPDResponse.PLAYER_UPDATE_PLAYLIST, playlist.getMusicList()));
+        System.out.println("Done");
+    }
+
     @Override
     public void trackChanged(MPDStatus mpdStatus, int oldTrack) {
         System.out.println("Track changed");
-        write(new ServerResponse(ServerResponse.PLAYER_UPDATE_CURRENTSONG, getCurrentSong(mpdStatus)));
+        write(new MPDResponse(MPDResponse.PLAYER_UPDATE_CURRENTSONG, getCurrentSong(mpdStatus)));
     }
 
     private Music getCurrentSong(MPDStatus status) {
@@ -194,16 +211,7 @@ public class MPDManager implements TrackPositionListener, StatusChangeListener {
 
     @Override
     public void trackPositionChanged(MPDStatus status) {
-        write(new ServerResponse(ServerResponse.PLAYER_UPDATE_TRACK_POSITION, status.getElapsedTime()));
-    }
-
-    private void updatePlaylist() {
-        System.out.println("Refreshing playlist");
-        mpdComm.getPlaylist().playlistChanged(null, -1);
-        System.out.println("Sending playlist");
-        MPDPlaylist playlist = mpdComm.getPlaylist();
-        write(new ServerResponse(ServerResponse.PLAYER_UPDATE_PLAYLIST, playlist.getMusicList()));
-        System.out.println("Done");
+        write(new MPDResponse(MPDResponse.PLAYER_UPDATE_TRACK_POSITION, status.getElapsedTime()));
     }
 
     public void setConnection(StreamConnection connection) {
