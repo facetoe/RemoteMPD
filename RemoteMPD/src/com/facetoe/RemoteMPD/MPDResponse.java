@@ -3,8 +3,8 @@ package com.facetoe.RemoteMPD;
 import com.google.gson.Gson;
 
 import java.io.Serializable;
-public class ServerResponse implements Serializable {
-    private static final String TAG = ServerResponse.class.getSimpleName();
+public class MPDResponse implements Serializable {
+    private static final String TAG = MPDResponse.class.getSimpleName();
 
     public static final int PLAYER_STOPPED = 0;
     public static final int PLAYER_STARTED = 1;
@@ -23,7 +23,7 @@ public class ServerResponse implements Serializable {
     private int responseType;
     private String objectJSON;
 
-    public ServerResponse(int responseType, Object obj) {
+    public MPDResponse(int responseType, Object obj) {
         this.responseType = responseType;
         this.objectJSON = new Gson().toJson(obj);
     }

@@ -35,8 +35,8 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener 
     private static final RemoteMPDApplication myApp = RemoteMPDApplication.getInstance();
 
     BluetoothAdapter mBluetoothAdapter;
-    RemoteMPDCommandService commandService;
-    PlayerManager playerManager;
+    BluetoothCommandService commandService;
+    PlayerController playerManager;
     SharedPreferences prefs;
     Gson gson = new Gson();
 
@@ -122,19 +122,21 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener 
         super.onDestroy();
         // Unregister broadcast listeners
         this.unregisterReceiver(mReceiver);
+        commandService.stop();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         initializeBlueTooth();
-        commandService = new RemoteMPDCommandService(this, handler);
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         String lastDeviceAddress = prefs.getString(LAST_DEVICE_KEY, "NONE");
         if (lastDeviceAddress.equals("NONE")) {
             //TODO handle no device
         } else {
-            commandService.connect(mBluetoothAdapter.getRemoteDevice(lastDeviceAddress));
+            BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(lastDeviceAddress);
+            commandService = new BluetoothCommandService(this, handler, device);
+            commandService.connect();
         }
         playerManager = new BluetoothMPDManager(commandService);
     }
@@ -175,8 +177,10 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener 
                             .getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
                     // Get the BLuetoothDevice object
                     BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
+
+                    commandService.setDevice(device);
                     // Attempt to connect to the device
-                    commandService.connect(device);
+                    commandService.connect();
 
                     // Save device.
                     SharedPreferences.Editor editor = prefs.edit();
@@ -199,28 +203,28 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener 
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             switch (msg.what) {
-                case RemoteMPDCommandService.MESSAGE_RECEIVED:
-                    ServerResponse response = (ServerResponse) msg.getData().getSerializable(MESSAGE);
+                case BluetoothCommandService.MESSAGE_RECEIVED:
+                    MPDResponse response = (MPDResponse) msg.getData().getSerializable(MESSAGE);
                     handleMessageReceived(response);
                     break;
             }
         }
     };
 
-    private void handleMessageReceived(ServerResponse response) {
+    private void handleMessageReceived(MPDResponse response) {
         String jsonString = response.getObjectJSON();
         switch (response.getResponseType()) {
-            case ServerResponse.PLAYER_UPDATE_CURRENTSONG:
+            case MPDResponse.PLAYER_UPDATE_CURRENTSONG:
                 Music newSong = gson.fromJson(jsonString, Music.class);
                 txtCurrentSong.setText(newSong.getTitle());
                 break;
 
-            case ServerResponse.PLAYER_UPDATE_TRACK_POSITION:
+            case MPDResponse.PLAYER_UPDATE_TRACK_POSITION:
                 int time = gson.fromJson(response.getObjectJSON(), int.class);
                 //skTrackPosition.setProgress(time);
                 txtCurrentAlbum.setText(Integer.toString(time));
                 break;
-            case ServerResponse.PLAYER_UPDATE_PLAYLIST:
+            case MPDResponse.PLAYER_UPDATE_PLAYLIST:
                 try {
                     Type listType = new TypeToken<List<Music>>() {}.getType();
                     List<Music> songList = gson.fromJson(response.getObjectJSON(), listType);
