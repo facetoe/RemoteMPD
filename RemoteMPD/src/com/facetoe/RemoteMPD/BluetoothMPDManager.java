@@ -1,7 +1,7 @@
 package com.facetoe.RemoteMPD;
 
 import android.util.Log;
-import org.a0z.mpdlocal.MPDCommand;
+import org.a0z.mpd.MPDCommand;
 
 class BluetoothMPDManager extends PlayerManager {
     private static final String TAG = "BluetoothMPDManager";
@@ -51,6 +51,6 @@ class BluetoothMPDManager extends PlayerManager {
     }
 
     private void sendCommand(String message) {
-        commandService.send(message + "\n");
+        commandService.write(message + "\n");
     }
 }

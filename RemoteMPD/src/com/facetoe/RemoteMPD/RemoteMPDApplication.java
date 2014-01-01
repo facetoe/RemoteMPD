@@ -2,7 +2,7 @@ package com.facetoe.RemoteMPD;
 
 import android.app.Application;
 import android.util.Log;
-import org.a0z.mpdlocal.Music;
+import org.a0z.mpd.Music;
 
 import java.util.List;
 
@@ -35,8 +35,6 @@ public class RemoteMPDApplication extends Application {
         Log.i(APP_TAG, "Initializing application..");
         instance = this;
     }
-
-
 
     private static void checkInstance() {
         if (instance == null)

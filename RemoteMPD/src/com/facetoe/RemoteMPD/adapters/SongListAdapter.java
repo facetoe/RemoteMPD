@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import com.facetoe.RemoteMPD.R;
-import org.a0z.mpdlocal.Music;
+import org.a0z.mpd.Music;
 
 import java.util.List;
 

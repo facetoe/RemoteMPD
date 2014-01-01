@@ -13,8 +13,8 @@ import android.widget.*;
 import com.facetoe.RemoteMPD.adapters.SongListAdapter;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import org.a0z.mpdlocal.MPDCommand;
-import org.a0z.mpdlocal.Music;
+import org.a0z.mpd.MPDCommand;
+import org.a0z.mpd.Music;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -93,7 +93,7 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener 
                 Music item = songListAdapter.getItem(position);
                 MPDCommand command = new MPDCommand(MPDCommand.MPD_CMD_PLAY_ID, Integer.toString(item.getSongId()));
                 Log.i(TAG, "Sending: " + command.toString());
-                commandService.send(command.toString());
+                commandService.write(command.toString());
             }
         });
 

@@ -58,10 +58,6 @@ public class MPDManager implements TrackPositionListener, StatusChangeListener {
 
         this.inputStream = new BufferedInputStream(connection.openInputStream(), 1024);
         this.outputStream = new BufferedOutputStream(connection.openOutputStream(), 1024);
-
-        if(mpdComm.getPlaylist().size() == 0)
-            updatePlaylist();
-
     }
 
     public void connect(String server, int port, String password) throws MPDServerException, UnknownHostException {
@@ -103,6 +99,8 @@ public class MPDManager implements TrackPositionListener, StatusChangeListener {
         else if (command.equals(MPDCommand.MPD_CMD_PREV)) mpdComm.previous();
         else if (command.equals(MPDCommand.MPD_CMD_VOLUME)) mpdComm.adjustVolume(extractInt(command));
         else if (command.startsWith(MPDCommand.MPD_CMD_PLAY_ID)) mpdComm.skipToId(extractInt(command));
+        else if(command.startsWith(MPDCommand.MPD_CMD_PLAYLIST_CHANGES)) updatePlaylist();
+        else System.out.println("Unknown command: " + command);
     }
 
     private void closeConnection() throws IOException {

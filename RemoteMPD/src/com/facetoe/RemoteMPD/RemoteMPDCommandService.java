@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import com.google.gson.Gson;
+import org.a0z.mpd.MPDCommand;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,8 +18,7 @@ import java.nio.charset.Charset;
 import java.util.UUID;
 
 public class RemoteMPDCommandService {
-    // Debugging
-    private static final boolean D = true;
+    // Debugging tag
     private static final String TAG = "RemoteMPDCommandService";
 
     // Unique UUID for this application
@@ -30,6 +30,7 @@ public class RemoteMPDCommandService {
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
     private int mState;
+    private RemoteMPDApplication app;
 
     // Constants that indicate the current connection state
     public static final int STATE_NONE = 0;       // we're doing nothing
@@ -37,11 +38,9 @@ public class RemoteMPDCommandService {
     public static final int STATE_CONNECTED = 2;  // now connected to a remote device
 
 
-    public static final int MESSAGE_RECEIVED = 3; // we have a responseType from the server
+    public static final int MESSAGE_RECEIVED = 3; // we have received a message from the server
 
-    // Constant that indicates end of session to the server
-    public static final int EXIT_CMD = -1;
-
+    // For sending JSON across the wire
     private Gson gson = new Gson();
 
     /**
@@ -54,6 +53,7 @@ public class RemoteMPDCommandService {
         mAdapter = BluetoothAdapter.getDefaultAdapter();
         mState = STATE_NONE;
         mHandler = handler;
+        app = RemoteMPDApplication.getInstance();
     }
 
     /**
@@ -62,7 +62,7 @@ public class RemoteMPDCommandService {
      * @param state An integer defining the current connection state
      */
     private synchronized void setState(int state) {
-        if (D) Log.d(TAG, "setState() " + mState + " -> " + state);
+        Log.d(TAG, "setState() " + mState + " -> " + state);
         mState = state;
 
         // Give the new state to the Handler so the UI Activity can update
@@ -82,7 +82,7 @@ public class RemoteMPDCommandService {
      * @param device The BluetoothDevice to connect
      */
     public synchronized void connect(BluetoothDevice device) {
-        if (D) Log.d(TAG, "connect to: " + device);
+        Log.d(TAG, "connect to: " + device);
 
         // Cancel any thread attempting to make a connection
         if (mState == STATE_CONNECTING) {
@@ -111,7 +111,7 @@ public class RemoteMPDCommandService {
      * @param device The BluetoothDevice that has been connected
      */
     public synchronized void connected(BluetoothSocket socket, BluetoothDevice device) {
-        if (D) Log.d(TAG, "connected()");
+        Log.d(TAG, "connected()");
 
         // Cancel the thread that completed the connection
         if (mConnectThread != null) {
@@ -129,13 +129,6 @@ public class RemoteMPDCommandService {
         mConnectedThread = new ConnectedThread(socket);
         mConnectedThread.start();
 
-//        // Send the name of the connected device back to the UI Activity
-//        Message msg = mHandler.obtainMessage(RemoteBluetooth.MESSAGE_DEVICE_NAME);
-//        Bundle bundle = new Bundle();
-//        bundle.putString(RemoteBluetooth.DEVICE_NAME, device.getName());
-//        msg.setData(bundle);
-//        mHandler.sendMessage(msg);
-
         setState(STATE_CONNECTED);
     }
 
@@ -143,7 +136,7 @@ public class RemoteMPDCommandService {
      * Stop all threads
      */
     public synchronized void stop() {
-        if (D) Log.d(TAG, "stop()");
+        Log.d(TAG, "stop()");
         if (mConnectThread != null) {
             mConnectThread.cancel();
             mConnectThread = null;
@@ -152,16 +145,15 @@ public class RemoteMPDCommandService {
             mConnectedThread.cancel();
             mConnectedThread = null;
         }
-
         setState(STATE_NONE);
     }
 
     /**
      * Send a string to the server.
      *
-     * @param message The responseType to send.
+     * @param message The responseType to write.
      */
-    public void send(String message) {
+    public void write(String message) {
         write(message.getBytes(Charset.forName("UTF-8")));
     }
 
@@ -172,7 +164,7 @@ public class RemoteMPDCommandService {
      * @see ConnectedThread#write(byte[])
      */
     private void write(byte[] out) {
-        if (D) Log.i("Writing: ", new String(out));
+        Log.d("Writing: ", new String(out));
         // Create temporary object
         ConnectedThread r;
         // Synchronize a copy of the ConnectedThread
@@ -183,6 +175,7 @@ public class RemoteMPDCommandService {
         // Perform the write unsynchronized
         r.write(out);
     }
+
 
     /**
      * Indicate that the connection attempt failed and notify the UI Activity.
@@ -317,10 +310,13 @@ public class RemoteMPDCommandService {
             mmOutStream = tmpOut;
         }
 
-        //TODO thing
         public void run() {
-            if (D) Log.i(TAG, "ConnectedThread.run()");
+            Log.d(TAG, "ConnectedThread running");
             int bytesRead;
+
+            if(app.getSongList() == null) {
+                write(new MPDCommand(MPDCommand.MPD_CMD_PLAYLIST_CHANGES, "-1").toString());
+            }
 
             StringBuilder builder = new StringBuilder();
             // Keep listening to the InputStream while connected
@@ -329,7 +325,7 @@ public class RemoteMPDCommandService {
                     // Read from the InputStream
                     int ch;
                     bytesRead = 0;
-                    while ((ch = mmInStream.read()) != (int)'\n' ) {
+                    while ((ch = mmInStream.read()) != 10 ) {
                         bytesRead++;
                         builder.append((char)ch);
                     }
@@ -355,6 +351,10 @@ public class RemoteMPDCommandService {
             mHandler.sendMessage(msg);
         }
 
+        public void write(String message) {
+            write((message + "\n").getBytes(Charset.forName("UTF-8")));
+        }
+
         /**
          * Write to the connected OutStream.
          *
@@ -363,30 +363,13 @@ public class RemoteMPDCommandService {
         public void write(byte[] buffer) {
             try {
                 mmOutStream.write(buffer);
-
-                // Share the sent responseType back to the UI Activity
-//                mHandler.obtainMessage(RemoteMPDCommandService.MESSAGE_WRITE, -1, -1, buffer)
-//                        .sendToTarget();
             } catch (IOException e) {
-                Log.e(TAG, "Exception during write", e);
-            }
-        }
-
-        public void write(int out) {
-            try {
-                mmOutStream.write(out);
-
-//                Share the sent responseType back to the UI Activity
-//                mHandler.obtainMessage(RemoteMPDCommandService.MESSAGE_WRITE, -1, -1, buffer)
-//                        .sendToTarget();
-            } catch (IOException e) {
-                Log.e(TAG, "Exception during write", e);
+                Log.e(TAG, "write() failed", e);
             }
         }
 
         public void cancel() {
             try {
-                mmOutStream.write(EXIT_CMD);
                 mmSocket.close();
             } catch (IOException e) {
                 Log.e(TAG, "close() of connect socket failed", e);
