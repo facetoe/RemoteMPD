@@ -1,6 +1,9 @@
 package com.facetoe.RemoteMPD;
 
-interface PlayerController {
+interface MPDPlayerController {
+
+    void start();
+
     void play();
 
     void stop(); // TODO remove this?

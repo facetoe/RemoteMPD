@@ -50,16 +50,16 @@ public class MPDManager implements TrackPositionListener, StatusChangeListener {
         if (!mpdMon.isConnected())
             mpdMon.connect(host, port, passwd);
 
-        if(!trackPositionMonitor.isAlive())
+        if (!trackPositionMonitor.isAlive())
             trackPositionMonitor.start();
 
-        if(trackPositionMonitor.isPaused())
+        if (trackPositionMonitor.isPaused())
             trackPositionMonitor.setPaused(false);
 
-        if(!statusMonitor.isAlive())
+        if (!statusMonitor.isAlive())
             statusMonitor.start();
 
-        if(statusMonitor.isPaused())
+        if (statusMonitor.isPaused())
             statusMonitor.setPaused(false);
 
         this.inputStream = new BufferedInputStream(connection.openInputStream(), 1024);
@@ -99,13 +99,13 @@ public class MPDManager implements TrackPositionListener, StatusChangeListener {
         closeConnection();
     }
 
-    private void processCommand(String command) throws MPDServerException {
+    private synchronized void processCommand(String command) throws MPDServerException {
         if (command.equals(MPDCommand.MPD_CMD_PLAY)) mpdComm.play();
         else if (command.equals(MPDCommand.MPD_CMD_NEXT)) mpdComm.next();
         else if (command.equals(MPDCommand.MPD_CMD_PREV)) mpdComm.previous();
         else if (command.equals(MPDCommand.MPD_CMD_VOLUME)) mpdComm.adjustVolume(extractInt(command));
         else if (command.startsWith(MPDCommand.MPD_CMD_PLAY_ID)) mpdComm.skipToId(extractInt(command));
-        else if(command.startsWith(MPDCommand.MPD_CMD_PLAYLIST_CHANGES)) updatePlaylist();
+        else if (command.startsWith(MPDCommand.MPD_CMD_PLAYLIST_CHANGES)) updatePlaylist();
         else System.out.println("Unknown command: " + command);
     }
 
@@ -166,7 +166,6 @@ public class MPDManager implements TrackPositionListener, StatusChangeListener {
     private void updatePlaylist() {
         System.out.println("Refreshing playlist");
         mpdComm.getPlaylist().playlistChanged(null, -1);
-        System.out.println("Sending playlist");
         MPDPlaylist playlist = mpdComm.getPlaylist();
         write(new MPDResponse(MPDResponse.PLAYER_UPDATE_PLAYLIST, playlist.getMusicList()));
         System.out.println("Done");
@@ -175,7 +174,7 @@ public class MPDManager implements TrackPositionListener, StatusChangeListener {
     @Override
     public void trackChanged(MPDStatus mpdStatus, int oldTrack) {
         System.out.println("Track changed");
-        write(new MPDResponse(MPDResponse.PLAYER_UPDATE_CURRENTSONG, getCurrentSong(mpdStatus)));
+        write(new MPDResponse(MPDResponse.PLAYER_UPDATE_CURRENTSONG, mpdStatus));
     }
 
     private Music getCurrentSong(MPDStatus status) {
@@ -211,7 +210,7 @@ public class MPDManager implements TrackPositionListener, StatusChangeListener {
 
     @Override
     public void trackPositionChanged(MPDStatus status) {
-        write(new MPDResponse(MPDResponse.PLAYER_UPDATE_TRACK_POSITION, status.getElapsedTime()));
+        //write(new MPDResponse(MPDResponse.PLAYER_UPDATE_TRACK_POSITION, status.getElapsedTime()));
     }
 
     public void setConnection(StreamConnection connection) {

@@ -1,15 +1,24 @@
 package com.facetoe.RemoteMPD;
 
+import android.os.Handler;
 import android.util.Log;
 import org.a0z.mpd.MPDCommand;
 
-class BluetoothMPDManager implements PlayerController{
+class BluetoothMPDManager implements MPDPlayerController {
     private static final String TAG = "BluetoothMPDManager";
 
-    BluetoothCommandService commandService;
 
-    public BluetoothMPDManager(BluetoothCommandService service) {
-        commandService = service;
+
+    private BluetoothController commandService;
+    private RemoteMPDApplication app = RemoteMPDApplication.getInstance();
+
+    public BluetoothMPDManager() {
+        commandService = new BluetoothController();
+    }
+
+    @Override
+    public void start() {
+        commandService.connect();
     }
 
     @Override
@@ -32,7 +41,7 @@ class BluetoothMPDManager implements PlayerController{
 
     @Override
     public void next() {
-        Log.d(TAG, "Next");
+        Log.d(TAG, MPDCommand.MPD_CMD_NEXT);
         commandService.sendCommand(new MPDCommand(MPDCommand.MPD_CMD_NEXT));
     }
 
@@ -48,7 +57,7 @@ class BluetoothMPDManager implements PlayerController{
         MPDCommand command = new MPDCommand(
                 MPDCommand.MPD_CMD_VOLUME,
                 Integer.toString(newVolume));
-        Log.d(TAG, command.toString());
         commandService.sendCommand(command);
+        Log.d(TAG, command.toString());
     }
 }

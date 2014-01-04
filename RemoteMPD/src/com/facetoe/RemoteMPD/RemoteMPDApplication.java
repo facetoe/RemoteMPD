@@ -1,7 +1,9 @@
 package com.facetoe.RemoteMPD;
 
 import android.app.Application;
+import android.content.SharedPreferences;
 import android.util.Log;
+import com.facetoe.RemoteMPD.helpers.MPDAsyncHelper;
 import org.a0z.mpd.Music;
 
 import java.util.List;
@@ -10,19 +12,42 @@ import java.util.List;
  * Created by facetoe on 31/12/13.
  */
 public class RemoteMPDApplication extends Application {
-    String APP_TAG = "RemoteMPDApplication";
+    public final static String APP_TAG = "RemoteMPDApplication";
+    private static final String PREFERENCES = "preferences";
 
     private static RemoteMPDApplication instance;
     List<Music> songList;
+    SharedPreferences sharedPreferences;
+    public MPDAsyncHelper asyncHelper = null;
+    private BluetoothMPDStatusMonitor bluetoothMonitor;
 
     public static RemoteMPDApplication getInstance() {
         checkInstance();
         return instance;
     }
 
+    public void connect() {
+        asyncHelper.connect();
+    }
+
     public List<Music> getSongList() {
         checkInstance();
         return songList;
+    }
+
+    public SharedPreferences getSharedPreferences() {
+        checkInstance();
+        if(sharedPreferences == null)
+            sharedPreferences = getSharedPreferences(PREFERENCES, MODE_PRIVATE);
+        return sharedPreferences;
+    }
+
+    public BluetoothMPDStatusMonitor getBluetoothMonitor() {
+        checkInstance();
+        if(bluetoothMonitor == null) {
+            bluetoothMonitor = new BluetoothMPDStatusMonitor();
+        }
+        return bluetoothMonitor;
     }
 
     public void setSongList(List<Music> songList) {
@@ -33,6 +58,8 @@ public class RemoteMPDApplication extends Application {
     public void onCreate() {
         super.onCreate();
         Log.i(APP_TAG, "Initializing application..");
+        asyncHelper = new MPDAsyncHelper();
+        asyncHelper.connect();
         instance = this;
     }
 

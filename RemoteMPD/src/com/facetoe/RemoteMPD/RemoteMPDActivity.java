@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.*;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -14,29 +16,27 @@ import com.facetoe.RemoteMPD.adapters.SongListAdapter;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.a0z.mpd.MPDCommand;
+import org.a0z.mpd.MPDStatus;
 import org.a0z.mpd.Music;
+import org.a0z.mpd.event.StatusChangeListener;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RemoteMPDActivity extends Activity implements View.OnClickListener {
+public class RemoteMPDActivity extends Activity implements View.OnClickListener, StatusChangeListener {
 
     private static final String TAG = "RemoteMPDActivity";
 
     private static final int REQUEST_ENABLE_BT = 1;
     private static final int REQUEST_CONNECT_DEVICE = 2;
 
-    // For saving and retrieving the last device
-    private static final String PREFERENCES = "preferences";
-    private static final String LAST_DEVICE_KEY = "lastDevice";
     public static final String MESSAGE = "message";
-
+    public static final String ERROR = "error";
+    BluetoothAdapter bluetoothAdapter;
+    private boolean isBluetooth = true; //TODO remove this and have it in preferences
     private static final RemoteMPDApplication myApp = RemoteMPDApplication.getInstance();
-
-    BluetoothAdapter mBluetoothAdapter;
-    BluetoothCommandService commandService;
-    PlayerController playerManager;
+    MPDPlayerController mpdManager;
     SharedPreferences prefs;
     Gson gson = new Gson();
 
@@ -52,6 +52,7 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener 
     private ListView songListView;
     private SongListAdapter songListAdapter;
     private List<Music> songList;
+    private BluetoothMPDStatusMonitor bluetoothMonitor = new BluetoothMPDStatusMonitor();
 
     private SeekBar skVolume;
     private SeekBar skTrackPosition;
@@ -80,7 +81,7 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener 
         btnPlay.setOnClickListener(this);
 
         songListView = (ListView) findViewById(R.id.listSongs);
-        if(myApp.getSongList() == null) {
+        if (myApp.getSongList() == null) {
             songList = new ArrayList<Music>();
         } else {
             songList = myApp.getSongList();
@@ -93,28 +94,72 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener 
                 Music item = songListAdapter.getItem(position);
                 MPDCommand command = new MPDCommand(MPDCommand.MPD_CMD_PLAY_ID, Integer.toString(item.getSongId()));
                 Log.i(TAG, "Sending: " + command.toString());
-                commandService.write(command.toString());
+                // TODO Add the command to play id to the playermanger
+                //commandService.sendCommand(command);
             }
         });
+
 
         skVolume = (SeekBar) findViewById(R.id.skVolume);
         skVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                playerManager.setVolume(progress);
-                Log.i(TAG, "Volume set to: " + progress);
+                mpdManager.setVolume(progress);
             }
+
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
         });
 
         // Register for broadcasts on BluetoothAdapter state change
         IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-        prefs = getSharedPreferences(PREFERENCES, MODE_PRIVATE);
-
+        prefs = myApp.getSharedPreferences();
         this.registerReceiver(mReceiver, filter);
+    }
+
+    @Override
+    public void volumeChanged(MPDStatus mpdStatus, int oldVolume) {
+
+    }
+
+    @Override
+    public void playlistChanged(MPDStatus mpdStatus, int oldPlaylistVersion) {
+
+    }
+
+    @Override
+    public void trackChanged(MPDStatus mpdStatus, int oldTrack) {
+        Log.e(TAG, "We got im: " + mpdStatus.toString() );
+    }
+
+    @Override
+    public void stateChanged(MPDStatus mpdStatus, String oldState) {
+
+    }
+
+    @Override
+    public void repeatChanged(boolean repeating) {
+
+    }
+
+    @Override
+    public void randomChanged(boolean random) {
+
+    }
+
+    @Override
+    public void connectionStateChanged(boolean connected, boolean connectionLost) {
+
+    }
+
+    @Override
+    public void libraryStateChanged(boolean updating) {
+
     }
 
     @Override
@@ -122,29 +167,55 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener 
         super.onDestroy();
         // Unregister broadcast listeners
         this.unregisterReceiver(mReceiver);
-        commandService.stop();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        initializeBlueTooth();
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        String lastDeviceAddress = prefs.getString(LAST_DEVICE_KEY, "NONE");
-        if (lastDeviceAddress.equals("NONE")) {
-            //TODO handle no device
+        if(isBluetooth) {
+            initializeBluetooth();
+            mpdManager = new BluetoothMPDManager();
+            mpdManager.start();
         } else {
-            BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(lastDeviceAddress);
-            commandService = new BluetoothCommandService(this, handler, device);
-            commandService.connect();
+            initializeWifi();
+            mpdManager = new WifiMPDManager();
+            mpdManager.start();
         }
-        playerManager = new BluetoothMPDManager(commandService);
+
+    }
+
+    private void initializeBluetooth() {
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        bluetoothMonitor.addStatusChangeListener(this);
+        if (bluetoothAdapter == null) {
+            //TODO error message;
+            // Bluetooth is not supported.
+            finish();
+        }
+
+        /* If Bluetooth is turned off request that it be enabled. */
+        if (!bluetoothAdapter.isEnabled()) {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        }
+    }
+
+    private void initializeWifi() {
+        ConnectivityManager connMgr = (ConnectivityManager)
+                getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            Log.i(TAG, "WiFI is connected");
+            myApp.asyncHelper.addStatusChangeListener(this);
+        } else {
+            Log.e(TAG, "No Wifi"); //TODO handle no wifi
+        }
+
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        commandService.stop();
     }
 
     @Override
@@ -176,15 +247,17 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener 
                     String address = data.getExtras()
                             .getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
                     // Get the BLuetoothDevice object
-                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
+                    BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
 
-                    commandService.setDevice(device);
+
+                    //TODO make this connect through the service
+                    //commandService.setDevice(device);
                     // Attempt to connect to the device
-                    commandService.connect();
+                    //commandService.connect();
 
                     // Save device.
                     SharedPreferences.Editor editor = prefs.edit();
-                    editor.putString(LAST_DEVICE_KEY, device.getAddress());
+                    editor.putString(BluetoothController.LAST_DEVICE_KEY, device.getAddress());
                     editor.commit();
                 }
                 break;
@@ -203,7 +276,7 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener 
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             switch (msg.what) {
-                case BluetoothCommandService.MESSAGE_RECEIVED:
+                case BluetoothController.MESSAGE_RECEIVED:
                     MPDResponse response = (MPDResponse) msg.getData().getSerializable(MESSAGE);
                     handleMessageReceived(response);
                     break;
@@ -226,14 +299,15 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener 
                 break;
             case MPDResponse.PLAYER_UPDATE_PLAYLIST:
                 try {
-                    Type listType = new TypeToken<List<Music>>() {}.getType();
+                    Type listType = new TypeToken<List<Music>>() {
+                    }.getType();
                     List<Music> songList = gson.fromJson(response.getObjectJSON(), listType);
                     songListAdapter.clear();
                     songListAdapter.addAll(songList);
                     songListAdapter.notifyDataSetChanged();
                     myApp.setSongList(songList);
-                    Log.i(TAG, "Added " + songList.size() +  " songs");
-                } catch ( Exception e ) {
+                    Log.i(TAG, "Added " + songList.size() + " songs");
+                } catch (Exception e) {
                     Log.e(TAG, "FUCK: ", e);
                 }
                 break;
@@ -241,21 +315,6 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener 
                 Log.i(TAG, "Unknown message type: " + response.getResponseType());
                 break;
 
-        }
-    }
-
-    private void initializeBlueTooth() {
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (mBluetoothAdapter == null) {
-            //TODO error message;
-            // Bluetooth is not supported.
-            finish();
-        }
-
-        /* If Bluetooth is turned off request that it be enabled. */
-        if (!mBluetoothAdapter.isEnabled()) {
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
     }
 
@@ -269,16 +328,16 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener 
                         BluetoothAdapter.ERROR);
                 switch (state) {
                     case BluetoothAdapter.STATE_OFF:
-                        //setTxtStatus("Bluetooth off");
+                        Log.i(TAG, "Bluetooth off");
                         break;
                     case BluetoothAdapter.STATE_TURNING_OFF:
-//                        setTxtStatus("Turning Bluetooth off...");
+                        Log.i(TAG, "Bluetooth turning off");
                         break;
                     case BluetoothAdapter.STATE_ON:
-//                        setTxtStatus("Bluetooth on");
+                        Log.i(TAG, "Bluetooth on");
                         break;
                     case BluetoothAdapter.STATE_TURNING_ON:
-//                        setTxtStatus("Turning Bluetooth on...");
+                        Log.i(TAG, "Bluetooth turning on");
                         break;
                 }
             }
@@ -289,13 +348,13 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener 
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btnNext:
-                playerManager.next();
+                mpdManager.next();
                 break;
             case R.id.btnBack:
-                playerManager.prev();
+                mpdManager.prev();
                 break;
             case R.id.btnPlay:
-                playerManager.play();
+                mpdManager.play();
                 break;
             default:
                 return;

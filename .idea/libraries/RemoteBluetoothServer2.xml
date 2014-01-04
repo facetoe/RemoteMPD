@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="RemoteBluetoothServer2">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/RemoteMPD/RemoteBluetoothServer/classes/artifacts/RemoteBluetoothServer_jar/RemoteBluetoothServer.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

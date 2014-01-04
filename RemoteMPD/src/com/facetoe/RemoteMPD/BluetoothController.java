@@ -3,10 +3,7 @@ package com.facetoe.RemoteMPD;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
+import android.content.SharedPreferences;
 import android.util.Log;
 import com.google.gson.Gson;
 import org.a0z.mpd.MPDCommand;
@@ -17,60 +14,78 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.UUID;
 
-public class BluetoothCommandService extends CommandService implements CommandServiceController {
+
+public class BluetoothController extends CommandService {
 
     // Unique UUID for this application
     private static final UUID MY_UUID = UUID.fromString("04c6093b-0000-1000-8000-00805f9b34fb");
 
+
+    // Constants that indicate the current connection state
+    protected static final int STATE_NONE = 0;       // we're doing nothing
+    protected static final int STATE_CONNECTING = 1; // now initiating an outgoing connection
+    protected static final int STATE_CONNECTED = 2;  // now spawnConnectedThread to a remote device
+    protected static int CURRENT_STATE = STATE_NONE;
+
+    // For saving and retrieving the last device
+    public static final String LAST_DEVICE_KEY = "lastDevice";
+
     // Member fields
-    private BluetoothAdapter mAdapter;
+    private BluetoothAdapter bluetoothAdapter;
     private BluetoothDevice device;
-    private ConnectThread mConnectThread;
-    private ConnectedThread mConnectedThread;
+    private ConnectThread connectThread;
+    private ConnectedThread connectedThread;
     private RemoteMPDApplication app;
+    private SharedPreferences prefs;
 
     // For sending JSON across the wire
     private Gson gson = new Gson();
+    BluetoothMPDStatusMonitor monitor;
 
 
     /**
-     * Constructor. Prepares a new BluetoothCommandService session.
-     *
-     * @param context The UI Activity Context
-     * @param handler A Handler to send messages back to the UI Activity
-     * @param device The BluetoothDevice to connect
+     * Constructor. Prepares a new BluetoothController session.
      */
-    public BluetoothCommandService(Context context, Handler handler, BluetoothDevice device) {
-        super(context, handler);
-        mAdapter = BluetoothAdapter.getDefaultAdapter();
+    public BluetoothController() {
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         app = RemoteMPDApplication.getInstance();
-        this.device = device;
+        prefs = app.getSharedPreferences();
+        this.monitor = app.getBluetoothMonitor();
+        initDevice();
+    }
+
+    private void initDevice() {
+        String lastDeviceAddress = prefs.getString(LAST_DEVICE_KEY, "NONE");
+        if(lastDeviceAddress.equals("NONE")) {
+            //TODO handle no device.
+        } else {
+           device = bluetoothAdapter.getRemoteDevice(lastDeviceAddress);
+        }
     }
 
 
     /**
      * Start the ConnectThread to initiate a connection to a remote device.
      */
-    @Override
     public synchronized void connect() {
         Log.d(TAG, "connect to: " + device);
         // Cancel any thread attempting to make a connection
         if (CURRENT_STATE == STATE_CONNECTING) {
-            if (mConnectThread != null) {
-                mConnectThread.cancel();
-                mConnectThread = null;
+            if (connectThread != null) {
+                connectThread.cancel();
+                connectThread = null;
             }
         }
 
         // Cancel any thread currently running a connection
-        if (mConnectedThread != null) {
-            mConnectedThread.cancel();
-            mConnectedThread = null;
+        if (connectedThread != null) {
+            connectedThread.cancel();
+            connectedThread = null;
         }
 
         // Start the thread to connect with the given device
-        mConnectThread = new ConnectThread(device);
-        mConnectThread.start();
+        connectThread = new ConnectThread(device);
+        connectThread.start();
         setState(STATE_CONNECTING);
 
     }
@@ -78,37 +93,25 @@ public class BluetoothCommandService extends CommandService implements CommandSe
     /**
      * Stop all threads
      */
-    @Override
-    public synchronized void stop() {
-        Log.d(TAG, "stop()");
-        if (mConnectThread != null) {
-            mConnectThread.cancel();
-            mConnectThread = null;
+    public synchronized void disconnect() {
+        Log.d(TAG, "disconnect()");
+        if (connectThread != null) {
+            connectThread.cancel();
+            connectThread = null;
         }
-        if (mConnectedThread != null) {
-            mConnectedThread.cancel();
-            mConnectedThread = null;
+        if (connectedThread != null) {
+            connectedThread.cancel();
+            connectedThread = null;
         }
         setState(STATE_NONE);
     }
 
-    @Override
     public boolean isConnected() {
-        return mConnectedThread != null && mConnectedThread.isAlive();
+        return connectedThread != null && connectedThread.isAlive();
     }
 
-    @Override
     public void sendCommand(MPDCommand command) {
         write(command.toString());
-    }
-
-    @Override
-    public void handleMPDResponse(MPDResponse response) {
-        Message msg = handler.obtainMessage(MESSAGE_RECEIVED);
-        Bundle bundle = new Bundle();
-        bundle.putSerializable(RemoteMPDActivity.MESSAGE, response);
-        msg.setData(bundle);
-        handler.sendMessage(msg);
     }
 
     /**
@@ -133,11 +136,26 @@ public class BluetoothCommandService extends CommandService implements CommandSe
         // Synchronize a copy of the ConnectedThread
         synchronized (this) {
             if (CURRENT_STATE != STATE_CONNECTED) return;
-            r = mConnectedThread;
+            r = connectedThread;
         }
         // Perform the write unsynchronized
         r.write(out);
     }
+
+    private void connectionFailed() {
+        setState(STATE_NONE);
+    }
+
+    private void connectionLost() {
+        setState(STATE_NONE);
+    }
+
+    private synchronized void setState(int newState) {
+        Log.d(TAG, "setState() " + CURRENT_STATE + " -> " + newState);
+        CURRENT_STATE = newState;
+    }
+
+    public synchronized int getState() { return CURRENT_STATE; }
 
     /**
      * Start the ConnectedThread to begin managing a Bluetooth connection
@@ -148,20 +166,20 @@ public class BluetoothCommandService extends CommandService implements CommandSe
         Log.d(TAG, "spawnConnectedThread()");
 
         // Cancel the thread that completed the connection
-        if (mConnectThread != null) {
-            mConnectThread.cancel();
-            mConnectThread = null;
+        if (connectThread != null) {
+            connectThread.cancel();
+            connectThread = null;
         }
 
         // Cancel any thread currently running a connection
-        if (mConnectedThread != null) {
-            mConnectedThread.cancel();
-            mConnectedThread = null;
+        if (connectedThread != null) {
+            connectedThread.cancel();
+            connectedThread = null;
         }
 
         // Start the thread to manage the connection and perform transmissions
-        mConnectedThread = new ConnectedThread(socket);
-        mConnectedThread.start();
+        connectedThread = new ConnectedThread(socket);
+        connectedThread.start();
 
         setState(STATE_CONNECTED);
     }
@@ -171,28 +189,28 @@ public class BluetoothCommandService extends CommandService implements CommandSe
      */
 
     //TODO fix this to reconnect
-    @Override
-    protected void connectionLost() {
-////        if (mConnectionLostCount < 3) {
-////            if(D) Log.i(TAG, "Connection lost");
-////            // Send a reconnect responseType back to the Activity
-////            Message msg = mHandler.obtainMessage(RemoteBluetooth.MESSAGE_TOAST);
-////            Bundle bundle = new Bundle();
-////            bundle.putString(RemoteBluetooth.TOAST, "Device connection was lost. Reconnecting " + mConnectionLostCount);
-////            msg.setData(bundle);
-////            mHandler.sendMessage(msg);
-////            connect(mSavedDevice);
-////
-////        } else {
-//        setState(STATE_LISTEN);
-//        // Send a failure responseType back to the Activity
-//        Message msg = mHandler.obtainMessage(RemoteBluetooth.MESSAGE_TOAST);
-//        Bundle bundle = new Bundle();
-//        bundle.putString(RemoteBluetooth.TOAST, "Device connection was lost");
-//        msg.setData(bundle);
-//        mHandler.sendMessage(msg);
-////        }
-    }
+//    @Override
+//    protected void connectionLost() {
+//////        if (mConnectionLostCount < 3) {
+//////            if(D) Log.i(TAG, "Connection lost");
+//////            // Send a reconnect responseType back to the Activity
+//////            Message msg = mHandler.obtainMessage(RemoteBluetooth.MESSAGE_TOAST);
+//////            Bundle bundle = new Bundle();
+//////            bundle.putString(RemoteBluetooth.TOAST, "Device connection was lost. Reconnecting " + mConnectionLostCount);
+//////            msg.setData(bundle);
+//////            mHandler.sendMessage(msg);
+//////            connect(mSavedDevice);
+//////
+//////        } else {
+////        setState(STATE_LISTEN);
+////        // Send a failure responseType back to the Activity
+////        Message msg = mHandler.obtainMessage(RemoteBluetooth.MESSAGE_TOAST);
+////        Bundle bundle = new Bundle();
+////        bundle.putString(RemoteBluetooth.TOAST, "Device connection was lost");
+////        msg.setData(bundle);
+////        mHandler.sendMessage(msg);
+//////        }
+//    }
 
     public BluetoothDevice getDevice() {
         return device;
@@ -228,7 +246,7 @@ public class BluetoothCommandService extends CommandService implements CommandSe
             setName("ConnectThread");
 
             // Always cancel discovery because it will slow down a connection
-            mAdapter.cancelDiscovery();
+            bluetoothAdapter.cancelDiscovery();
 
             // Make a connection to the BluetoothSocket
             try {
@@ -248,8 +266,8 @@ public class BluetoothCommandService extends CommandService implements CommandSe
             }
 
             // Reset the ConnectThread because we're done
-            synchronized (BluetoothCommandService.this) {
-                mConnectThread = null;
+            synchronized (BluetoothController.this) {
+                connectThread = null;
             }
 
             // Start the ConnectedThread thread
@@ -327,11 +345,7 @@ public class BluetoothCommandService extends CommandService implements CommandSe
         private void handleMessage(String message) {
             Log.i(TAG, "Message Received: " + message);
             MPDResponse response = gson.fromJson(message, MPDResponse.class);
-            handleMPDResponse(response);
-        }
-
-        public void write(String message) {
-            write((message + "\n").getBytes(Charset.forName("UTF-8")));
+            monitor.handleMessage(response);
         }
 
         /**
