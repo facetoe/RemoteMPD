@@ -308,7 +308,6 @@ public class BluetoothController extends CommandService {
 
             mmInStream = tmpIn;
             mmOutStream = tmpOut;
-            Log.e(TAG, "State: " + getState() + " : " + CURRENT_STATE);
         }
 
         public void run() {
