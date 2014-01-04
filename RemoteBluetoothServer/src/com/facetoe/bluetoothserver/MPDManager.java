@@ -19,19 +19,19 @@ import java.util.regex.Pattern;
  * Created by facetoe on 31/12/13.
  */
 public class MPDManager implements TrackPositionListener, StatusChangeListener {
-    MPD mpdComm;
-    MPD mpdMon;
-    Gson gson = new Gson();
-    StreamConnection connection;
-    BufferedInputStream inputStream;
-    BufferedOutputStream outputStream;
-    StringBuilder sb = new StringBuilder(1024);
+    private boolean D = true;
+    private MPD mpdComm;
+    private MPD mpdMon;
+    private Gson gson = new Gson();
+    private StreamConnection connection;
+    private BufferedInputStream inputStream;
+    private BufferedOutputStream outputStream;
+    private StringBuilder sb = new StringBuilder(1024);
     private static final Pattern digit = Pattern.compile("\\d+");
-    boolean isCanceled = false;
+    private boolean isCanceled = false;
     private String host;
     private int port;
     private String passwd;
-    private MPDTrackPositionMonitor trackPositionMonitor;
     private MPDStatusMonitor statusMonitor;
 
     public MPDManager(MPD mpdComm, MPD mpdMon) {
@@ -39,8 +39,6 @@ public class MPDManager implements TrackPositionListener, StatusChangeListener {
         this.mpdMon = mpdMon;
         statusMonitor = new MPDStatusMonitor(mpdMon, 1000);
         statusMonitor.addStatusChangeListener(this);
-        trackPositionMonitor = new MPDTrackPositionMonitor(mpdMon, 1000);
-        trackPositionMonitor.addTrackPositionListener(this);
     }
 
     private void initConnection() throws MPDServerException, IOException {
@@ -49,12 +47,6 @@ public class MPDManager implements TrackPositionListener, StatusChangeListener {
 
         if (!mpdMon.isConnected())
             mpdMon.connect(host, port, passwd);
-
-        if (!trackPositionMonitor.isAlive())
-            trackPositionMonitor.start();
-
-        if (trackPositionMonitor.isPaused())
-            trackPositionMonitor.setPaused(false);
 
         if (!statusMonitor.isAlive())
             statusMonitor.start();
@@ -77,10 +69,10 @@ public class MPDManager implements TrackPositionListener, StatusChangeListener {
 
     public void run() throws IOException, MPDServerException {
         initConnection();
-        System.out.println("Running");
+        if (D) System.out.println("Running");
         int ch;
         while (!isCanceled) {
-            System.out.println("Waiting for input...");
+            if (D) System.out.println("Waiting for input...");
             while ((ch = inputStream.read()) != 10) {
                 if (ch == -1) {
                     isCanceled = true;
@@ -91,7 +83,7 @@ public class MPDManager implements TrackPositionListener, StatusChangeListener {
             }
 
             if (!isCanceled) {
-                System.out.println(sb);
+                if (D) System.out.println(sb);
                 processCommand(sb.toString());
                 sb.setLength(0);
             }
@@ -106,14 +98,13 @@ public class MPDManager implements TrackPositionListener, StatusChangeListener {
         else if (command.equals(MPDCommand.MPD_CMD_VOLUME)) mpdComm.adjustVolume(extractInt(command));
         else if (command.startsWith(MPDCommand.MPD_CMD_PLAY_ID)) mpdComm.skipToId(extractInt(command));
         else if (command.startsWith(MPDCommand.MPD_CMD_PLAYLIST_CHANGES)) updatePlaylist();
-        else System.out.println("Unknown command: " + command);
+        else if (D) System.out.println("Unknown command: " + command);
     }
 
     private void closeConnection() throws IOException {
         inputStream.close();
         outputStream.close();
         connection.close();
-        trackPositionMonitor.setPaused(true);
         statusMonitor.setPaused(true);
     }
 
@@ -139,7 +130,7 @@ public class MPDManager implements TrackPositionListener, StatusChangeListener {
         try {
             int bytes = message.getBytes().length;
             write((message + "\n").getBytes("UTF-8"));
-            System.out.println("Wrote: " + bytes + " bytes.");
+            if (D) System.out.println("Wrote: " + bytes + " bytes.");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -154,63 +145,64 @@ public class MPDManager implements TrackPositionListener, StatusChangeListener {
 
     @Override
     public void volumeChanged(MPDStatus mpdStatus, int oldVolume) {
-        System.out.println("Volume changed");
+        if (D) System.out.println("Volume changed");
+        write(new MPDResponse(MPDResponse.EVENT_VOLUME, mpdStatus));
     }
 
     @Override
     public void playlistChanged(MPDStatus mpdStatus, int oldPlaylistVersion) {
-        System.out.println("Playlist changed");
+        if (D) System.out.println("Playlist changed");
         updatePlaylist();
     }
 
     private void updatePlaylist() {
-        System.out.println("Refreshing playlist");
+        if (D) System.out.println("Refreshing playlist");
         mpdComm.getPlaylist().playlistChanged(null, -1);
         MPDPlaylist playlist = mpdComm.getPlaylist();
-        write(new MPDResponse(MPDResponse.PLAYER_UPDATE_PLAYLIST, playlist.getMusicList()));
-        System.out.println("Done");
+        write(new MPDResponse(MPDResponse.EVENT_UPDATE_PLAYLIST, playlist.getMusicList()));
+        if (D) System.out.println("Done");
     }
 
     @Override
     public void trackChanged(MPDStatus mpdStatus, int oldTrack) {
-        System.out.println("Track changed");
-        write(new MPDResponse(MPDResponse.PLAYER_UPDATE_CURRENTSONG, mpdStatus));
-    }
-
-    private Music getCurrentSong(MPDStatus status) {
-        int position = status.getSongPos();
-        return mpdComm.getPlaylist().getByIndex(position);
+        if (D) System.out.println("Track changed");
+        write(new MPDResponse(MPDResponse.EVENT_TRACK, mpdStatus));
     }
 
     @Override
     public void stateChanged(MPDStatus mpdStatus, String oldState) {
-        System.out.println("State changed");
-
+        if (D) System.out.println("State changed");
+        write(new MPDResponse(MPDResponse.EVENT_STATE, mpdStatus));
     }
 
     @Override
     public void repeatChanged(boolean repeating) {
-        System.out.println("Repeat changed");
+        if (D) System.out.println("Repeat changed");
+        write(new MPDResponse(MPDResponse.EVENT_REPEAT, repeating));
     }
 
     @Override
     public void randomChanged(boolean random) {
-        System.out.println("Random changed");
+        if (D) System.out.println("Random changed");
+        write(new MPDResponse(MPDResponse.EVENT_RANDOM, random));
     }
 
     @Override
     public void connectionStateChanged(boolean connected, boolean connectionLost) {
-        System.out.println("Connection State changed");
+        if (D) System.out.println("Connection State changed");
+        write(new MPDResponse(MPDResponse.EVENT_CONNECTIONSTATE, connected)); // TODO FIX THIS
     }
 
     @Override
     public void libraryStateChanged(boolean updating) {
-        System.out.println("Library state changed");
+        if (D) System.out.println("Library state changed");
+        write(new MPDResponse(MPDResponse.EVENT_UPDATESTATE, updating));
     }
 
     @Override
     public void trackPositionChanged(MPDStatus status) {
-        //write(new MPDResponse(MPDResponse.PLAYER_UPDATE_TRACK_POSITION, status.getElapsedTime()));
+        if (D) System.out.println("Track position changed");
+        write(new MPDResponse(MPDResponse.EVENT_TRACK, status));
     }
 
     public void setConnection(StreamConnection connection) {
