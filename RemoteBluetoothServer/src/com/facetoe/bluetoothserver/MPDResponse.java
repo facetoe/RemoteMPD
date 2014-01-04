@@ -1,7 +1,6 @@
 package com.facetoe.bluetoothserver;
 
 import com.google.gson.Gson;
-import com.sun.java.swing.plaf.gtk.resources.gtk_sv;
 
 import java.io.Serializable;
 
@@ -41,11 +40,9 @@ public class MPDResponse implements Serializable {
         this.responseType = responseType;
         numObjects = obj.length;
         objectJSON = new String[numObjects];
-        synchronized (this) {
-            Gson gson = new Gson();
-            for (int i = 0; i < numObjects; i++) {
-                objectJSON[i] = gson.toJson(obj[i]);
-            }
+        Gson gson = new Gson();
+        for (int i = 0; i < numObjects; i++) {
+            objectJSON[i] = gson.toJson(obj[i]);
         }
     }
 
