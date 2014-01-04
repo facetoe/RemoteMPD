@@ -10,20 +10,27 @@ import java.io.Serializable;
 public class MPDResponse implements Serializable {
     private static final String TAG = MPDResponse.class.getSimpleName();
 
-    public static final int PLAYER_STOPPED = 0;
-    public static final int PLAYER_STARTED = 1;
-    public static final int PLAYER_PAUSED = 2;
-    public static final int PLAYER_UNPAUSED = 3;
-    public static final int PLAYER_RANDOM_CHANGED = 4;
-    public static final int PLAYER_REPEAT_CHANGED = 5;
-    public static final int PLAYER_SINGLE_CHANGED = 6;
-    public static final int PLAYER_VOLUME_CHANGED = 7;
-    public static final int PLAYER_MUTE_CHANGED = 8;
+    // Event-ID's for PMix internal events...
+    public static final int EVENT_CONNECT = 0;
+    public static final int EVENT_DISCONNECT = 1;
+    public static final int EVENT_CONNECTFAILED = 2;
+    public static final int EVENT_CONNECTSUCCEEDED = 3;
+    public static final int EVENT_STARTMONITOR = 4;
+    public static final int EVENT_STOPMONITOR = 5;
+    public static final int EVENT_EXECASYNC = 6;
+    public static final int EVENT_EXECASYNCFINISHED = 7;
 
-    public static final int PLAYER_UPDATE_CURRENTSONG = 9;
-    public static final int PLAYER_UPDATE_TRACK_POSITION = 10;
-    public static final int PLAYER_UPDATE_PLAYLIST = 11;
-    public static final int PLAYER_UPDATE_STATE = 12;
+    // Event-ID's for JMPDComm events (from the listener)...
+    public static final int EVENT_CONNECTIONSTATE = 11;
+    public static final int EVENT_PLAYLIST = 12;
+    public static final int EVENT_RANDOM = 13;
+    public static final int EVENT_REPEAT = 14;
+    public static final int EVENT_STATE = 15;
+    public static final int EVENT_TRACK = 16;
+    public static final int EVENT_UPDATESTATE = 17;
+    public static final int EVENT_VOLUME = 18;
+    public static final int EVENT_TRACKPOSITION = 19;
+    public static final int EVENT_UPDATE_PLAYLIST = 20;
 
     private int responseType;
     private String objectJSON;
