@@ -14,15 +14,14 @@ import android.view.*;
 import android.widget.*;
 import com.facetoe.RemoteMPD.adapters.SongListAdapter;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import org.a0z.mpd.MPDCommand;
 import org.a0z.mpd.MPDStatus;
 import org.a0z.mpd.Music;
 import org.a0z.mpd.event.StatusChangeListener;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class RemoteMPDActivity extends Activity implements View.OnClickListener, StatusChangeListener {
 
@@ -52,7 +51,6 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener,
     private ListView songListView;
     private SongListAdapter songListAdapter;
     private List<Music> songList;
-    private BluetoothMPDStatusMonitor bluetoothMonitor = new BluetoothMPDStatusMonitor();
 
     private SeekBar skVolume;
     private SeekBar skTrackPosition;
@@ -134,7 +132,14 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener,
 
     @Override
     public void trackChanged(MPDStatus mpdStatus, int oldTrack) {
-        Log.e(TAG, "We got im: " + mpdStatus.toString() );
+        List<Music> music = myApp.getSongList();
+        if (songList != null) {
+            int pos = mpdStatus.getSongPos();
+            Music song = music.get(pos);
+            Log.e(TAG, "We got im: " + song);
+        } else {
+            Log.e(TAG, "Song list was null");
+        }
     }
 
     @Override
@@ -172,7 +177,7 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener,
     @Override
     protected void onStart() {
         super.onStart();
-        if(isBluetooth) {
+        if (isBluetooth) {
             initializeBluetooth();
             mpdManager = new BluetoothMPDManager();
             mpdManager.start();
@@ -186,7 +191,7 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener,
 
     private void initializeBluetooth() {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        bluetoothMonitor.addStatusChangeListener(this);
+        myApp.getBluetoothMonitor().addStatusChangeListener(this);
         if (bluetoothAdapter == null) {
             //TODO error message;
             // Bluetooth is not supported.
@@ -285,37 +290,37 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener,
     };
 
     private void handleMessageReceived(MPDResponse response) {
-        String jsonString = response.getObjectJSON();
-        switch (response.getResponseType()) {
-            case MPDResponse.PLAYER_UPDATE_CURRENTSONG:
-                Music newSong = gson.fromJson(jsonString, Music.class);
-                txtCurrentSong.setText(newSong.getTitle());
-                break;
-
-            case MPDResponse.PLAYER_UPDATE_TRACK_POSITION:
-                int time = gson.fromJson(response.getObjectJSON(), int.class);
-                //skTrackPosition.setProgress(time);
-                txtCurrentAlbum.setText(Integer.toString(time));
-                break;
-            case MPDResponse.PLAYER_UPDATE_PLAYLIST:
-                try {
-                    Type listType = new TypeToken<List<Music>>() {
-                    }.getType();
-                    List<Music> songList = gson.fromJson(response.getObjectJSON(), listType);
-                    songListAdapter.clear();
-                    songListAdapter.addAll(songList);
-                    songListAdapter.notifyDataSetChanged();
-                    myApp.setSongList(songList);
-                    Log.i(TAG, "Added " + songList.size() + " songs");
-                } catch (Exception e) {
-                    Log.e(TAG, "FUCK: ", e);
-                }
-                break;
-            default:
-                Log.i(TAG, "Unknown message type: " + response.getResponseType());
-                break;
-
-        }
+//        String jsonString = response.getObjectJSON();
+//        switch (response.getResponseType()) {
+//            case MPDResponse.PLAYER_UPDATE_CURRENTSONG:
+//                Music newSong = gson.fromJson(jsonString, Music.class);
+//                txtCurrentSong.setText(newSong.getTitle());
+//                break;
+//
+//            case MPDResponse.PLAYER_UPDATE_TRACK_POSITION:
+//                int time = gson.fromJson(response.getObjectJSON(), int.class);
+//                //skTrackPosition.setProgress(time);
+//                txtCurrentAlbum.setText(Integer.toString(time));
+//                break;
+//            case MPDResponse.PLAYER_UPDATE_PLAYLIST:
+//                try {
+//                    Type listType = new TypeToken<List<Music>>() {
+//                    }.getType();
+//                    List<Music> songList = gson.fromJson(response.getObjectJSON(), listType);
+//                    songListAdapter.clear();
+//                    songListAdapter.addAll(songList);
+//                    songListAdapter.notifyDataSetChanged();
+//                    myApp.setSongList(songList);
+//                    Log.i(TAG, "Added " + songList.size() + " songs");
+//                } catch (Exception e) {
+//                    Log.e(TAG, "FUCK: ", e);
+//                }
+//                break;
+//            default:
+//                Log.i(TAG, "Unknown message type: " + response.getResponseType());
+//                break;
+//
+//        }
     }
 
     //TODO Hook this in with the notification bar.
