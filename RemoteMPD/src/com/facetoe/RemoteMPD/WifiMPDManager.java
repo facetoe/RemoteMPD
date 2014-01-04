@@ -37,6 +37,10 @@ public class WifiMPDManager extends CommandService implements MPDPlayerControlle
 
         if(!mpd.isConnected())
             asyncHelper.connect();
+
+        if(app.getSongList() == null) {
+            app.setSongList(asyncHelper.oMPD.getPlaylist().getMusicList());
+        }
     }
 
     @Override
