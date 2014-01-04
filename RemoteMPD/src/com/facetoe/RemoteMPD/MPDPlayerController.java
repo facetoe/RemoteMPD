@@ -6,6 +6,8 @@ interface MPDPlayerController {
 
     void play();
 
+    void playID(int id);
+
     void stop(); // TODO remove this?
 
     void pause();

@@ -29,17 +29,28 @@ public class MPDResponse implements Serializable {
     public static final int EVENT_UPDATE_PLAYLIST = 20;
 
     private int responseType;
-    private String objectJSON;
+    private int numObjects;
+    private String[] objectJSON;
 
-    public MPDResponse(int responseType, Object obj) {
+    public MPDResponse(int responseType, Object... obj) {
         this.responseType = responseType;
-        this.objectJSON = new Gson().toJson(obj);
+        numObjects = obj.length;
+        objectJSON = new String[numObjects];
+        for (int i = 0; i < numObjects; i++) {
+            objectJSON[i] = new Gson().toJson(obj[i]);
+        }
     }
 
-    public String getObjectJSON() {
-        return objectJSON;
+    public String getObjectJSON(int index) {
+        if(index >= numObjects || index < 0)
+            throw new IndexOutOfBoundsException("Index out of bounds: " + index);
+        return objectJSON[index];
     }
     public int getResponseType() {
         return responseType;
+    }
+
+    public int getNumObjects() {
+        return numObjects;
     }
 }

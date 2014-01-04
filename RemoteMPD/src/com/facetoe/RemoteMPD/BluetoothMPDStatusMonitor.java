@@ -26,16 +26,47 @@ public class BluetoothMPDStatusMonitor {
     }
 
     public void handleMessage(MPDResponse response) {
-        String jsonString = response.getObjectJSON();
+        String firstJSONObject = response.getObjectJSON(0);
+        String secondJSONObject = null;
+        if(response.getNumObjects() > 1)
+            secondJSONObject = response.getObjectJSON(1);
         MPDStatus status;
+        boolean random;
+        boolean repeating;
+        int volume;
+        int oldTrack;
+        int oldPlaylistVersion;
         switch (response.getResponseType()) {
             case MPDResponse.EVENT_UPDATE_PLAYLIST:
                 extractSonglist(response);
             break;
             case MPDResponse.EVENT_TRACK:
-                status = gson.fromJson(jsonString, MPDStatus.class);
-                for (StatusChangeListener statusChangedListener : statusChangedListeners) {
-                    statusChangedListener.trackChanged(status, -1);
+                status = gson.fromJson(firstJSONObject, MPDStatus.class);
+                oldTrack = gson.fromJson(secondJSONObject, int.class);
+                for (StatusChangeListener listener : statusChangedListeners)
+                    listener.trackChanged(status, oldTrack);
+                break;
+            case MPDResponse.EVENT_PLAYLIST:
+                status = gson.fromJson(firstJSONObject, MPDStatus.class);
+                oldPlaylistVersion = gson.fromJson(secondJSONObject, int.class);
+                for (StatusChangeListener listener : statusChangedListeners)
+                    listener.playlistChanged(status, oldPlaylistVersion);
+                break;
+            case MPDResponse.EVENT_RANDOM:
+                random = gson.fromJson(firstJSONObject, boolean.class);
+                for (StatusChangeListener listener : statusChangedListeners)
+                    listener.randomChanged(random);
+                break;
+            case MPDResponse.EVENT_REPEAT:
+                repeating = gson.fromJson(firstJSONObject, boolean.class);
+                for (StatusChangeListener listener : statusChangedListeners)
+                    listener.repeatChanged(repeating);
+                break;
+            case MPDResponse.EVENT_VOLUME:
+                status = gson.fromJson(firstJSONObject, MPDStatus.class);
+                volume = gson.fromJson(secondJSONObject, int.class);
+                for (StatusChangeListener listener : statusChangedListeners) {
+                    listener.volumeChanged(status, volume);
                 }
                 break;
             default:
@@ -47,7 +78,7 @@ public class BluetoothMPDStatusMonitor {
 
     private void extractSonglist(MPDResponse response) {
         Type listType = new TypeToken<List<Music>>() {}.getType();
-        List<Music> songList = gson.fromJson(response.getObjectJSON(), listType);
+        List<Music> songList = gson.fromJson(response.getObjectJSON(0), listType);
         RemoteMPDApplication.getInstance().setSongList(songList);
         Log.i(TAG, "Added " + songList.size() + " songs");
     }
@@ -61,6 +92,10 @@ public class BluetoothMPDStatusMonitor {
         statusChangedListeners.add(listener);
     }
 
+    public void removeStatusChangeListener(StatusChangeListener listener) {
+        statusChangedListeners.remove(listener);
+    }
+
     /**
      * Adds a <code>TrackPositionListener</code>.
      *
@@ -68,5 +103,9 @@ public class BluetoothMPDStatusMonitor {
      */
     public void addTrackPositionListener(TrackPositionListener listener) {
         trackPositionChangedListeners.add(listener);
+    }
+
+    public void removeTrackPositionListener(TrackPositionListener listener) {
+        trackPositionChangedListeners.remove(listener);
     }
 }

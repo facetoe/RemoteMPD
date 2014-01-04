@@ -53,6 +53,15 @@ public class WifiMPDManager extends CommandService implements MPDPlayerControlle
     }
 
     @Override
+    public void playID(int id) {
+        try {
+            mpd.skipToId(id);
+        } catch (MPDServerException e) {
+            handleError(e);
+        }
+    }
+
+    @Override
     public void stop() {
         try {
             mpd.stop();

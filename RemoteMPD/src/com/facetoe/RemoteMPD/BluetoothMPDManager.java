@@ -28,6 +28,11 @@ class BluetoothMPDManager implements MPDPlayerController {
     }
 
     @Override
+    public void playID(int id) {
+        commandService.sendCommand(new MPDCommand(MPDCommand.MPD_CMD_PLAY_ID, Integer.toString(id)));
+    }
+
+    @Override
     public void stop() {
         Log.d(TAG, MPDCommand.MPD_CMD_STOP);
         commandService.sendCommand(new MPDCommand(MPDCommand.MPD_CMD_STOP));

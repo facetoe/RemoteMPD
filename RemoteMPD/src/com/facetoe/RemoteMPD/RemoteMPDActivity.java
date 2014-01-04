@@ -25,7 +25,7 @@ import java.util.List;
 
 public class RemoteMPDActivity extends Activity implements View.OnClickListener, StatusChangeListener {
 
-    private static final String TAG = "RemoteMPDActivity";
+    private static final String TAG = RemoteMPDApplication.APP_TAG;
 
     private static final int REQUEST_ENABLE_BT = 1;
     private static final int REQUEST_CONNECT_DEVICE = 2;
@@ -37,7 +37,6 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener,
     private static final RemoteMPDApplication myApp = RemoteMPDApplication.getInstance();
     MPDPlayerController mpdManager;
     SharedPreferences prefs;
-    Gson gson = new Gson();
 
     private ImageButton btnNext;
     private ImageButton btnPrev;
@@ -90,10 +89,7 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener,
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Music item = songListAdapter.getItem(position);
-                MPDCommand command = new MPDCommand(MPDCommand.MPD_CMD_PLAY_ID, Integer.toString(item.getSongId()));
-                Log.i(TAG, "Sending: " + command.toString());
-                // TODO Add the command to play id to the playermanger
-                //commandService.sendCommand(command);
+                mpdManager.playID(item.getSongId());
             }
         });
 
@@ -122,12 +118,12 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener,
 
     @Override
     public void volumeChanged(MPDStatus mpdStatus, int oldVolume) {
-
+        Log.i(TAG, "Volume changed: " + mpdStatus.getVolume());
     }
 
     @Override
     public void playlistChanged(MPDStatus mpdStatus, int oldPlaylistVersion) {
-
+        Log.i(TAG, "Playlist changed");
     }
 
     @Override
@@ -144,27 +140,28 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener,
 
     @Override
     public void stateChanged(MPDStatus mpdStatus, String oldState) {
-
+        Log.i(TAG, "State changed");
     }
 
     @Override
     public void repeatChanged(boolean repeating) {
+        Log.i(TAG, "Repeat changed");
 
     }
 
     @Override
     public void randomChanged(boolean random) {
-
+        Log.i(TAG, "Random changed");
     }
 
     @Override
     public void connectionStateChanged(boolean connected, boolean connectionLost) {
-
+        Log.i(TAG, "Connection state changed");
     }
 
     @Override
     public void libraryStateChanged(boolean updating) {
-
+        Log.i(TAG, "Library state changed");
     }
 
     @Override
@@ -179,11 +176,12 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener,
         super.onStart();
         if (isBluetooth) {
             initializeBluetooth();
-            mpdManager = new BluetoothMPDManager();
+            mpdManager = myApp.getMpdManager();
             mpdManager.start();
         } else {
             initializeWifi();
             mpdManager = new WifiMPDManager();
+            myApp.setMpdManager(mpdManager);
             mpdManager.start();
         }
 
@@ -215,12 +213,12 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener,
         } else {
             Log.e(TAG, "No Wifi"); //TODO handle no wifi
         }
-
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        myApp.getBluetoothMonitor().removeStatusChangeListener(this);
     }
 
     @Override
@@ -274,53 +272,6 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener,
                     finish();
                 }
         }
-    }
-
-    private final Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what) {
-                case BluetoothController.MESSAGE_RECEIVED:
-                    MPDResponse response = (MPDResponse) msg.getData().getSerializable(MESSAGE);
-                    handleMessageReceived(response);
-                    break;
-            }
-        }
-    };
-
-    private void handleMessageReceived(MPDResponse response) {
-//        String jsonString = response.getObjectJSON();
-//        switch (response.getResponseType()) {
-//            case MPDResponse.PLAYER_UPDATE_CURRENTSONG:
-//                Music newSong = gson.fromJson(jsonString, Music.class);
-//                txtCurrentSong.setText(newSong.getTitle());
-//                break;
-//
-//            case MPDResponse.PLAYER_UPDATE_TRACK_POSITION:
-//                int time = gson.fromJson(response.getObjectJSON(), int.class);
-//                //skTrackPosition.setProgress(time);
-//                txtCurrentAlbum.setText(Integer.toString(time));
-//                break;
-//            case MPDResponse.PLAYER_UPDATE_PLAYLIST:
-//                try {
-//                    Type listType = new TypeToken<List<Music>>() {
-//                    }.getType();
-//                    List<Music> songList = gson.fromJson(response.getObjectJSON(), listType);
-//                    songListAdapter.clear();
-//                    songListAdapter.addAll(songList);
-//                    songListAdapter.notifyDataSetChanged();
-//                    myApp.setSongList(songList);
-//                    Log.i(TAG, "Added " + songList.size() + " songs");
-//                } catch (Exception e) {
-//                    Log.e(TAG, "FUCK: ", e);
-//                }
-//                break;
-//            default:
-//                Log.i(TAG, "Unknown message type: " + response.getResponseType());
-//                break;
-//
-//        }
     }
 
     //TODO Hook this in with the notification bar.

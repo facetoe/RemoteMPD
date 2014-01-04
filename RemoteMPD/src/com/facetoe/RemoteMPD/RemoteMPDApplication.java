@@ -20,14 +20,20 @@ public class RemoteMPDApplication extends Application {
     SharedPreferences sharedPreferences;
     public MPDAsyncHelper asyncHelper = null;
     private BluetoothMPDStatusMonitor bluetoothMonitor;
+    private MPDPlayerController mpdManager;
 
     public static RemoteMPDApplication getInstance() {
         checkInstance();
         return instance;
     }
 
-    public void connect() {
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Log.i(APP_TAG, "Initializing application..");
+        asyncHelper = new MPDAsyncHelper();
         asyncHelper.connect();
+        instance = this;
     }
 
     public List<Music> getSongList() {
@@ -54,13 +60,15 @@ public class RemoteMPDApplication extends Application {
         this.songList = songList;
     }
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        Log.i(APP_TAG, "Initializing application..");
-        asyncHelper = new MPDAsyncHelper();
-        asyncHelper.connect();
-        instance = this;
+    public MPDPlayerController getMpdManager() {
+        if(mpdManager == null) {
+            mpdManager = new BluetoothMPDManager();
+        }
+        return mpdManager;
+    }
+
+    public void setMpdManager(MPDPlayerController mpdManager) {
+        this.mpdManager = mpdManager;
     }
 
     private static void checkInstance() {
