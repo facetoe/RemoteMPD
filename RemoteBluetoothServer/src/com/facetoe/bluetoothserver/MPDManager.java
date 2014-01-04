@@ -21,7 +21,6 @@ import java.util.regex.Pattern;
 public class MPDManager implements TrackPositionListener, StatusChangeListener {
     private boolean D = true;
     private MPD mpdComm;
-    private MPD mpdMon;
     private Gson gson = new Gson();
     private StreamConnection connection;
     private BufferedInputStream inputStream;
@@ -34,19 +33,15 @@ public class MPDManager implements TrackPositionListener, StatusChangeListener {
     private String passwd;
     private MPDStatusMonitor statusMonitor;
 
-    public MPDManager(MPD mpdComm, MPD mpdMon) {
+    public MPDManager(MPD mpdComm) {
         this.mpdComm = mpdComm;
-        this.mpdMon = mpdMon;
-        statusMonitor = new MPDStatusMonitor(mpdMon, 1000);
+        statusMonitor = new MPDStatusMonitor(mpdComm, 1000);
         statusMonitor.addStatusChangeListener(this);
     }
 
     private void initConnection() throws MPDServerException, IOException {
         if (!mpdComm.isConnected())
             mpdComm.connect(host, port, passwd);
-
-        if (!mpdMon.isConnected())
-            mpdMon.connect(host, port, passwd);
 
         if (!statusMonitor.isAlive())
             statusMonitor.start();
@@ -60,11 +55,10 @@ public class MPDManager implements TrackPositionListener, StatusChangeListener {
 
     public void connect(String server, int port, String password) throws MPDServerException, UnknownHostException {
         mpdComm.connect(server, port, password);
-        mpdMon.connect(server, port, password);
     }
 
     public boolean isConnected() {
-        return mpdComm.isConnected() && mpdMon.isConnected();
+        return mpdComm.isConnected();
     }
 
     public void run() throws IOException, MPDServerException {
@@ -91,7 +85,7 @@ public class MPDManager implements TrackPositionListener, StatusChangeListener {
         closeConnection();
     }
 
-    private synchronized void processCommand(String command) throws MPDServerException {
+    private void processCommand(final String command) throws MPDServerException {
         if (command.equals(MPDCommand.MPD_CMD_PLAY)) mpdComm.play();
         else if (command.equals(MPDCommand.MPD_CMD_NEXT)) mpdComm.next();
         else if (command.equals(MPDCommand.MPD_CMD_PREV)) mpdComm.previous();
@@ -146,7 +140,7 @@ public class MPDManager implements TrackPositionListener, StatusChangeListener {
     @Override
     public void volumeChanged(MPDStatus mpdStatus, int oldVolume) {
         if (D) System.out.println("Volume changed");
-        write(new MPDResponse(MPDResponse.EVENT_VOLUME, mpdStatus));
+        write(new MPDResponse(MPDResponse.EVENT_VOLUME, mpdStatus, oldVolume));
     }
 
     @Override
@@ -166,13 +160,13 @@ public class MPDManager implements TrackPositionListener, StatusChangeListener {
     @Override
     public void trackChanged(MPDStatus mpdStatus, int oldTrack) {
         if (D) System.out.println("Track changed");
-        write(new MPDResponse(MPDResponse.EVENT_TRACK, mpdStatus));
+        write(new MPDResponse(MPDResponse.EVENT_TRACK, mpdStatus, oldTrack));
     }
 
     @Override
     public void stateChanged(MPDStatus mpdStatus, String oldState) {
         if (D) System.out.println("State changed");
-        write(new MPDResponse(MPDResponse.EVENT_STATE, mpdStatus));
+        write(new MPDResponse(MPDResponse.EVENT_STATE, mpdStatus, oldState));
     }
 
     @Override
@@ -190,7 +184,7 @@ public class MPDManager implements TrackPositionListener, StatusChangeListener {
     @Override
     public void connectionStateChanged(boolean connected, boolean connectionLost) {
         if (D) System.out.println("Connection State changed");
-        write(new MPDResponse(MPDResponse.EVENT_CONNECTIONSTATE, connected)); // TODO FIX THIS
+        write(new MPDResponse(MPDResponse.EVENT_CONNECTIONSTATE, connected, connectionLost));
     }
 
     @Override
@@ -202,7 +196,7 @@ public class MPDManager implements TrackPositionListener, StatusChangeListener {
     @Override
     public void trackPositionChanged(MPDStatus status) {
         if (D) System.out.println("Track position changed");
-        write(new MPDResponse(MPDResponse.EVENT_TRACK, status));
+        write(new MPDResponse(MPDResponse.EVENT_TRACKPOSITION, status));
     }
 
     public void setConnection(StreamConnection connection) {

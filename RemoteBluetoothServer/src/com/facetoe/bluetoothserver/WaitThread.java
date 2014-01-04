@@ -55,9 +55,8 @@ public class WaitThread implements Runnable {
         String passwd = "password";
         int port = 6600;
         MPD mpdComm = new MPD();
-        MPD mpdMon = new MPD();
 
-        MPDManager manager = new MPDManager(mpdComm, mpdMon);
+        MPDManager manager = new MPDManager(mpdComm);
         manager.setPasswd(passwd);
         manager.setPort(port);
         manager.setHost(host);
