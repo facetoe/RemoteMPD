@@ -1,24 +1,15 @@
 package com.facetoe.RemoteMPD;
 
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import com.facetoe.RemoteMPD.helpers.MPDAsyncHelper;
 import org.a0z.mpd.MPD;
-import org.a0z.mpd.MPDStatus;
-import org.a0z.mpd.Music;
-import org.a0z.mpd.event.StatusChangeListener;
-import org.a0z.mpd.event.TrackPositionListener;
 import org.a0z.mpd.exception.MPDServerException;
-
-import java.net.UnknownHostException;
 
 
 /**
  * Created by facetoe on 2/01/14.
  */
-public class WifiMPDManager extends CommandService implements MPDPlayerController {
+public class WifiMPDManager implements MPDPlayerController {
 
     String TAG = RemoteMPDApplication.APP_TAG;
     MPD mpd;
@@ -32,15 +23,29 @@ public class WifiMPDManager extends CommandService implements MPDPlayerControlle
         asyncHelper = RemoteMPDApplication.getInstance().asyncHelper;
         mpd = asyncHelper.oMPD;
 
-        if(!asyncHelper.isMonitorAlive())
+        if (!asyncHelper.isMonitorAlive())
             asyncHelper.startMonitor();
 
-        if(!mpd.isConnected())
+        if (!mpd.isConnected())
             asyncHelper.connect();
 
-        if(app.getSongList() == null) {
+        if (app.getSongList() == null) {
             app.setSongList(asyncHelper.oMPD.getPlaylist().getMusicList());
         }
+    }
+
+    @Override
+    public void restart() {
+        asyncHelper.stopMonitor();
+        asyncHelper.disconnect();
+        asyncHelper.startMonitor();
+        asyncHelper.connect();
+    }
+
+    @Override
+    public void disconnect() {
+        asyncHelper.stopMonitor();
+        asyncHelper.disconnect();
     }
 
     @Override

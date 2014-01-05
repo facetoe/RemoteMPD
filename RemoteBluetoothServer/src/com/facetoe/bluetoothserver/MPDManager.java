@@ -37,6 +37,7 @@ public class MPDManager implements TrackPositionListener, StatusChangeListener {
         this.mpdComm = mpdComm;
         statusMonitor = new MPDStatusMonitor(mpdComm, 1000);
         statusMonitor.addStatusChangeListener(this);
+        statusMonitor.addTrackPositionListener(this);
     }
 
     private void initConnection() throws MPDServerException, IOException {
@@ -79,13 +80,13 @@ public class MPDManager implements TrackPositionListener, StatusChangeListener {
             if (!isCanceled) {
                 if (DEBUG) System.out.println(sb);
                 processCommand(sb.toString());
-                sb.setLength(0);
             }
+            sb.setLength(0);
         }
         closeConnection();
     }
 
-    private void processCommand(final String command) throws MPDServerException {
+    private void processCommand(String command) throws MPDServerException {
         if (command.equals(MPDCommand.MPD_CMD_PLAY)) mpdComm.play();
         else if (command.equals(MPDCommand.MPD_CMD_NEXT)) mpdComm.next();
         else if (command.equals(MPDCommand.MPD_CMD_PREV)) mpdComm.previous();

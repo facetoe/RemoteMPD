@@ -69,6 +69,19 @@ public class BluetoothMPDStatusMonitor {
                     listener.volumeChanged(status, volume);
                 }
                 break;
+            case MPDResponse.EVENT_STATE:
+                status = gson.fromJson(firstJSONObject, MPDStatus.class);
+                String oldState = gson.fromJson(secondJSONObject, String.class);
+                for (StatusChangeListener listener : statusChangedListeners) {
+                    listener.stateChanged(status, oldState);
+                }
+                break;
+            case MPDResponse.EVENT_TRACKPOSITION:
+                status = gson.fromJson(firstJSONObject, MPDStatus.class);
+                for (TrackPositionListener listener : trackPositionChangedListeners) {
+                    listener.trackPositionChanged(status);
+                }
+                break;
             default:
                 Log.i(TAG, "Unknown message type: " + response.getResponseType());
                 break;

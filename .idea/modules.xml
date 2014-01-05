@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/AndroidSlidingUpPanel/AndroidSlidingUpPanel.iml" filepath="$PROJECT_DIR$/AndroidSlidingUpPanel/AndroidSlidingUpPanel.iml" />
       <module fileurl="file://$PROJECT_DIR$/JMPDCommLocal/JMPDCommLocal.iml" filepath="$PROJECT_DIR$/JMPDCommLocal/JMPDCommLocal.iml" />
       <module fileurl="file://$PROJECT_DIR$/JMPDCommRemote/JMPDCommRemote.iml" filepath="$PROJECT_DIR$/JMPDCommRemote/JMPDCommRemote.iml" />
       <module fileurl="file://$PROJECT_DIR$/RemoteBluetoothServer/RemoteBluetoothServer.iml" filepath="$PROJECT_DIR$/RemoteBluetoothServer/RemoteBluetoothServer.iml" />

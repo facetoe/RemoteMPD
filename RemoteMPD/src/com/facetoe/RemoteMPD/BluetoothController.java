@@ -15,10 +15,10 @@ import java.nio.charset.Charset;
 import java.util.UUID;
 
 
-public class BluetoothController extends CommandService {
-
+public class BluetoothController  {
     // Unique UUID for this application
     private static final UUID MY_UUID = UUID.fromString("04c6093b-0000-1000-8000-00805f9b34fb");
+    protected static final String TAG = RemoteMPDApplication.APP_TAG;
 
 
     // Constants that indicate the current connection state
@@ -42,7 +42,6 @@ public class BluetoothController extends CommandService {
     private Gson gson = new Gson();
     BluetoothMPDStatusMonitor monitor;
 
-
     /**
      * Constructor. Prepares a new BluetoothController session.
      */
@@ -62,7 +61,6 @@ public class BluetoothController extends CommandService {
            device = bluetoothAdapter.getRemoteDevice(lastDeviceAddress);
         }
     }
-
 
     /**
      * Start the ConnectThread to initiate a connection to a remote device.
@@ -184,34 +182,6 @@ public class BluetoothController extends CommandService {
         setState(STATE_CONNECTED);
     }
 
-    /**
-     * Indicate that the connection was lost and notify the UI Activity.
-     */
-
-    //TODO fix this to reconnect
-//    @Override
-//    protected void connectionLost() {
-//////        if (mConnectionLostCount < 3) {
-//////            if(D) Log.i(TAG, "Connection lost");
-//////            // Send a reconnect responseType back to the Activity
-//////            Message msg = mHandler.obtainMessage(RemoteBluetooth.MESSAGE_TOAST);
-//////            Bundle bundle = new Bundle();
-//////            bundle.putString(RemoteBluetooth.TOAST, "Device connection was lost. Reconnecting " + mConnectionLostCount);
-//////            msg.setData(bundle);
-//////            mHandler.sendMessage(msg);
-//////            connect(mSavedDevice);
-//////
-//////        } else {
-////        setState(STATE_LISTEN);
-////        // Send a failure responseType back to the Activity
-////        Message msg = mHandler.obtainMessage(RemoteBluetooth.MESSAGE_TOAST);
-////        Bundle bundle = new Bundle();
-////        bundle.putString(RemoteBluetooth.TOAST, "Device connection was lost");
-////        msg.setData(bundle);
-////        mHandler.sendMessage(msg);
-//////        }
-//    }
-
     public BluetoothDevice getDevice() {
         return device;
     }
@@ -313,10 +283,6 @@ public class BluetoothController extends CommandService {
         public void run() {
             Log.d(TAG, "ConnectedThread running");
             int bytesRead;
-
-            if (app.getSongList() == null) {
-                sendCommand(new MPDCommand(MPDCommand.MPD_CMD_PLAYLIST_CHANGES, "-1"));
-            }
 
             StringBuilder builder = new StringBuilder();
             // Keep listening to the InputStream while spawnConnectedThread

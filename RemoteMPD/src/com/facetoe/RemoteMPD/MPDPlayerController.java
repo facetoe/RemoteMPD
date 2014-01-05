@@ -4,6 +4,10 @@ interface MPDPlayerController {
 
     void start();
 
+    void restart();
+
+    void disconnect();
+
     void play();
 
     void playID(int id);

@@ -18,12 +18,13 @@ import org.a0z.mpd.MPDCommand;
 import org.a0z.mpd.MPDStatus;
 import org.a0z.mpd.Music;
 import org.a0z.mpd.event.StatusChangeListener;
+import org.a0z.mpd.event.TrackPositionListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class RemoteMPDActivity extends Activity implements View.OnClickListener, StatusChangeListener {
+public class RemoteMPDActivity extends Activity implements View.OnClickListener, StatusChangeListener, TrackPositionListener {
 
     private static final String TAG = RemoteMPDApplication.APP_TAG;
 
@@ -94,21 +95,21 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener,
         });
 
 
-        skVolume = (SeekBar) findViewById(R.id.skVolume);
-        skVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                mpdManager.setVolume(progress);
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
-        });
+//        skVolume = (SeekBar) findViewById(R.id.skVolume);
+//        skVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+//            @Override
+//            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+//                mpdManager.setVolume(progress);
+//            }
+//
+//            @Override
+//            public void onStartTrackingTouch(SeekBar seekBar) {
+//            }
+//
+//            @Override
+//            public void onStopTrackingTouch(SeekBar seekBar) {
+//            }
+//        });
 
         // Register for broadcasts on BluetoothAdapter state change
         IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
@@ -128,10 +129,10 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener,
 
     @Override
     public void trackChanged(MPDStatus mpdStatus, int oldTrack) {
-        List<Music> music = myApp.getSongList();
-        if (songList != null) {
+        songList = myApp.getSongList();
+        if (songList != null ) {
             int pos = mpdStatus.getSongPos();
-            Music song = music.get(pos);
+            Music song = songList.get(pos);
             Log.e(TAG, "We got im: " + song);
         } else {
             Log.e(TAG, "Song list was null");
@@ -162,6 +163,11 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener,
     @Override
     public void libraryStateChanged(boolean updating) {
         Log.i(TAG, "Library state changed");
+    }
+
+    @Override
+    public void trackPositionChanged(MPDStatus status) {
+        Log.i(TAG, "Track position changed");
     }
 
     @Override
@@ -249,14 +255,9 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener,
                     // Get the device MAC address
                     String address = data.getExtras()
                             .getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
+
                     // Get the BLuetoothDevice object
                     BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
-
-
-                    //TODO make this connect through the service
-                    //commandService.setDevice(device);
-                    // Attempt to connect to the device
-                    //commandService.connect();
 
                     // Save device.
                     SharedPreferences.Editor editor = prefs.edit();
