@@ -1,79 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:layout_weight="1"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <LinearLayout
-        android:orientation="vertical"
+    <fragment
         android:layout_width="fill_parent"
-        android:layout_height="0dip"
-        android:layout_weight=".04">
-
-        <ListView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/listSongs"
-            android:layout_gravity="center_horizontal"
-            android:choiceMode="singleChoice"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
-
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/btnBack"
-            android:src="@drawable/media_fast_backward"
-            android:background="@android:color/transparent"/>
-
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/btnPlay"
-            android:src="@drawable/ic_media_play"
-            android:background="@android:color/transparent"/>
-
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/btnNext"
-            android:background="@android:color/transparent"
-            android:src="@drawable/media_fast_forward"/>
-
-        <RelativeLayout
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:text="Current Album"
-                android:id="@+id/txtCurrentAlbum"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentRight="true"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="Current Song"
-                android:id="@+id/txtCurrentSong"
-                android:layout_above="@+id/txtCurrentAlbum"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentLeft="true"/>
-
-        </RelativeLayout>
-
-    </LinearLayout>
-
+        android:layout_height="fill_parent"
+        android:name="com.facetoe.RemoteMPD.fragments.PlayerPanelFragment"
+        android:id="@+id/fragment"
+        android:layout_gravity="center_horizontal"
+        tools:layout="@layout/player_panel_fragment"/>
 </LinearLayout>

@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class RemoteMPDActivity extends Activity implements View.OnClickListener, StatusChangeListener, TrackPositionListener {
+public class RemoteMPDActivity extends Activity  {
 
     private static final String TAG = RemoteMPDApplication.APP_TAG;
 
@@ -33,28 +33,14 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener,
 
     public static final String MESSAGE = "message";
     public static final String ERROR = "error";
-    BluetoothAdapter bluetoothAdapter;
-    private boolean isBluetooth = true; //TODO remove this and have it in preferences
-    private static final RemoteMPDApplication myApp = RemoteMPDApplication.getInstance();
-    MPDPlayerController mpdManager;
-    SharedPreferences prefs;
-
-    private ImageButton btnNext;
-    private ImageButton btnPrev;
-    private ImageButton btnPlay;
-    private TextView txtCurrentSong;
-    private TextView txtCurrentAlbum;
-    private TextView txtCurrentArtist;
-    private TextView txtElapsedTime;
-    private TextView txtTotalTime;
 
     private ListView songListView;
     private SongListAdapter songListAdapter;
     private List<Music> songList;
 
-    private SeekBar skVolume;
-    private SeekBar skTrackPosition;
-
+    BluetoothAdapter bluetoothAdapter;
+    private static final RemoteMPDApplication myApp = RemoteMPDApplication.getInstance();
+    SharedPreferences prefs;
 
     /**
      * Called when the activity is first created.
@@ -64,35 +50,25 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener,
         super.onCreate(savedInstanceState);
 
         // Set up the window layout
-        requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+        //requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         setContentView(R.layout.main);
-        getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
+        //getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
 
-        txtCurrentAlbum = (TextView) findViewById(R.id.txtCurrentAlbum);
-        txtCurrentSong = (TextView) findViewById(R.id.txtCurrentSong);
-
-        btnNext = (ImageButton) findViewById(R.id.btnNext);
-        btnNext.setOnClickListener(this);
-        btnPrev = (ImageButton) findViewById(R.id.btnBack);
-        btnPrev.setOnClickListener(this);
-        btnPlay = (ImageButton) findViewById(R.id.btnPlay);
-        btnPlay.setOnClickListener(this);
-
-        songListView = (ListView) findViewById(R.id.listSongs);
-        if (myApp.getSongList() == null) {
-            songList = new ArrayList<Music>();
-        } else {
-            songList = myApp.getSongList();
-        }
-        songListAdapter = new SongListAdapter(this, songList);
-        songListView.setAdapter(songListAdapter);
-        songListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Music item = songListAdapter.getItem(position);
-                mpdManager.playID(item.getSongId());
-            }
-        });
+//        songListView = (ListView) findViewById(R.id.listSongs);
+//        if (myApp.getSongList() == null) {
+//            songList = new ArrayList<Music>();
+//        } else {
+//            songList = myApp.getSongList();
+//        }
+//        songListAdapter = new SongListAdapter(this, songList);
+//        songListView.setAdapter(songListAdapter);
+//        songListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                Music item = songListAdapter.getItem(position);
+//                mpdManager.playID(item.getSongId());
+//            }
+//        });
 
 
 //        skVolume = (SeekBar) findViewById(R.id.skVolume);
@@ -118,59 +94,6 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener,
     }
 
     @Override
-    public void volumeChanged(MPDStatus mpdStatus, int oldVolume) {
-        Log.i(TAG, "Volume changed: " + mpdStatus.getVolume());
-    }
-
-    @Override
-    public void playlistChanged(MPDStatus mpdStatus, int oldPlaylistVersion) {
-        Log.i(TAG, "Playlist changed");
-    }
-
-    @Override
-    public void trackChanged(MPDStatus mpdStatus, int oldTrack) {
-        songList = myApp.getSongList();
-        if (songList != null ) {
-            int pos = mpdStatus.getSongPos();
-            Music song = songList.get(pos);
-            Log.e(TAG, "We got im: " + song);
-        } else {
-            Log.e(TAG, "Song list was null");
-        }
-    }
-
-    @Override
-    public void stateChanged(MPDStatus mpdStatus, String oldState) {
-        Log.i(TAG, "State changed");
-    }
-
-    @Override
-    public void repeatChanged(boolean repeating) {
-        Log.i(TAG, "Repeat changed");
-
-    }
-
-    @Override
-    public void randomChanged(boolean random) {
-        Log.i(TAG, "Random changed");
-    }
-
-    @Override
-    public void connectionStateChanged(boolean connected, boolean connectionLost) {
-        Log.i(TAG, "Connection state changed");
-    }
-
-    @Override
-    public void libraryStateChanged(boolean updating) {
-        Log.i(TAG, "Library state changed");
-    }
-
-    @Override
-    public void trackPositionChanged(MPDStatus status) {
-        Log.i(TAG, "Track position changed");
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
         // Unregister broadcast listeners
@@ -180,22 +103,10 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener,
     @Override
     protected void onStart() {
         super.onStart();
-        if (isBluetooth) {
-            initializeBluetooth();
-            mpdManager = myApp.getMpdManager();
-            mpdManager.start();
-        } else {
-            initializeWifi();
-            mpdManager = new WifiMPDManager();
-            myApp.setMpdManager(mpdManager);
-            mpdManager.start();
-        }
-
     }
 
     private void initializeBluetooth() {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        myApp.getBluetoothMonitor().addStatusChangeListener(this);
         if (bluetoothAdapter == null) {
             //TODO error message;
             // Bluetooth is not supported.
@@ -215,7 +126,6 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener,
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
             Log.i(TAG, "WiFI is connected");
-            myApp.asyncHelper.addStatusChangeListener(this);
         } else {
             Log.e(TAG, "No Wifi"); //TODO handle no wifi
         }
@@ -224,7 +134,6 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener,
     @Override
     protected void onStop() {
         super.onStop();
-        myApp.getBluetoothMonitor().removeStatusChangeListener(this);
     }
 
     @Override
@@ -300,21 +209,4 @@ public class RemoteMPDActivity extends Activity implements View.OnClickListener,
             }
         }
     };
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.btnNext:
-                mpdManager.next();
-                break;
-            case R.id.btnBack:
-                mpdManager.prev();
-                break;
-            case R.id.btnPlay:
-                mpdManager.play();
-                break;
-            default:
-                return;
-        }
-    }
 }

@@ -3,13 +3,15 @@ package com.facetoe.RemoteMPD;
 import android.util.Log;
 import com.facetoe.RemoteMPD.helpers.MPDAsyncHelper;
 import org.a0z.mpd.MPD;
+import org.a0z.mpd.event.StatusChangeListener;
+import org.a0z.mpd.event.TrackPositionListener;
 import org.a0z.mpd.exception.MPDServerException;
 
 
 /**
  * Created by facetoe on 2/01/14.
  */
-public class WifiMPDManager implements MPDPlayerController {
+public class WifiMPDManager extends AbstractMPDManager {
 
     String TAG = RemoteMPDApplication.APP_TAG;
     MPD mpd;
@@ -113,5 +115,25 @@ public class WifiMPDManager implements MPDPlayerController {
 
     private void handleError(Exception ex) {
         Log.e(TAG, "Error: ", ex);
+    }
+
+    @Override
+    public void addStatusChangeListener(StatusChangeListener listener) {
+        asyncHelper.addStatusChangeListener(listener);
+    }
+
+    @Override
+    public void removeStatusChangeListener(StatusChangeListener listener) {
+        asyncHelper.removeStatusChangeListener(listener);
+    }
+
+    @Override
+    public void addTrackPositionListener(TrackPositionListener listener) {
+        asyncHelper.addTrackPositionListener(listener);
+    }
+
+    @Override
+    public void removeTrackPositionListener(TrackPositionListener listener) {
+        asyncHelper.removeTrackPositionListener(listener);
     }
 }

@@ -45,11 +45,11 @@ public class BluetoothController  {
     /**
      * Constructor. Prepares a new BluetoothController session.
      */
-    public BluetoothController() {
+    public BluetoothController(BluetoothMPDStatusMonitor monitor) {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         app = RemoteMPDApplication.getInstance();
         prefs = app.getSharedPreferences();
-        this.monitor = app.getBluetoothMonitor();
+        this.monitor = monitor;
         initDevice();
     }
 

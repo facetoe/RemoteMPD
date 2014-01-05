@@ -1,12 +1,9 @@
 package com.facetoe.RemoteMPD;
 
-interface MPDPlayerController {
+import org.a0z.mpd.event.StatusChangeListener;
+import org.a0z.mpd.event.TrackPositionListener;
 
-    void start();
-
-    void restart();
-
-    void disconnect();
+public interface MPDPlayerController {
 
     void play();
 

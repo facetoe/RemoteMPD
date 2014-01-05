@@ -2,14 +2,17 @@ package com.facetoe.RemoteMPD;
 
 import android.util.Log;
 import org.a0z.mpd.MPDCommand;
+import org.a0z.mpd.event.StatusChangeListener;
+import org.a0z.mpd.event.TrackPositionListener;
 
-class BluetoothMPDManager implements MPDPlayerController {
+class BluetoothMPDManager extends AbstractMPDManager {
     private static final String TAG = RemoteMPDApplication.APP_TAG;
     private BluetoothController controller;
-    private RemoteMPDApplication app = RemoteMPDApplication.getInstance();
+    private BluetoothMPDStatusMonitor bluetoothMonitor;
 
     public BluetoothMPDManager() {
-        controller = app.getBluetoothController();
+        bluetoothMonitor = new BluetoothMPDStatusMonitor();
+        controller = new BluetoothController(bluetoothMonitor);
     }
 
     @Override
@@ -72,5 +75,25 @@ class BluetoothMPDManager implements MPDPlayerController {
                 Integer.toString(newVolume));
         controller.sendCommand(command);
         Log.d(TAG, command.toString());
+    }
+
+    @Override
+    public void addStatusChangeListener(StatusChangeListener listener) {
+        bluetoothMonitor.addStatusChangeListener(listener);
+    }
+
+    @Override
+    public void removeStatusChangeListener(StatusChangeListener listener) {
+        bluetoothMonitor.removeStatusChangeListener(listener);
+    }
+
+    @Override
+    public void addTrackPositionListener(TrackPositionListener listener) {
+        bluetoothMonitor.addTrackPositionListener(listener);
+    }
+
+    @Override
+    public void removeTrackPositionListener(TrackPositionListener listener) {
+        bluetoothMonitor.removeTrackPositionListener(listener);
     }
 }

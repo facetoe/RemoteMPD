@@ -256,7 +256,7 @@ public class MPDAsyncHelper extends Handler {
 				case EVENT_CONNECT:
 					try {
 						MPDConnectionInfo conInfo = (MPDConnectionInfo) msg.obj;
-                            Log.i("MPDAsyncHelper", "Connecting");
+                            Log.i("RemoteMPDBla", "Connecting");
 							oMPD.connect("192.168.1.6", 6600, "password");
                             Log.i("MPDAsyncHelper", "Connected: " + oMPD.isConnected());
 							MPDAsyncHelper.this.obtainMessage(EVENT_CONNECTSUCCEEDED).sendToTarget();

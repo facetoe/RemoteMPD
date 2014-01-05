@@ -15,13 +15,13 @@ public class RemoteMPDApplication extends Application {
     public final static String APP_TAG = "RemoteMPDApplication";
     private static final String PREFERENCES = "preferences";
 
+    public static boolean isBluetooth = false;
+
     private static RemoteMPDApplication instance;
     List<Music> songList;
     SharedPreferences sharedPreferences;
     public MPDAsyncHelper asyncHelper;
-    private BluetoothMPDStatusMonitor bluetoothMonitor;
-    private BluetoothController bluetoothController;
-    private MPDPlayerController mpdManager;
+    private AbstractMPDManager mpdManager;
 
     public static RemoteMPDApplication getInstance() {
         checkInstance();
@@ -55,30 +55,18 @@ public class RemoteMPDApplication extends Application {
         return sharedPreferences;
     }
 
-    public BluetoothMPDStatusMonitor getBluetoothMonitor() {
-        checkInstance();
-        if(bluetoothMonitor == null) {
-            bluetoothMonitor = new BluetoothMPDStatusMonitor();
-        }
-        return bluetoothMonitor;
-    }
-
     // TODO fix this to select the right manager based on user preference
-    public MPDPlayerController getMpdManager() {
-        if(mpdManager == null) {
+    public AbstractMPDManager getMpdManager() {
+        if(isBluetooth && mpdManager == null)
             mpdManager = new BluetoothMPDManager();
-        }
+        else if(!isBluetooth && mpdManager == null)
+            mpdManager = new WifiMPDManager();
+
         return mpdManager;
     }
 
-    public void setMpdManager(MPDPlayerController mpdManager) {
+    public void setMpdManager(AbstractMPDManager mpdManager) {
         this.mpdManager = mpdManager;
-    }
-
-    public BluetoothController getBluetoothController() {
-        if(bluetoothController == null)
-            bluetoothController = new BluetoothController();
-        return bluetoothController;
     }
 
     private static void checkInstance() {
