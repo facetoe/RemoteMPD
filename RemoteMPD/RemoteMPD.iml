@@ -15,6 +15,10 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="gson-2.2.41" level="project" />
     <orderEntry type="module" module-name="JMPDCommRemote" />
+    <orderEntry type="library" name="libs" level="application" />
+    <orderEntry type="module" module-name="appcompat" />
+    <orderEntry type="library" name="android-support-v7-appcompat" level="project" />
+    <orderEntry type="library" name="android-support-v4" level="project" />
   </component>
 </module>
 

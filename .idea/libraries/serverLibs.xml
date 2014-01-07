@@ -1,5 +1,5 @@
 <component name="libraryTable">
-  <library name="lib1">
+  <library name="serverLibs">
     <CLASSES>
       <root url="jar://$PROJECT_DIR$/RemoteBluetoothServer/lib/bluecove-2.1.0.jar!/" />
       <root url="jar://$PROJECT_DIR$/RemoteBluetoothServer/lib/bluecove-gpl-2.1.0.jar!/" />

@@ -7,24 +7,20 @@ import android.content.*;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.*;
-import android.widget.*;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.widget.ListView;
+import android.widget.Toast;
 import com.facetoe.RemoteMPD.adapters.SongListAdapter;
-import com.google.gson.Gson;
-import org.a0z.mpd.MPDCommand;
-import org.a0z.mpd.MPDStatus;
 import org.a0z.mpd.Music;
-import org.a0z.mpd.event.StatusChangeListener;
-import org.a0z.mpd.event.TrackPositionListener;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
-public class RemoteMPDActivity extends Activity  {
+public class RemoteMPDActivity extends ActionBarActivity {
 
     private static final String TAG = RemoteMPDApplication.APP_TAG;
 

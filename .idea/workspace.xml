@@ -23,18 +23,17 @@
     </shared>
   </component>
   <component name="AndroidLogFilters">
-    <option name="TOOL_WINDOW_CONFIGURED_FILTER" value="AllApp" />
+    <option name="TOOL_WINDOW_LOG_LEVEL" value="ERROR" />
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cb21cd32-e419-46b4-b453-4813b29a1655" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/tools/NetworkHelper.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RemoteBluetoothServer/src/com/facetoe/bluetoothserver/MPDManager.java" afterPath="$PROJECT_DIR$/RemoteBluetoothServer/src/com/facetoe/bluetoothserver/MPDManager.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/fragments/PlayerPanelFragment.java" afterPath="$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/fragments/PlayerPanelFragment.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/RemoteMPDApplication.java" afterPath="$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/RemoteMPDApplication.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/WifiMPDManager.java" afterPath="$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/WifiMPDManager.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/AndroidSlidingUpPanel/project.properties" afterPath="$PROJECT_DIR$/AndroidSlidingUpPanel/project.properties" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/JMPDCommRemote/project.properties" afterPath="$PROJECT_DIR$/JMPDCommRemote/project.properties" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RemoteMPD/project.properties" afterPath="$PROJECT_DIR$/RemoteMPD/project.properties" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/android_support_v7_appcompat.xml" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/.idea/libraries/lib1.xml" afterPath="$PROJECT_DIR$/.idea/libraries/serverLibs.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RemoteMPD/AndroidManifest.xml" afterPath="$PROJECT_DIR$/RemoteMPD/AndroidManifest.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RemoteBluetoothServer/RemoteBluetoothServer.iml" afterPath="$PROJECT_DIR$/RemoteBluetoothServer/RemoteBluetoothServer.iml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RemoteMPD/RemoteMPD.iml" afterPath="$PROJECT_DIR$/RemoteMPD/RemoteMPD.iml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/RemoteMPDActivity.java" afterPath="$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/RemoteMPDActivity.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules.xml" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="RemoteMPD.iws" />
@@ -161,66 +160,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="WifiMPDManager.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/WifiMPDManager.java">
+      <file leaf-file-name="AndroidManifest.xml" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/RemoteMPD/AndroidManifest.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="31" column="29" selection-start="884" selection-end="884" vertical-scroll-proportion="0.0" vertical-offset="558" max-vertical-offset="2610">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="RemoteMPDApplication.java" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/RemoteMPDApplication.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="153" column="19" selection-start="4797" selection-end="4797" vertical-scroll-proportion="0.36196318" vertical-offset="2240" max-vertical-offset="3348">
-              <folding>
-                <element signature="e#994#1002#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="RemoteMPDActivity.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/RemoteMPDActivity.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="53" column="0" selection-start="1599" selection-end="1599" vertical-scroll-proportion="0.0" vertical-offset="954" max-vertical-offset="3924">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="NetworkHelper.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/tools/NetworkHelper.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="2" column="0" selection-start="38" selection-end="38" vertical-scroll-proportion="0.0" vertical-offset="36" max-vertical-offset="648">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="BluetoothMPDManager.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/BluetoothMPDManager.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="10" column="29" selection-start="380" selection-end="380" vertical-scroll-proportion="0.0" vertical-offset="180" max-vertical-offset="1872">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="BluetoothMPDStatusMonitor.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/BluetoothMPDStatusMonitor.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="17" column="13" selection-start="419" selection-end="419" vertical-scroll-proportion="0.0" vertical-offset="522" max-vertical-offset="2340">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="PlayerPanelFragment.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/fragments/PlayerPanelFragment.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="43" column="46" selection-start="1404" selection-end="1404" vertical-scroll-proportion="0.0" vertical-offset="774" max-vertical-offset="2826">
+            <state line="21" column="49" selection-start="911" selection-end="911" vertical-scroll-proportion="0.54847646" vertical-offset="180" max-vertical-offset="702">
               <folding />
             </state>
           </provider>
@@ -256,7 +199,6 @@
         <option value="$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/PlayerController.java" />
         <option value="$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/BluetoothCommandService.java" />
         <option value="$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/BluetoothMPDManagerService.java" />
-        <option value="$PROJECT_DIR$/RemoteMPD/AndroidManifest.xml" />
         <option value="$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/MPDAsyncHelper.java" />
         <option value="$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/WeakLinkedList.java" />
         <option value="$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/tools/Tools.java" />
@@ -275,7 +217,6 @@
         <option value="$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/BluetoothController.java" />
         <option value="$PROJECT_DIR$/RemoteMPD/res/layout/player_panel_fragment.xml" />
         <option value="$PROJECT_DIR$/RemoteMPD/res/layout/main.xml" />
-        <option value="$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/RemoteMPDActivity.java" />
         <option value="$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/BluetoothMPDManager.java" />
         <option value="$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/helpers/MPDAsyncHelper.java" />
         <option value="$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/MPDPlayerController.java" />
@@ -288,6 +229,9 @@
         <option value="$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/ConnectionSettings.java" />
         <option value="$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/WifiConnectionSettings.java" />
         <option value="$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/RemoteMPDApplication.java" />
+        <option value="$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/RemoteMPDActivity.java" />
+        <option value="$PROJECT_DIR$/RemoteMPD/res/values/styles.xml" />
+        <option value="$PROJECT_DIR$/RemoteMPD/AndroidManifest.xml" />
       </list>
     </option>
   </component>
@@ -323,7 +267,6 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -331,6 +274,16 @@
               <option name="myItemId" value="RemoteMPD" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="External Libraries" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="RemoteMPD" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
           </PATH>
           <PATH>
             <PATH_ELEMENT>
@@ -352,33 +305,11 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
+              <option name="myItemId" value="res" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="RemoteMPD" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="RemoteMPD" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="RemoteMPD" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="RemoteMPD" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="fragments" />
+              <option name="myItemId" value="values" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -414,50 +345,9 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="RemoteMPD" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="RemoteBluetoothServer" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="RemoteMPD" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="RemoteBluetoothServer" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="RemoteMPD" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="RemoteBluetoothServer" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="bluetoothserver" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
         </subPane>
       </pane>
+      <pane id="PackagesPane" />
       <pane id="Scope" />
     </panes>
   </component>
@@ -534,6 +424,19 @@
       <option name="PORT" value="5005" />
       <method />
     </configuration>
+    <configuration default="true" type="Applet" factoryName="Applet">
+      <module name="" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="HTML_FILE_NAME" />
+      <option name="HTML_USED" value="false" />
+      <option name="WIDTH" value="400" />
+      <option name="HEIGHT" value="300" />
+      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
+      <option name="VM_PARAMETERS" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <method />
+    </configuration>
     <configuration default="true" type="TestNG" factoryName="TestNG">
       <module name="" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
@@ -559,19 +462,6 @@
       <envs />
       <properties />
       <listeners />
-      <method />
-    </configuration>
-    <configuration default="true" type="Applet" factoryName="Applet">
-      <module name="" />
-      <option name="MAIN_CLASS_NAME" />
-      <option name="HTML_FILE_NAME" />
-      <option name="HTML_USED" value="false" />
-      <option name="WIDTH" value="400" />
-      <option name="HEIGHT" value="300" />
-      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
-      <option name="VM_PARAMETERS" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
       <method />
     </configuration>
     <configuration default="true" type="Application" factoryName="Application">
@@ -732,6 +622,7 @@
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32857144" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32954547" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -741,7 +632,7 @@
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Build Variants" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32857144" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Android" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.384127" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Android" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.384127" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32857144" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24962178" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -752,7 +643,6 @@
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32954547" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32857144" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
@@ -761,13 +651,13 @@
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32857144" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.384127" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Build Variants" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32857144" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2246596" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="combo" />
       <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32857144" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="combo" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
@@ -780,8 +670,8 @@
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32857144" sideWeight="0.5" order="12" side_tool="false" content_ui="tabs" />
       <window_info id="Android" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.384127" sideWeight="0.5" order="13" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24962178" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout-to-restore>
   </component>
@@ -806,13 +696,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/BluetoothMPDManager.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="10" column="29" selection-start="380" selection-end="380" vertical-scroll-proportion="0.0" vertical-offset="180" max-vertical-offset="1872">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/BluetoothMPDStatusMonitor.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="17" column="13" selection-start="419" selection-end="419" vertical-scroll-proportion="0.0" vertical-offset="522" max-vertical-offset="2340">
@@ -830,16 +713,16 @@
     <entry file="file://$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/RemoteMPDApplication.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="37" column="0" selection-start="822" selection-end="822" vertical-scroll-proportion="0.0" vertical-offset="666" max-vertical-offset="882">
-          <folding>
-            <element signature="e#994#1002#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/RemoteMPDActivity.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="22" column="13" selection-start="615" selection-end="615" vertical-scroll-proportion="0.0" vertical-offset="396" max-vertical-offset="5508">
-          <folding />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -888,13 +771,6 @@
         <state line="1027" column="19" selection-start="46651" selection-end="46651" vertical-scroll-proportion="0.33274648" vertical-offset="16551" max-vertical-offset="93924" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/RemoteMPD/AndroidManifest.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="13" column="34" selection-start="645" selection-end="645" vertical-scroll-proportion="0.44444445" vertical-offset="58" max-vertical-offset="684">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/JMPDCommRemote/src/org/a0z/mpd/MPDConnection.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="374" column="0" selection-start="13137" selection-end="13137" vertical-scroll-proportion="0.33159268" vertical-offset="6137" max-vertical-offset="8424" />
@@ -936,30 +812,22 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/RemoteBluetoothServer/src/com/facetoe/bluetoothserver/MPDResponse.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="41" column="44" selection-start="1559" selection-end="1559" vertical-scroll-proportion="1.7727273" vertical-offset="0" max-vertical-offset="1116">
-          <folding />
-        </state>
+        <state line="41" column="44" selection-start="1559" selection-end="1559" vertical-scroll-proportion="1.7727273" vertical-offset="0" max-vertical-offset="1116" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/RemoteBluetoothServer/src/com/facetoe/bluetoothserver/BluetoothServer.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="2" column="13" selection-start="51" selection-end="51" vertical-scroll-proportion="0.09090909" vertical-offset="0" max-vertical-offset="396">
-          <folding />
-        </state>
+        <state line="2" column="13" selection-start="51" selection-end="51" vertical-scroll-proportion="0.09090909" vertical-offset="0" max-vertical-offset="396" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/RemoteBluetoothServer/src/com/facetoe/bluetoothserver/WaitThread.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="57" column="0" selection-start="1673" selection-end="1673" vertical-scroll-proportion="-0.3957219" vertical-offset="1012" max-vertical-offset="1386">
-          <folding />
-        </state>
+        <state line="57" column="0" selection-start="1673" selection-end="1673" vertical-scroll-proportion="-0.3957219" vertical-offset="1012" max-vertical-offset="1386" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/RemoteBluetoothServer/src/com/facetoe/bluetoothserver/ConnectedThread.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="23" column="32" selection-start="743" selection-end="743" vertical-scroll-proportion="0.54545456" vertical-offset="108" max-vertical-offset="522">
-          <folding />
-        </state>
+        <state line="23" column="32" selection-start="743" selection-end="743" vertical-scroll-proportion="0.54545456" vertical-offset="108" max-vertical-offset="522" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/DeviceListActivity.java">
@@ -973,7 +841,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/adapters/SongListAdapter.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="16" column="13" selection-start="373" selection-end="373" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="720" />
+        <state line="16" column="13" selection-start="373" selection-end="373" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="720">
+          <folding>
+            <element signature="imports" expanded="false" />
+          </folding>
+        </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/RemoteMPD/res/layout/custom_title.xml">
@@ -1000,23 +872,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/RemoteMPD/res/values/styles.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="374">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/RemoteMPD/res/layout/main.xml">
-      <provider editor-type-id="android-designer">
-        <state />
-      </provider>
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="11" column="42" selection-start="383" selection-end="383" vertical-scroll-proportion="0.34315425" vertical-offset="0" max-vertical-offset="577">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/programs/adt-bundle-linux-x86_64-20131030/sdk/sources/android-18/android/os/Handler.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="103" column="0" selection-start="4127" selection-end="4127" vertical-scroll-proportion="0.3322785" vertical-offset="1443" max-vertical-offset="13968" />
@@ -1035,16 +890,6 @@
     <entry file="file://$USER_HOME$/programs/adt-bundle-linux-x86_64-20131030/sdk/sources/android-18/com/android/internal/os/ZygoteInit.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="12888" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/RemoteMPD/res/layout/player_panel_fragment.xml">
-      <provider selected="true" editor-type-id="android-designer">
-        <state />
-      </provider>
-      <provider editor-type-id="text-editor">
-        <state line="7" column="16" selection-start="216" selection-end="216" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1314">
-          <folding />
-        </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/BluetoothController.java">
@@ -1077,11 +922,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/RemoteBluetoothServer/src/com/facetoe/bluetoothserver/MPDManager.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="20" column="78" selection-start="671" selection-end="671" vertical-scroll-proportion="0.05172414" vertical-offset="342" max-vertical-offset="3852">
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
-        </state>
+        <state line="20" column="78" selection-start="671" selection-end="671" vertical-scroll-proportion="0.05172414" vertical-offset="342" max-vertical-offset="3852" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/BluetoothMPDStatusMonitor.java">
@@ -1103,13 +944,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/tools/NetworkHelper.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="2" column="0" selection-start="38" selection-end="38" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="612">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/WifiMPDManager.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="31" column="29" selection-start="884" selection-end="884" vertical-scroll-proportion="0.0" vertical-offset="270" max-vertical-offset="2520">
@@ -1124,19 +958,65 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/RemoteMPDActivity.java">
+    <entry file="file://$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/RemoteMPDApplication.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="53" column="0" selection-start="1599" selection-end="1599" vertical-scroll-proportion="0.0" vertical-offset="463" max-vertical-offset="3492">
+        <state line="154" column="9" selection-start="4807" selection-end="4807" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="3348">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/RemoteMPDApplication.java">
+    <entry file="file://$USER_HOME$/programs/adt-bundle-linux-x86_64-20131030/sdk/extras/android/support/v7/appcompat/README.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="153" column="19" selection-start="4797" selection-end="4797" vertical-scroll-proportion="0.36196318" vertical-offset="2240" max-vertical-offset="3348">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="374" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/RemoteMPDActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="22" column="7" selection-start="609" selection-end="609" vertical-scroll-proportion="0.0" vertical-offset="272" max-vertical-offset="3798">
           <folding>
-            <element signature="e#994#1002#0" expanded="true" />
+            <element signature="imports" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/RemoteMPD/res/values/styles.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="2" column="62" selection-start="109" selection-end="113" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="198">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/RemoteMPD/res/layout/main.xml">
+      <provider editor-type-id="android-designer">
+        <state />
+      </provider>
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="11" column="42" selection-start="383" selection-end="383" vertical-scroll-proportion="-7.6153846" vertical-offset="0" max-vertical-offset="396">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/RemoteMPD/src/com/facetoe/RemoteMPD/tools/NetworkHelper.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="2" column="0" selection-start="38" selection-end="38" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="612">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/RemoteMPD/res/layout/player_panel_fragment.xml">
+      <provider editor-type-id="android-designer">
+        <state />
+      </provider>
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="7" column="16" selection-start="216" selection-end="216" vertical-scroll-proportion="-4.8461537" vertical-offset="0" max-vertical-offset="1314">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/RemoteMPD/AndroidManifest.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="21" column="49" selection-start="911" selection-end="911" vertical-scroll-proportion="0.54847646" vertical-offset="180" max-vertical-offset="702">
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1169,6 +1049,7 @@
       </state>
       <state key="GlobalLibrariesConfigurable.UI">
         <settings>
+          <last-edited>libs</last-edited>
           <splitter-proportions>
             <option name="proportions">
               <list>
@@ -1216,7 +1097,7 @@
       </state>
       <state key="ProjectLibrariesConfigurable.UI">
         <settings>
-          <last-edited>android-support-v4</last-edited>
+          <last-edited>android-support-v7-appcompat</last-edited>
           <splitter-proportions>
             <option name="proportions">
               <list>
