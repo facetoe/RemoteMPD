@@ -41,6 +41,7 @@ public class PlayerPanelFragment extends Fragment implements View.OnClickListene
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        app.setCurrentActivity(getActivity());
         Log.i(TAG, "OnCreate()");
     }
 
@@ -60,6 +61,11 @@ public class PlayerPanelFragment extends Fragment implements View.OnClickListene
         btnPlay = (ImageButton) view.findViewById(R.id.btnPlay);
         btnPlay.setOnClickListener(this);
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
     }
 
     @Override
@@ -95,7 +101,6 @@ public class PlayerPanelFragment extends Fragment implements View.OnClickListene
                     }
                 });
             }
-
         } else {
             Log.e(TAG, "Song list was null");
         }

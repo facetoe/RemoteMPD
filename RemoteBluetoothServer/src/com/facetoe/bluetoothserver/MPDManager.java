@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 /**
  * Created by facetoe on 31/12/13.
  */
-public class MPDManager implements TrackPositionListener, StatusChangeListener {
+public class MPDManager implements TrackPositionListener, StatusChangeListener  {
     private boolean DEBUG = true;
     private MPD mpdComm;
     private Gson gson = new Gson();

@@ -29,7 +29,7 @@ public class WifiMPDManager extends AbstractMPDManager {
             asyncHelper.startMonitor();
 
         if (!mpd.isConnected())
-            asyncHelper.connect();
+            app.connectMPD();
 
         if (app.getSongList() == null) {
             app.setSongList(asyncHelper.oMPD.getPlaylist().getMusicList());
