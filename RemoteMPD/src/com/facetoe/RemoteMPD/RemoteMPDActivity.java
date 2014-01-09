@@ -7,17 +7,20 @@ import android.content.*;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 import com.facetoe.RemoteMPD.adapters.SongListAdapter;
 import org.a0z.mpd.Music;
 
 import java.util.List;
+import java.util.prefs.Preferences;
 
 
 public class RemoteMPDActivity extends ActionBarActivity {
@@ -33,8 +36,6 @@ public class RemoteMPDActivity extends ActionBarActivity {
     private ListView songListView;
     private SongListAdapter songListAdapter;
     private List<Music> songList;
-
-    BluetoothAdapter bluetoothAdapter;
     private static final RemoteMPDApplication myApp = RemoteMPDApplication.getInstance();
     SharedPreferences prefs;
 
@@ -45,10 +46,7 @@ public class RemoteMPDActivity extends ActionBarActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Set up the window layout
-        //requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         setContentView(R.layout.main);
-        //getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
 
 //        songListView = (ListView) findViewById(R.id.listSongs);
 //        if (myApp.getSongList() == null) {
@@ -87,7 +85,11 @@ public class RemoteMPDActivity extends ActionBarActivity {
         IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
         prefs = myApp.getSharedPreferences();
         this.registerReceiver(mReceiver, filter);
+        RemoteMPDApplication.getInstance().setCurrentActivity(this);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
     }
+
+
 
     @Override
     protected void onDestroy() {
@@ -130,12 +132,13 @@ public class RemoteMPDActivity extends ActionBarActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        RemoteMPDApplication.getInstance().unsetActivity();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.find_devices, menu);
+        inflater.inflate(R.menu.action_bar, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -143,10 +146,9 @@ public class RemoteMPDActivity extends ActionBarActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.findDevices:
-                // Launch the DeviceListActivity to see devices and do scan
-                Intent serverIntent = new Intent(this, DeviceListActivity.class);
-                startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
+            case R.id.settings:
+                Intent myIntent = new Intent(this, SettingsActivity.class);
+                startActivity(myIntent);
                 return true;
         }
         return false;
@@ -162,6 +164,7 @@ public class RemoteMPDActivity extends ActionBarActivity {
                             .getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
 
                     // Get the BLuetoothDevice object
+                    BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
                     BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
 
                     // Save device.

@@ -11,7 +11,8 @@ public abstract class AbstractMPDManager implements MPDPlayerController {
     abstract public void removeStatusChangeListener(StatusChangeListener listener);
     abstract public void addTrackPositionListener(TrackPositionListener listener);
     abstract public void removeTrackPositionListener(TrackPositionListener listener);
-    abstract public void start();
+    abstract public void connect();
+    abstract public boolean isConnected();
     abstract public void restart();
     abstract public void disconnect();
 }

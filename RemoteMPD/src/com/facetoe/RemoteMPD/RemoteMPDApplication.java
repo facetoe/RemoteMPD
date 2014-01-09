@@ -3,15 +3,12 @@ package com.facetoe.RemoteMPD;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Application;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.KeyEvent;
-import android.view.WindowManager;
 import com.facetoe.RemoteMPD.helpers.MPDAsyncHelper;
-import com.facetoe.RemoteMPD.tools.NetworkHelper;
 import org.a0z.mpd.Music;
 
 import java.util.Collection;
@@ -33,23 +30,20 @@ public class RemoteMPDApplication extends Application implements MPDAsyncHelper.
     private static RemoteMPDApplication instance;
     List<Music> songList;
     SharedPreferences sharedPreferences;
-    public MPDAsyncHelper asyncHelper;
     private AbstractMPDManager mpdManager;
 
     class DialogClickListener implements DialogInterface.OnClickListener {
         public void onClick(DialogInterface dialog, int which) {
             switch (which) {
                 case AlertDialog.BUTTON_NEUTRAL:
-                    // Show Settings
-                    //currentActivity.startActivityForResult(new Intent(currentActivity, WifiConnectionSettings.class), SETTINGS);
+                    currentActivity.startActivityForResult(new Intent(currentActivity, SettingsActivity.class), 5);
                     break;
                 case AlertDialog.BUTTON_NEGATIVE:
                     currentActivity.finish();
                     break;
                 case AlertDialog.BUTTON_POSITIVE:
-                    connectMPD();
+                    mpdManager.connect();
                     break;
-
             }
         }
     }
@@ -62,39 +56,19 @@ public class RemoteMPDApplication extends Application implements MPDAsyncHelper.
     @Override
     public void onCreate() {
         super.onCreate();
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+        checkSettings();
         Log.i(APP_TAG, "Initializing application..");
-        asyncHelper = new MPDAsyncHelper();
-        asyncHelper.addConnectionListener(this);
         instance = this;
     }
 
-    public void connectMPD() {
-        Log.i(APP_TAG, "Connecting MPD");
-        // check for network
-        if (!NetworkHelper.isNetworkConnected(this.getApplicationContext())) {
-            connectionFailed("No network.");
-            return;
+    private void checkSettings() {
+        RemoteMPDSettings settings = getMPDWifiSettings();
+        if(settings.getHost().isEmpty()) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
         }
-
-        // show connecting to server dialog
-        if (currentActivity != null) {
-            ad = new ProgressDialog(currentActivity);
-            ad.setTitle("Connecting"); //TODO add as resource
-            ad.setMessage("Connecting to server"); //TODO add as resource
-            ad.setCancelable(false);
-            ad.setOnKeyListener(new DialogInterface.OnKeyListener() {
-                public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
-                    // Handle all keys!
-                    return true;
-                }
-            });
-            try {
-                ad.show();
-            } catch (WindowManager.BadTokenException e) {
-                // Can't display it. Don't care.
-            }
-        }
-        asyncHelper.connect();
     }
 
     public List<Music> getSongList() {
@@ -113,17 +87,23 @@ public class RemoteMPDApplication extends Application implements MPDAsyncHelper.
         return sharedPreferences;
     }
 
-    public AbstractMPDManager getMpdManager() {
-        if (isBluetooth && mpdManager == null)
-            mpdManager = new BluetoothMPDManager();
-        else if (!isBluetooth && mpdManager == null)
-            mpdManager = new WifiMPDManager();
-
-        return mpdManager;
+    public RemoteMPDSettings getMPDWifiSettings() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String host = preferences.getString("mpdWifiHost", "");
+        String port = preferences.getString("mpdWifiPort", "6600");
+        String password = preferences.getString("mpdWifiPassword", "");
+        String lastDevice = "NONE";
+        boolean isBluetooth = preferences.getString("mpdConnectionOptions", "NONE").equals("wifi");
+        return new RemoteMPDSettings(host, port, password, lastDevice, isBluetooth);
     }
 
-    public void setMpdManager(AbstractMPDManager mpdManager) {
-        this.mpdManager = mpdManager;
+    public AbstractMPDManager getMpdManager() {
+        if (isBluetooth)
+            mpdManager = BluetoothMPDManager.getInstance();
+        else
+            mpdManager = WifiMPDManager.getInstance();
+
+        return mpdManager;
     }
 
     private static void checkInstance() {
@@ -133,47 +113,12 @@ public class RemoteMPDApplication extends Application implements MPDAsyncHelper.
 
     @Override
     public void connectionFailed(String message) {
-        if(isBluetooth) {
-
-        } else {
-            handleWifiConnectionFailed(message);
-        }
-    }
-
-    private void handleWifiConnectionFailed(String message) {
-        if (ad != null && !(ad instanceof ProgressDialog) && ad.isShowing()) {
-            return;
-        }
-
-        // dismiss possible dialog
-        dismissAlertDialog();
-
-        asyncHelper.disconnect();
-
-        if (currentActivity == null) {
-            return;
-        }
-
-        Log.e(APP_TAG, "Connection failed: " + message);
-        AlertDialog.Builder builder = new AlertDialog.Builder(currentActivity);
-        builder.setTitle("Connection failed");
-        builder.setMessage(message);
-        builder.setCancelable(false);
-
-        DialogClickListener listener = new DialogClickListener();
-        builder.setNegativeButton("Quit", listener);
-        builder.setNeutralButton("Settings", listener);
-        builder.setPositiveButton("Reconnect", listener);
-        try {
-            ad = builder.show();
-        } catch (WindowManager.BadTokenException e) {
-            // Can't display it. Don't care.
-        }
+        Log.e(APP_TAG, "Connection Failed: " + message);
     }
 
     @Override
     public void connectionSucceeded(String message) {
-        Log.e(APP_TAG, "Connection succeeded! " + message);
+        Log.e(APP_TAG, "Connection succeeded: " + message);
         dismissAlertDialog();
     }
 
@@ -183,7 +128,7 @@ public class RemoteMPDApplication extends Application implements MPDAsyncHelper.
                 try {
                     ad.dismiss();
                 } catch (IllegalArgumentException e) {
-                    // We don't care, it has already been destroyed
+                    Log.e(APP_TAG, "Shit", e);
                 }
             }
         }
@@ -191,12 +136,24 @@ public class RemoteMPDApplication extends Application implements MPDAsyncHelper.
 
     public void setCurrentActivity(Activity currentActivity) {
         this.currentActivity = currentActivity;
+        checkConnectionNeeded();
         connectionLocks.add(currentActivity);
     }
 
     public void unsetActivity() {
         connectionLocks.remove(currentActivity);
+        checkConnectionNeeded();
         this.currentActivity = null;
     }
 
+    private void checkConnectionNeeded() {
+        Log.i(APP_TAG, "Checking connection");
+        if (connectionLocks.size() > 0 && (currentActivity == null || !currentActivity.getClass().equals(SettingsActivity.class))) {
+            if (!mpdManager.isConnected()) {
+                mpdManager.connect();
+            }
+        } else {
+            //disconnect();
+        }
+    }
 }

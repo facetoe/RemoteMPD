@@ -17,23 +17,38 @@ public class WifiMPDManager extends AbstractMPDManager {
     MPD mpd;
     RemoteMPDApplication app;
     MPDAsyncHelper asyncHelper;
+    private static WifiMPDManager instance;
+
+    private WifiMPDManager() {
+        asyncHelper = new MPDAsyncHelper();
+        mpd = asyncHelper.oMPD;
+        app = RemoteMPDApplication.getInstance();
+    }
+
+    public static WifiMPDManager getInstance() {
+        if(instance == null)
+            instance = new WifiMPDManager();
+        return instance;
+    }
 
     @Override
-    public void start() {
-        Log.i(TAG, "WifiManager.start()");
-        app = RemoteMPDApplication.getInstance();
-        asyncHelper = RemoteMPDApplication.getInstance().asyncHelper;
-        mpd = asyncHelper.oMPD;
+    public void connect() {
+        Log.i(TAG, "WifiManager.connect()");
+
+        if(!mpd.isConnected())
+            asyncHelper.connect();
 
         if (!asyncHelper.isMonitorAlive())
             asyncHelper.startMonitor();
 
-        if (!mpd.isConnected())
-            app.connectMPD();
-
         if (app.getSongList() == null) {
             app.setSongList(asyncHelper.oMPD.getPlaylist().getMusicList());
         }
+    }
+
+    @Override
+    public boolean isConnected() {
+        return mpd.isConnected();
     }
 
     @Override

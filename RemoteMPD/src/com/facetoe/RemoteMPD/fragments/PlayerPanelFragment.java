@@ -52,7 +52,7 @@ public class PlayerPanelFragment extends Fragment implements View.OnClickListene
         txtCurrentAlbum = (TextView) view.findViewById(R.id.txtCurrentAlbum);
         txtCurrentSong = (TextView) view.findViewById(R.id.txtCurrentSong);
         mpdManager = app.getMpdManager();
-        mpdManager.start();
+        mpdManager.connect();
         mpdManager.addStatusChangeListener(this);
         btnNext = (ImageButton) view.findViewById(R.id.btnNext);
         btnNext.setOnClickListener(this);
