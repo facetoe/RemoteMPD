@@ -203,7 +203,10 @@ public class MPD {
      * @param port   server port
      */
     public final void connect(InetAddress server, int port, String password) throws MPDServerException {
-        this.mpdConnection = new MPDConnectionMultiSocket(server, port, 5, password, 5000);
+        // I changed this from MPDConnectionMultiSocket as the ThreadLocals were not being cleaned on disconnect
+        // leading to multiple orphaned sockets. Eventually MPD would stop accepting connections becuase of all these
+        // orphaned sockets. So far it seems to work fine with the monosocket connections...
+        this.mpdConnection = new MPDConnectionMonoSocket(server, port, password, 5000);
         this.mpdIdleConnection = new MPDConnectionMonoSocket(server, port, password, 0);
         this.mpdStatusConnection = new MPDConnectionMonoSocket(server, port, password, 10000);
     }
