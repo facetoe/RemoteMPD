@@ -1,7 +1,7 @@
 package com.facetoe.bluetoothserver;
 
 
-import org.a0z.mpdlocal.MPD;
+import org.a0z.mpdlocal.exception.MPDServerException;
 
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DiscoveryAgent;
@@ -22,6 +22,7 @@ public class WaitThread implements Runnable {
     @Override
     public void run() {
         waitForConnection();
+        Thread.currentThread().interrupt();
     }
 
     /**
@@ -51,29 +52,23 @@ public class WaitThread implements Runnable {
             return;
         }
 
-        String host = "localhost";
-        String passwd = "password";
-        int port = 6600;
-        MPD mpdComm = new MPD();
-
-        MPDManager manager = new MPDManager(mpdComm);
-        manager.setPasswd(passwd);
-        manager.setPort(port);
-        manager.setHost(host);
 
         // waiting for connection
+        Thread thread;
         while (true) {
             try {
                 System.out.println("waiting for connection...");
                 connection = notifier.acceptAndOpen();
-                manager.setConnection(connection);
-                manager.reset();
-                Thread connectedThread = new Thread(new ConnectedThread(manager));
-                connectedThread.start();
+                thread = new ConnectedThread(connection);
+                thread.start();
+                System.out.println("Before join");
+                thread.join();
+                System.out.println("After join");
 
-            } catch (Exception e) {
+            } catch (IOException e) {
                 e.printStackTrace();
-                return;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }

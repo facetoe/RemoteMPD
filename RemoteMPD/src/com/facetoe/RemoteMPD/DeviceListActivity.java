@@ -20,10 +20,7 @@ import java.util.Set;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.*;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -44,11 +41,12 @@ import android.widget.AdapterView.OnItemClickListener;
  */
 public class DeviceListActivity extends Activity {
     // Debugging
-    private static final String TAG = "DeviceListActivity";
+    private static final String TAG = RemoteMPDApplication.APP_TAG;
     private static final boolean D = true;
 
     // Return Intent extra
     public static String EXTRA_DEVICE_ADDRESS = "device_address";
+    public static String NO_DEVICE = "NONE";
 
     // Member fields
     private BluetoothAdapter mBtAdapter;
@@ -160,6 +158,13 @@ public class DeviceListActivity extends Activity {
             // Get the device MAC address, which is the last 17 chars in the View
             String info = ((TextView) v).getText().toString();
             String address = info.substring(info.length() - 17);
+
+            // Save device.
+            SharedPreferences prefs = getSharedPreferences(RemoteMPDApplication.PREFERENCES, MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString(BluetoothController.LAST_DEVICE_KEY, address);
+            editor.commit();
+            Log.i(RemoteMPDApplication.APP_TAG, "Found device: " + address);
 
             // Create the result Intent and include the MAC address
             Intent intent = new Intent();

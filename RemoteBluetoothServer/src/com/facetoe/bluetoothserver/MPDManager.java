@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 /**
  * Created by facetoe on 31/12/13.
  */
-public class MPDManager implements TrackPositionListener, StatusChangeListener  {
+public class MPDManager implements TrackPositionListener, StatusChangeListener {
     private boolean DEBUG = true;
     private MPD mpdComm;
     private Gson gson = new Gson();
@@ -33,25 +33,38 @@ public class MPDManager implements TrackPositionListener, StatusChangeListener  
     private String passwd;
     private MPDStatusMonitor statusMonitor;
 
-    public MPDManager(MPD mpdComm) {
-        this.mpdComm = mpdComm;
+    public MPDManager() {
+        this.mpdComm = new MPD();
         statusMonitor = new MPDStatusMonitor(mpdComm, 1000);
-        statusMonitor.addStatusChangeListener(this);
-        statusMonitor.addTrackPositionListener(this);
     }
 
     private void initConnection() throws MPDServerException, IOException {
         if (!mpdComm.isConnected())
             mpdComm.connect(host, port, passwd);
 
-        if (!statusMonitor.isAlive())
+        if (statusMonitor == null) {
+            statusMonitor = new MPDStatusMonitor(mpdComm, 1000);
+            statusMonitor.addStatusChangeListener(this);
+            statusMonitor.addTrackPositionListener(this);
             statusMonitor.start();
-
-        if (statusMonitor.isPaused())
-            statusMonitor.setPaused(false);
+        }
 
         this.inputStream = new BufferedInputStream(connection.openInputStream(), 1024);
         this.outputStream = new BufferedOutputStream(connection.openOutputStream(), 1024);
+    }
+
+    private void closeConnection() throws IOException {
+        try {
+            statusMonitor.giveup();
+            statusMonitor = null;
+            mpdComm.disconnect();
+            inputStream.close();
+            outputStream.close();
+            connection.close();
+        } catch (MPDServerException e) {
+            System.err.println("Error closing mpd: " + e.getMessage());
+        }
+        if (DEBUG) System.out.println("Connection closed.");
     }
 
     public void connect(String server, int port, String password) throws MPDServerException, UnknownHostException {
@@ -86,22 +99,18 @@ public class MPDManager implements TrackPositionListener, StatusChangeListener  
         closeConnection();
     }
 
-    private void processCommand(String command) throws MPDServerException {
-        if (command.equals(MPDCommand.MPD_CMD_PLAY)) mpdComm.play();
-        else if (command.equals(MPDCommand.MPD_CMD_NEXT)) mpdComm.next();
-        else if (command.equals(MPDCommand.MPD_CMD_PREV)) mpdComm.previous();
-        else if (command.equals(MPDCommand.MPD_CMD_VOLUME)) mpdComm.adjustVolume(extractInt(command));
-        else if (command.startsWith(MPDCommand.MPD_CMD_PLAY_ID)) mpdComm.skipToId(extractInt(command));
-        else if (command.startsWith(MPDCommand.MPD_CMD_PLAYLIST_CHANGES)) updatePlaylist();
-        else if (DEBUG) System.out.println("Unknown command: " + command);
-    }
-
-    private void closeConnection() throws IOException {
-        inputStream.close();
-        outputStream.close();
-        connection.close();
-        statusMonitor.setPaused(true);
-        if(DEBUG) System.out.println("Connection closed.");
+    private void processCommand(String command) {
+        try {
+            if (command.equals(MPDCommand.MPD_CMD_PLAY)) mpdComm.play();
+            else if (command.equals(MPDCommand.MPD_CMD_NEXT)) mpdComm.next();
+            else if (command.equals(MPDCommand.MPD_CMD_PREV)) mpdComm.previous();
+            else if (command.equals(MPDCommand.MPD_CMD_VOLUME)) mpdComm.adjustVolume(extractInt(command));
+            else if (command.startsWith(MPDCommand.MPD_CMD_PLAY_ID)) mpdComm.skipToId(extractInt(command));
+            else if (command.startsWith(MPDCommand.MPD_CMD_PLAYLIST_CHANGES)) updatePlaylist();
+            else if (DEBUG) System.out.println("Unknown command: " + command);
+        } catch (MPDServerException e) {
+            e.printStackTrace();
+        }
     }
 
     private int extractInt(String str) {

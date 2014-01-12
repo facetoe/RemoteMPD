@@ -11,6 +11,7 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.facetoe.RemoteMPD.AbstractMPDManager;
+import com.facetoe.RemoteMPD.MPDManagerChangeListener;
 import com.facetoe.RemoteMPD.R;
 import com.facetoe.RemoteMPD.RemoteMPDApplication;
 import com.facetoe.RemoteMPD.adapters.SongListAdapter;
@@ -23,7 +24,9 @@ import java.util.List;
 /**
  * Created by facetoe on 5/01/14.
  */
-public class PlayerPanelFragment extends Fragment implements View.OnClickListener, StatusChangeListener {
+
+public class PlayerPanelFragment extends Fragment implements
+        View.OnClickListener, StatusChangeListener, MPDManagerChangeListener {
     String TAG = RemoteMPDApplication.APP_TAG;
 
     private ImageButton btnNext;
@@ -52,7 +55,10 @@ public class PlayerPanelFragment extends Fragment implements View.OnClickListene
         txtCurrentAlbum = (TextView) view.findViewById(R.id.txtCurrentAlbum);
         txtCurrentSong = (TextView) view.findViewById(R.id.txtCurrentSong);
         mpdManager = app.getMpdManager();
-        mpdManager.connect();
+        app.addMPDManagerChangeListener(this);
+
+        if(!RemoteMPDApplication.getInstance().getRemoteMPDSettings().getLastDevice().equals("NONE"))
+            mpdManager.connect();
         mpdManager.addStatusChangeListener(this);
         btnNext = (ImageButton) view.findViewById(R.id.btnNext);
         btnNext.setOnClickListener(this);
@@ -147,5 +153,16 @@ public class PlayerPanelFragment extends Fragment implements View.OnClickListene
             default:
                 return;
         }
+    }
+
+    @Override
+    public void mpdManagerChanged() {
+        Log.i(TAG, "MPD manager changed");
+        mpdManager.removeStatusChangeListener(this);
+        mpdManager.removeStatusChangeListener(this);
+        if(mpdManager != null)
+            mpdManager.disconnect();
+        mpdManager = app.getMpdManager();
+        mpdManager.connect();
     }
 }

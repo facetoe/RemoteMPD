@@ -64,6 +64,8 @@ public class RemoteMPDSettings {
                 "host='" + host + '\'' +
                 ", port=" + port +
                 ", password='" + password + '\'' +
+                ", isBluetooth=" + isBluetooth +
+                ", lastDevice='" + lastDevice + '\'' +
                 '}';
     }
 }

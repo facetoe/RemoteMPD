@@ -9,17 +9,10 @@ class BluetoothMPDManager extends AbstractMPDManager {
     private static final String TAG = RemoteMPDApplication.APP_TAG;
     private BluetoothController controller;
     private BluetoothMPDStatusMonitor bluetoothMonitor;
-    private static BluetoothMPDManager instance;
 
-    private BluetoothMPDManager() {
+    public BluetoothMPDManager() {
         bluetoothMonitor = new BluetoothMPDStatusMonitor();
         controller = new BluetoothController(bluetoothMonitor);
-    }
-
-    public static BluetoothMPDManager getInstance() {
-        if(instance == null)
-            instance = new BluetoothMPDManager();
-        return instance;
     }
 
     @Override
@@ -42,6 +35,7 @@ class BluetoothMPDManager extends AbstractMPDManager {
     @Override
     public void disconnect() {
         controller.disconnect();
+        Log.i(TAG, "Disconnected from bluetooth: " + !controller.isConnected());
     }
 
     @Override

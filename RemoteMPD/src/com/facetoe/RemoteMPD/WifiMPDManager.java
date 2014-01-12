@@ -11,24 +11,18 @@ import org.a0z.mpd.exception.MPDServerException;
 /**
  * Created by facetoe on 2/01/14.
  */
-public class WifiMPDManager extends AbstractMPDManager {
+public class WifiMPDManager extends AbstractMPDManager implements MPDAsyncHelper.ConnectionListener {
 
     String TAG = RemoteMPDApplication.APP_TAG;
     MPD mpd;
     RemoteMPDApplication app;
     MPDAsyncHelper asyncHelper;
-    private static WifiMPDManager instance;
 
-    private WifiMPDManager() {
+    public WifiMPDManager() {
         asyncHelper = new MPDAsyncHelper();
+        asyncHelper.addConnectionListener(this);
         mpd = asyncHelper.oMPD;
         app = RemoteMPDApplication.getInstance();
-    }
-
-    public static WifiMPDManager getInstance() {
-        if(instance == null)
-            instance = new WifiMPDManager();
-        return instance;
     }
 
     @Override
@@ -44,6 +38,7 @@ public class WifiMPDManager extends AbstractMPDManager {
         if (app.getSongList() == null) {
             app.setSongList(asyncHelper.oMPD.getPlaylist().getMusicList());
         }
+        Log.i(TAG, "Wifi connected: " + mpd.isConnected());
     }
 
     @Override
@@ -63,6 +58,7 @@ public class WifiMPDManager extends AbstractMPDManager {
     public void disconnect() {
         asyncHelper.stopMonitor();
         asyncHelper.disconnect();
+        asyncHelper.removeConnectionListener(this);
     }
 
     @Override
@@ -126,6 +122,16 @@ public class WifiMPDManager extends AbstractMPDManager {
         } catch (MPDServerException e) {
             handleError(e);
         }
+    }
+
+    @Override
+    public void connectionFailed(String message) {
+        Log.e(TAG, "Connection failed: " + message);
+    }
+
+    @Override
+    public void connectionSucceeded(String message) {
+        Log.i(TAG, "Connection succeded: " + message);
     }
 
     private void handleError(Exception ex) {

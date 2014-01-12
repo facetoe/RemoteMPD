@@ -45,6 +45,11 @@ public class RemoteMPDActivity extends ActionBarActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Register for broadcasts on BluetoothAdapter state change
+        IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+        prefs = myApp.getSharedPreferences();
+        this.registerReceiver(mReceiver, filter);
+        RemoteMPDApplication.getInstance().setCurrentActivity(this);
 
         setContentView(R.layout.main);
 
@@ -80,13 +85,6 @@ public class RemoteMPDActivity extends ActionBarActivity {
 //            public void onStopTrackingTouch(SeekBar seekBar) {
 //            }
 //        });
-
-        // Register for broadcasts on BluetoothAdapter state change
-        IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-        prefs = myApp.getSharedPreferences();
-        this.registerReceiver(mReceiver, filter);
-        RemoteMPDApplication.getInstance().setCurrentActivity(this);
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
     }
 
 
@@ -167,10 +165,6 @@ public class RemoteMPDActivity extends ActionBarActivity {
                     BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
                     BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
 
-                    // Save device.
-                    SharedPreferences.Editor editor = prefs.edit();
-                    editor.putString(BluetoothController.LAST_DEVICE_KEY, device.getAddress());
-                    editor.commit();
                 }
                 break;
             case REQUEST_ENABLE_BT:

@@ -1,7 +1,9 @@
 package com.facetoe.RemoteMPD;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -10,7 +12,7 @@ import com.facetoe.RemoteMPD.fragments.MPDSettingsFragment;
 /**
  * Created by facetoe on 7/01/14.
  */
-public class SettingsActivity extends Activity {
+public class SettingsActivity extends Activity  {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

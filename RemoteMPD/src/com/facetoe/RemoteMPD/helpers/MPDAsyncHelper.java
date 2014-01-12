@@ -252,7 +252,7 @@ public class MPDAsyncHelper extends Handler {
             switch (msg.what) {
                 case EVENT_CONNECT:
                     try {
-                        RemoteMPDSettings settings = RemoteMPDApplication.getInstance().getMPDWifiSettings();
+                        RemoteMPDSettings settings = RemoteMPDApplication.getInstance().getRemoteMPDSettings();
                         Log.i(RemoteMPDApplication.APP_TAG, settings.toString());
                         oMPD.connect(settings.getHost(), settings.getPort(), settings.getPassword());
                         Log.i("MPDAsyncHelper", "Connected: " + oMPD.isConnected());
