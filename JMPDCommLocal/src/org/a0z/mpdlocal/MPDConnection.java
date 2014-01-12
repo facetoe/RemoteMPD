@@ -263,6 +263,7 @@ public abstract class MPDConnection {
     }
 
     private void writeToServer(MPDCommand command) throws IOException {
+        OutputStreamWriter writer = getOutputStream();
         getOutputStream().write(command.toString());
         getOutputStream().flush();
         command.setSentToServer(true);
