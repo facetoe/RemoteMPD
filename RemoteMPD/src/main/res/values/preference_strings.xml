@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="remoteMpdSettingsKey">mpdSettings</string>
+    <string name="remoteMpdSettingsTitle">MPD Settings</string>
+    <string name="remoteMpdConnectionTypeKey">mpdConnectionType</string>
+    <string name="remoteMpdConnectionTypeTitle">Connection Type</string>
+    <string name="remoteMpdConnectionTypeSummary">Connect with Wifi or Bluetooth</string>
+    <string name="defaultConnectionValue">wifi</string>
+    <string name="wifiConSettingsKey">wifiConnectionSettings</string>
+    <string name="wifiIpTitle">IP address</string>
+    <string name="wifiConSettingsTitle">Wifi connection settings</string>
+    <string name="wifiConSettingsSummary">Configure Wifi settings</string>
+    <string name="wifIpKey">mpdIp</string>
+    <string name="wifiIpSummary">IP address for the MPD server</string>
+    <string name="wifiPortKey">mpdPort</string>
+    <string name="wifiPortTitle">Port</string>
+    <string name="wifiPortSummary">Port the MPD server is listening on</string>
+    <string name="wifiPortDefault">6600</string>
+    <string name="wifiPassKey">mpdPassword</string>
+    <string name="wifiPassTitle">Password</string>
+    <string name="wifiPassSummary">Password for the MPD server</string>
+    <string name="bluetoothConSettingsKey">bluetoothConnectionSettings</string>
+    <string name="bluetoothConSettingsTitle">Bluetooth Connection Settings</string>
+    <string name="bluetoothConSettingsSummary">Configure Bluetooth settings</string>
+    <string name="bluetoothScanKey">bluetoothScan</string>
+    <string name="bluetoothScanTitle">Scan for devices</string>
+    <string name="bluetoothScanSummary">Scan for local Bluetooth MPD server</string>
+
+</resources>

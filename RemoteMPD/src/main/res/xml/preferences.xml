@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+                  android:key="@string/remoteMpdSettingsKey"
+                  android:title="@string/remoteMpdSettingsTitle">
+    <ListPreference
+        android:key="@string/remoteMpdConnectionTypeKey"
+        android:title="@string/remoteMpdConnectionTypeTitle"
+        android:summary="@string/remoteMpdConnectionTypeSummary"
+        android:entries="@array/remoteMpdConnectionOptions"
+        android:entryValues="@array/remoteMpdConnectionOptionsValues"
+        android:defaultValue="@string/defaultConnectionValue"/>
+
+    <PreferenceScreen
+        android:key="@string/wifiConSettingsKey"
+        android:title="@string/wifiConSettingsTitle"
+        android:summary="@string/wifiConSettingsSummary">
+        <EditTextPreference
+            android:key="@string/wifIpKey"
+            android:title="@string/wifiIpTitle"
+            android:summary="@string/wifiIpSummary"/>
+        <EditTextPreference
+            android:key="@string/wifiPortKey"
+            android:title="@string/wifiPortTitle"
+            android:summary="@string/wifiPortSummary"
+            android:defaultValue="@string/wifiPortDefault"/>
+        <EditTextPreference
+            android:key="@string/wifiPassKey"
+            android:title="@string/wifiPassTitle"
+            android:summary="@string/wifiPassSummary"/>
+    </PreferenceScreen>
+
+    <PreferenceScreen
+        android:key="@string/bluetoothConSettingsKey"
+        android:title="@string/bluetoothConSettingsTitle"
+        android:summary="@string/bluetoothConSettingsSummary">
+        <Preference
+            android:key="@string/bluetoothScanKey"
+            android:title="@string/bluetoothScanTitle"
+            android:summary="@string/bluetoothScanSummary"/>
+    </PreferenceScreen>
+
+</PreferenceScreen>
