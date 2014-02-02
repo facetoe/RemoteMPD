@@ -10,6 +10,9 @@ public class RemoteMPDSettings {
     private boolean isBluetooth;
     private String lastDevice;
 
+    public RemoteMPDSettings() {
+    }
+
     public RemoteMPDSettings(String host, String port, String password, String lastDevice, boolean isBluetooth) {
         this.host = host;
         this.port = Integer.parseInt(port);

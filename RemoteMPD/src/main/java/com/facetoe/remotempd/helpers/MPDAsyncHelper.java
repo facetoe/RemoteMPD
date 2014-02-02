@@ -4,9 +4,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
-import com.facetoe.remotempd.RemoteMPDApplication;
-import com.facetoe.remotempd.RemoteMPDSettings;
 import com.facetoe.remotempd.tools.Tools;
 import com.facetoe.remotempd.tools.WeakLinkedList;
 import org.a0z.mpd.MPD;
@@ -14,9 +11,7 @@ import org.a0z.mpd.MPDStatus;
 import org.a0z.mpd.MPDStatusMonitor;
 import org.a0z.mpd.event.StatusChangeListener;
 import org.a0z.mpd.event.TrackPositionListener;
-import org.a0z.mpd.exception.MPDServerException;
 
-import java.net.UnknownHostException;
 import java.util.Collection;
 
 /**
@@ -251,18 +246,19 @@ public class MPDAsyncHelper extends Handler {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case EVENT_CONNECT:
-                    try {
-                        RemoteMPDSettings settings = RemoteMPDApplication.getInstance().getRemoteMPDSettings();
-                        Log.i(RemoteMPDApplication.APP_TAG, settings.toString());
-                        oMPD.connect(settings.getHost(), settings.getPort(), settings.getPassword());
-                        Log.i("MPDAsyncHelper", "Connected: " + oMPD.isConnected());
-                        MPDAsyncHelper.this.obtainMessage(EVENT_CONNECTSUCCEEDED).sendToTarget();
-
-                    } catch (MPDServerException e) {
-                        MPDAsyncHelper.this.obtainMessage(EVENT_CONNECTFAILED, Tools.toObjectArray(e.getMessage())).sendToTarget();
-                    } catch (UnknownHostException e) {
-                        MPDAsyncHelper.this.obtainMessage(EVENT_CONNECTFAILED, Tools.toObjectArray(e.getMessage())).sendToTarget();
-                    }
+                    //TODO Handle connection stuff
+//                    try {
+//                        RemoteMPDSettings settings = RemoteMPDApplication.getInstance().getRemoteMPDSettings();
+//                        Log.i(RemoteMPDApplication.APP_TAG, settings.toString());
+//                        oMPD.connect(settings.getHost(), settings.getPort(), settings.getPassword());
+//                        Log.i("MPDAsyncHelper", "Connected: " + oMPD.isConnected());
+//                        MPDAsyncHelper.this.obtainMessage(EVENT_CONNECTSUCCEEDED).sendToTarget();
+//
+//                    } catch (MPDServerException e) {
+//                        MPDAsyncHelper.this.obtainMessage(EVENT_CONNECTFAILED, Tools.toObjectArray(e.getMessage())).sendToTarget();
+//                    } catch (UnknownHostException e) {
+//                        MPDAsyncHelper.this.obtainMessage(EVENT_CONNECTFAILED, Tools.toObjectArray(e.getMessage())).sendToTarget();
+//                    }
                     break;
                 case EVENT_STARTMONITOR:
                     oMonitor = new MPDStatusMonitor(oMPD, 500);
@@ -275,16 +271,17 @@ public class MPDAsyncHelper extends Handler {
                         oMonitor.giveup();
                     break;
                 case EVENT_DISCONNECT:
-                    try {
-                        if (oMPD != null)
-                            oMPD.disconnect();
-                        Log.d(RemoteMPDApplication.APP_TAG, "Disconnected");
-                    } catch (MPDServerException e) {
-                        Log.e(RemoteMPDApplication.APP_TAG, "Error on disconnect", e);// Silent exception are dangerous
-                    }
-                    // Should not happen anymore
-                    // catch (NullPointerException ex) {
-                    // }
+                    //TODO handle disconnection stuff
+//                    try {
+//                        if (oMPD != null)
+//                            oMPD.disconnect();
+//                        Log.d(RemoteMPDApplication.APP_TAG, "Disconnected");
+//                    } catch (MPDServerException e) {
+//                        Log.e(RemoteMPDApplication.APP_TAG, "Error on disconnect", e);// Silent exception are dangerous
+//                    }
+//                    // Should not happen anymore
+//                    // catch (NullPointerException ex) {
+//                    // }
                     break;
                 case EVENT_EXECASYNC:
                     Runnable run = (Runnable) msg.obj;

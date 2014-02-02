@@ -13,7 +13,7 @@ import org.a0z.mpd.exception.MPDServerException;
  */
 public class WifiMPDManager extends AbstractMPDManager implements MPDAsyncHelper.ConnectionListener {
 
-    String TAG = RemoteMPDApplication.APP_TAG;
+    String TAG = RemoteMPDApplication.APP_PREFIX + "WifiMPDManager";
     MPD mpd;
     RemoteMPDApplication app;
     MPDAsyncHelper asyncHelper;
@@ -22,7 +22,6 @@ public class WifiMPDManager extends AbstractMPDManager implements MPDAsyncHelper
         asyncHelper = new MPDAsyncHelper();
         asyncHelper.addConnectionListener(this);
         mpd = asyncHelper.oMPD;
-        app = RemoteMPDApplication.getInstance();
     }
 
     @Override
@@ -34,10 +33,6 @@ public class WifiMPDManager extends AbstractMPDManager implements MPDAsyncHelper
 
         if (!asyncHelper.isMonitorAlive())
             asyncHelper.startMonitor();
-
-        if (app.getSongList() == null) {
-            app.setSongList(asyncHelper.oMPD.getPlaylist().getMusicList());
-        }
         Log.i(TAG, "Wifi connected: " + mpd.isConnected());
     }
 

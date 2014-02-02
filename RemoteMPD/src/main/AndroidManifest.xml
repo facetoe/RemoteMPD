@@ -1,20 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.facetoe.remotempd" >
-    <uses-sdk android:minSdkVersion="11"/>
+
+    <uses-sdk android:minSdkVersion="11" />
+
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/Theme.AppCompat"
-
-        >
+        android:name=".RemoteMPDApplication">
         <activity
-            android:name=".SettingsActivity"
+            android:name="com.facetoe.remotempd.SettingsActivity"
             android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name="com.facetoe.remotempd.DeviceListActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:label="Device List Activity"
+            android:theme="@android:style/Theme.Dialog" />
+        <activity
+            android:name="com.facetoe.remotempd.TestActivity"
+            android:label="@string/title_activity_test" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

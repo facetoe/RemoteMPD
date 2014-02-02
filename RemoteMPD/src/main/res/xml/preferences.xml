@@ -23,7 +23,8 @@
             android:key="@string/wifiPortKey"
             android:title="@string/wifiPortTitle"
             android:summary="@string/wifiPortSummary"
-            android:defaultValue="@string/wifiPortDefault"/>
+            android:defaultValue="@string/wifiPortDefault"
+            android:numeric="integer"/>
         <EditTextPreference
             android:key="@string/wifiPassKey"
             android:title="@string/wifiPassTitle"
@@ -37,7 +38,9 @@
         <Preference
             android:key="@string/bluetoothScanKey"
             android:title="@string/bluetoothScanTitle"
-            android:summary="@string/bluetoothScanSummary"/>
+            android:summary="@string/bluetoothScanSummary">
+        </Preference>
+
     </PreferenceScreen>
 
 </PreferenceScreen>
