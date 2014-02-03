@@ -4,11 +4,11 @@ package com.facetoe.remotempd;
  * Created by facetoe on 7/01/14.
  */
 public class RemoteMPDSettings {
-    private String host;
+    private String host = "";
     private int port;
-    private String password;
+    private String password = "";
     private boolean isBluetooth;
-    private String lastDevice;
+    private String lastDevice = "";
 
     public RemoteMPDSettings() {
     }
@@ -63,12 +63,12 @@ public class RemoteMPDSettings {
 
     @Override
     public String toString() {
-        return "RemoteMPDSettings{" +
-                "host='" + host + '\'' +
-                ", port=" + port +
-                ", password='" + password + '\'' +
-                ", isBluetooth=" + isBluetooth +
-                ", lastDevice='" + lastDevice + '\'' +
+        return "\nRemoteMPDSettings{" +
+                "\nhost='" + host + '\'' +
+                "\nport=" + port +
+                "\npassword='" + password + '\'' +
+                "\nisBluetooth=" + isBluetooth +
+                "\nlastDevice='" + lastDevice + '\'' +
                 '}';
     }
 }

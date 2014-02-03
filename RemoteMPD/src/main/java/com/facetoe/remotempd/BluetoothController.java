@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.SharedPreferences;
 import android.util.Log;
+import com.facetoe.remotempd.helpers.SettingsHelper;
 import com.google.gson.Gson;
 import org.a0z.mpd.MPDCommand;
 
@@ -18,7 +19,7 @@ import java.util.UUID;
 public class BluetoothController  {
     // Unique UUID for this application
     private static final UUID MY_UUID = UUID.fromString("04c6093b-0000-1000-8000-00805f9b34fb");
-    protected static final String TAG = "BluetoothController";
+    protected static final String TAG = RemoteMPDApplication.APP_PREFIX + "BluetoothController";
 
 
     // Constants that indicate the current connection state
@@ -27,15 +28,11 @@ public class BluetoothController  {
     protected static final int STATE_CONNECTED = 2;  // now spawnConnectedThread to a remote device
     protected static int CURRENT_STATE = STATE_NONE;
 
-    // For saving and retrieving the last device
-    public static final String LAST_DEVICE_KEY = "lastDevice";
-
     // Member fields
     private BluetoothAdapter bluetoothAdapter;
     private BluetoothDevice device;
     private ConnectThread connectThread;
     private ConnectedThread connectedThread;
-    private SharedPreferences prefs;
 
     // For sending JSON across the wire
     private Gson gson = new Gson();
@@ -51,11 +48,11 @@ public class BluetoothController  {
     }
 
     private void initDevice() {
-        String lastDeviceAddress = prefs.getString(LAST_DEVICE_KEY, "NONE");
-        if(lastDeviceAddress.equals("NONE")) {
+        RemoteMPDSettings settings = RemoteMPDApplication.getInstance().getSettings();
+        if(settings.getLastDevice().isEmpty()) {
             //TODO handle no device.
         } else {
-           device = bluetoothAdapter.getRemoteDevice(lastDeviceAddress);
+           device = bluetoothAdapter.getRemoteDevice(settings.getLastDevice());
         }
     }
 
@@ -139,6 +136,7 @@ public class BluetoothController  {
 
     private void connectionFailed() {
         setState(STATE_NONE);
+        RemoteMPDApplication.getInstance().connectionFailed("Failed to connect to bluetooth server");
     }
 
     private void connectionLost() {

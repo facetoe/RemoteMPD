@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/JMPDCommRemote/JMPDCommRemote.iml" filepath="$PROJECT_DIR$/JMPDCommRemote/JMPDCommRemote.iml" />
-      <module fileurl="file://$PROJECT_DIR$/JMPDCommRemote/JMPDCommRemote-JMPDCommRemote.iml" filepath="$PROJECT_DIR$/JMPDCommRemote/JMPDCommRemote-JMPDCommRemote.iml" />
       <module fileurl="file://$PROJECT_DIR$/RemoteMPD.iml" filepath="$PROJECT_DIR$/RemoteMPD.iml" />
       <module fileurl="file://$PROJECT_DIR$/RemoteMPD/RemoteMPD-RemoteMPD.iml" filepath="$PROJECT_DIR$/RemoteMPD/RemoteMPD-RemoteMPD.iml" />
     </modules>

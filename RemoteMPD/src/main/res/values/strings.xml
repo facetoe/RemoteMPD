@@ -13,5 +13,11 @@
     <string name="button_scan">Scan</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="title_activity_test">TestActivity</string>
+    <string name="settingsFragment">settingsFragment</string>
+    <string name="connectionFailedDialogMessage">Error connecting to MPD: </string>
+    <string name="connectionFailedDialogTitle">Connection Failed</string>
+    <string name="connectionFailedSettingsOption">Settings</string>
+    <string name="connectionFailedQuitOption">Quit</string>
+    <string name="connectionFailedRetryOption">Retry</string>
 
 </resources>

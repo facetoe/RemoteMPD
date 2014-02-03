@@ -11,16 +11,16 @@ import org.a0z.mpd.exception.MPDServerException;
 /**
  * Created by facetoe on 2/01/14.
  */
-public class WifiMPDManager extends AbstractMPDManager implements MPDAsyncHelper.ConnectionListener {
+public class WifiMPDManager extends AbstractMPDManager {
 
     String TAG = RemoteMPDApplication.APP_PREFIX + "WifiMPDManager";
     MPD mpd;
-    RemoteMPDApplication app;
+    RemoteMPDApplication app = RemoteMPDApplication.getInstance();
     MPDAsyncHelper asyncHelper;
 
     public WifiMPDManager() {
         asyncHelper = new MPDAsyncHelper();
-        asyncHelper.addConnectionListener(this);
+        asyncHelper.addConnectionListener(app);
         mpd = asyncHelper.oMPD;
     }
 
@@ -33,7 +33,6 @@ public class WifiMPDManager extends AbstractMPDManager implements MPDAsyncHelper
 
         if (!asyncHelper.isMonitorAlive())
             asyncHelper.startMonitor();
-        Log.i(TAG, "Wifi connected: " + mpd.isConnected());
     }
 
     @Override
@@ -53,11 +52,12 @@ public class WifiMPDManager extends AbstractMPDManager implements MPDAsyncHelper
     public void disconnect() {
         asyncHelper.stopMonitor();
         asyncHelper.disconnect();
-        asyncHelper.removeConnectionListener(this);
+        asyncHelper.removeConnectionListener(app);
     }
 
     @Override
     public void play() {
+        checkState();
         try {
             mpd.play();
         } catch (MPDServerException e) {
@@ -67,6 +67,7 @@ public class WifiMPDManager extends AbstractMPDManager implements MPDAsyncHelper
 
     @Override
     public void playID(int id) {
+        checkState();
         try {
             mpd.skipToId(id);
         } catch (MPDServerException e) {
@@ -76,6 +77,7 @@ public class WifiMPDManager extends AbstractMPDManager implements MPDAsyncHelper
 
     @Override
     public void stop() {
+        checkState();
         try {
             mpd.stop();
         } catch (MPDServerException e) {
@@ -85,6 +87,7 @@ public class WifiMPDManager extends AbstractMPDManager implements MPDAsyncHelper
 
     @Override
     public void pause() {
+        checkState();
         try {
             mpd.pause();
         } catch (MPDServerException e) {
@@ -94,6 +97,7 @@ public class WifiMPDManager extends AbstractMPDManager implements MPDAsyncHelper
 
     @Override
     public void next() {
+        checkState();
         try {
             mpd.next();
         } catch (MPDServerException e) {
@@ -103,6 +107,7 @@ public class WifiMPDManager extends AbstractMPDManager implements MPDAsyncHelper
 
     @Override
     public void prev() {
+        checkState();
         try {
             mpd.previous();
         } catch (MPDServerException e) {
@@ -112,6 +117,7 @@ public class WifiMPDManager extends AbstractMPDManager implements MPDAsyncHelper
 
     @Override
     public void setVolume(int newVolume) {
+        checkState();
         try {
             mpd.setVolume(newVolume);
         } catch (MPDServerException e) {
@@ -119,18 +125,14 @@ public class WifiMPDManager extends AbstractMPDManager implements MPDAsyncHelper
         }
     }
 
-    @Override
-    public void connectionFailed(String message) {
-        Log.e(TAG, "Connection failed: " + message);
-    }
-
-    @Override
-    public void connectionSucceeded(String message) {
-        Log.i(TAG, "Connection succeded: " + message);
-    }
-
     private void handleError(Exception ex) {
         Log.e(TAG, "Error: ", ex);
+    }
+
+    private void checkState() {
+        if(!mpd.isConnected()) {
+            throw new IllegalStateException("MPD is not connected!");
+        }
     }
 
     @Override

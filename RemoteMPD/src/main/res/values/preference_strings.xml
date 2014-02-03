@@ -27,5 +27,6 @@
     <string name="bluetoothScanKey">bluetoothScan</string>
     <string name="bluetoothScanTitle">Scan for devices</string>
     <string name="bluetoothScanSummary">Scan for local Bluetooth MPD server</string>
+    <string name="lastBTAddressKey">lastBTDeviceAddress</string>
 
 </resources>

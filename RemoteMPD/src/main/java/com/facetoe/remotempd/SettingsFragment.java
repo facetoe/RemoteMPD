@@ -28,7 +28,7 @@ public class SettingsFragment extends PreferenceFragment {
             bluetoothScan.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    startActivityForResult(deviceScanIntent, REQUEST_SCAN_FOR_DEVICE);
+                    startActivity(deviceScanIntent);
                     return false;
                 }
             });

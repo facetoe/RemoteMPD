@@ -20,12 +20,14 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.*;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.*;
 import android.widget.AdapterView.OnItemClickListener;
+import com.facetoe.remotempd.helpers.SettingsHelper;
 
 import java.util.Set;
 
@@ -37,7 +39,7 @@ import java.util.Set;
  */
 public class DeviceListActivity extends Activity {
     // Debugging
-    private static final String TAG = "DeviceListActivity";
+    private static final String TAG = RemoteMPDApplication.APP_PREFIX + "DeviceListActivity";
     private static final boolean D = true;
 
     // Return Intent extra
@@ -154,16 +156,18 @@ public class DeviceListActivity extends Activity {
             // Get the device MAC address, which is the last 17 chars in the View
             String info = ((TextView) v).getText().toString();
             String address = info.substring(info.length() - 17);
-
-            // Create the result Intent and include the MAC address
-            Intent intent = new Intent();
-            intent.putExtra(EXTRA_DEVICE_ADDRESS, address);
-
-            // Set result and finish this Activity
-            setResult(Activity.RESULT_OK, intent);
+            Log.i(TAG, "New BTDevice: " + address);
+            saveBTDevice(address);
             finish();
         }
     };
+
+    private void saveBTDevice(String address) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(SettingsHelper.BT_LAST_BTDEVICE, address);
+        editor.commit();
+    }
 
     // The BroadcastReceiver that listens for discovered devices and
     // changes the title when discovery is finished
@@ -191,5 +195,4 @@ public class DeviceListActivity extends Activity {
             }
         }
     };
-
 }

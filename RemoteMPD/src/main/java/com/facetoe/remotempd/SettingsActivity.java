@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
+import android.util.Log;
 
 /**
  * RemoteMPDNew
@@ -11,21 +12,21 @@ import android.preference.PreferenceActivity;
  */
 public class SettingsActivity extends PreferenceActivity {
     private static final String TAG = RemoteMPDApplication.APP_PREFIX + "SettingsActivity";
+    private RemoteMPDApplication app = RemoteMPDApplication.getInstance();
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        app.registerCurrentActivity(this);
+
         getFragmentManager().beginTransaction()
                 .replace(android.R.id.content, new SettingsFragment())
                 .commit();
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == SettingsFragment.REQUEST_SCAN_FOR_DEVICE) {
-            if(resultCode == Activity.RESULT_OK) {
 
-            }
-        }
+    @Override
+    protected void onStop() {
+        super.onStop();
+        app.unregisterCurrentActivity();
     }
 }
