@@ -861,6 +861,20 @@ public class MPD {
         return result;
     }
 
+
+    /**
+     * Sends a command to the MPD server.
+     *
+     * @throws MPDServerException
+     */
+    public void sendCommand(MPDCommand command) throws MPDServerException {
+        if(!isConnected()) {
+            throw new MPDServerException("MPD Connection is not established");
+        }
+
+        mpdConnection.sendCommand(command);
+    }
+
     /**
      * Jumps to next playlist track.
      *
