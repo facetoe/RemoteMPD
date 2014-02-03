@@ -3,6 +3,7 @@ package com.facetoe.remotempd;
 import android.util.Log;
 import com.facetoe.remotempd.helpers.MPDAsyncHelper;
 import org.a0z.mpd.MPD;
+import org.a0z.mpd.MPDCommand;
 import org.a0z.mpd.event.StatusChangeListener;
 import org.a0z.mpd.event.TrackPositionListener;
 import org.a0z.mpd.exception.MPDServerException;
@@ -28,7 +29,7 @@ public class WifiMPDManager extends AbstractMPDManager {
     public void connect() {
         Log.i(TAG, "WifiManager.connect()");
 
-        if(!mpd.isConnected())
+        if (!mpd.isConnected())
             asyncHelper.connect();
 
         if (!asyncHelper.isMonitorAlive())
@@ -41,14 +42,6 @@ public class WifiMPDManager extends AbstractMPDManager {
     }
 
     @Override
-    public void restart() {
-        asyncHelper.stopMonitor();
-        asyncHelper.disconnect();
-        asyncHelper.startMonitor();
-        asyncHelper.connect();
-    }
-
-    @Override
     public void disconnect() {
         asyncHelper.stopMonitor();
         asyncHelper.disconnect();
@@ -56,82 +49,17 @@ public class WifiMPDManager extends AbstractMPDManager {
     }
 
     @Override
-    public void play() {
-        checkState();
+    public void sendCommand(MPDCommand command) {
+        lastCommand = command;
         try {
-            mpd.play();
+            mpd.sendCommand(command);
+            retryAttempts = 0;
         } catch (MPDServerException e) {
-            handleError(e);
-        }
-    }
-
-    @Override
-    public void playID(int id) {
-        checkState();
-        try {
-            mpd.skipToId(id);
-        } catch (MPDServerException e) {
-            handleError(e);
-        }
-    }
-
-    @Override
-    public void stop() {
-        checkState();
-        try {
-            mpd.stop();
-        } catch (MPDServerException e) {
-            handleError(e);
-        }
-    }
-
-    @Override
-    public void pause() {
-        checkState();
-        try {
-            mpd.pause();
-        } catch (MPDServerException e) {
-            handleError(e);
-        }
-    }
-
-    @Override
-    public void next() {
-        checkState();
-        try {
-            mpd.next();
-        } catch (MPDServerException e) {
-            handleError(e);
-        }
-    }
-
-    @Override
-    public void prev() {
-        checkState();
-        try {
-            mpd.previous();
-        } catch (MPDServerException e) {
-            handleError(e);
-        }
-    }
-
-    @Override
-    public void setVolume(int newVolume) {
-        checkState();
-        try {
-            mpd.setVolume(newVolume);
-        } catch (MPDServerException e) {
-            handleError(e);
-        }
-    }
-
-    private void handleError(Exception ex) {
-        Log.e(TAG, "Error: ", ex);
-    }
-
-    private void checkState() {
-        if(!mpd.isConnected()) {
-            throw new IllegalStateException("MPD is not connected!");
+            if (retryAttempts < MAX_COMMAND_RETRY_ATTEMPTS) {
+                attemptReconnect();
+            } else {
+                handleError(e);
+            }
         }
     }
 

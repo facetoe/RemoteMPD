@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class BluetoothMPDStatusMonitor {
 
-    private static final String TAG = "BluetoothMPDStatusMonitor";
+    private static final String TAG = RemoteMPDApplication.APP_PREFIX + "BluetoothMPDStatusMonitor";
     private LinkedList<StatusChangeListener> statusChangedListeners = new LinkedList<StatusChangeListener>();
     private LinkedList<TrackPositionListener> trackPositionChangedListeners = new LinkedList<TrackPositionListener>();
     Gson gson;

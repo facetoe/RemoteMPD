@@ -19,5 +19,15 @@
     <string name="connectionFailedSettingsOption">Settings</string>
     <string name="connectionFailedQuitOption">Quit</string>
     <string name="connectionFailedRetryOption">Retry</string>
+    <string name="noSettingsDialogTitle">No Settings Defined</string>
+    <string name="noSettingsDialogMessage">Before you can use RemoteMPD you need to configure the connection settings</string>
+    <string name="noSettingsDialogOkOption">OK</string>
+    <string name="noSettingsDialogQuitOption">Quit</string>
+    <string name="noBluetoothDeviceDialogTitle">No Bluetooth Device!</string>
+    <string name="noBluetoothDeviceDialogMessage">No Bluetooth device selected. Please scan for and select a device.</string>
+    <string name="dialogQuitOption">Quit</string>
+    <string name="dialogOpenSettingsOption">Settings</string>
+    <string name="noWifiSettingsDialogTitle">No Wifi Settings!</string>
+    <string name="noWifiSettingsDialogMessage">Please configure Wifi connections to connect to MPD</string>
 
 </resources>

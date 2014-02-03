@@ -12,7 +12,6 @@ import android.preference.PreferenceFragment;
 public class SettingsFragment extends PreferenceFragment {
 
     private static final String TAG = RemoteMPDApplication.APP_PREFIX + "SettingsFragment";
-    public static final int REQUEST_SCAN_FOR_DEVICE = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

@@ -1,5 +1,7 @@
 package com.facetoe.remotempd;
 
+import org.a0z.mpd.MPDCommand;
+
 public interface MPDPlayerController {
 
     void play();

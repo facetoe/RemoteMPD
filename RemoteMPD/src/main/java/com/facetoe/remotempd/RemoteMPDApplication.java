@@ -3,11 +3,10 @@ package com.facetoe.remotempd;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Application;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import com.facetoe.remotempd.helpers.DialogBuilderFactory;
 import com.facetoe.remotempd.helpers.MPDAsyncHelper;
 import com.facetoe.remotempd.helpers.SettingsHelper;
 
@@ -17,20 +16,20 @@ import java.util.ArrayList;
  * Created by facetoe on 31/12/13.
  */
 
+
 public class RemoteMPDApplication extends Application implements
         SharedPreferences.OnSharedPreferenceChangeListener,
         MPDAsyncHelper.ConnectionListener {
+
     private static RemoteMPDApplication instance;
     public final static String APP_PREFIX = "RMPD-";
     private static final String TAG = APP_PREFIX + "RemoteMPDApplication";
 
     private SettingsHelper settingsHelper;
+    private AlertDialog dialog;
     private Activity currentActivity;
     private AbstractMPDManager mpdManager;
     private final ArrayList<MPDManagerChangeListener> mpdManagerChangeListeners = new ArrayList<MPDManagerChangeListener>();
-
-    private int MAX_RECONNECT_ATTEMPTS = 3;
-    private int reconnectAttemps;
 
     @Override
     public void onCreate() {
@@ -47,13 +46,38 @@ public class RemoteMPDApplication extends Application implements
     }
 
     public void registerCurrentActivity(Activity activity) {
+        Log.d(TAG, "Registering: " + activity);
         checkInstance();
         currentActivity = activity;
         checkSettings();
+        checkConnection();
+    }
+
+    private void checkSettings() {
+        if (currentActivity instanceof SettingsActivity) {
+            return;
+        }
+
+        if (settingsHelper.getSettings().isBluetooth() && !settingsHelper.hasBluetoothSettings()) {
+            AlertDialog.Builder builder = DialogBuilderFactory.getNoBluetoothSettingsDialog(currentActivity);
+            showDialog(builder);
+        } else if (!settingsHelper.getSettings().isBluetooth() && !settingsHelper.hasWifiSettings()) {
+            AlertDialog.Builder builder = DialogBuilderFactory.getNoWifiSettingsDialog(currentActivity);
+            showDialog(builder);
+        } else {
+            Log.e(TAG, "I Don't know what dialog to show.");
+        }
+    }
+
+    private void checkConnection() {
+        if (mpdManager != null && !mpdManager.isConnected()) {
+            mpdManager.connect();
+        }
     }
 
     public void unregisterCurrentActivity() {
         checkInstance();
+        Log.d(TAG, "Unregistering: " + currentActivity);
         currentActivity = null;
     }
 
@@ -71,31 +95,13 @@ public class RemoteMPDApplication extends Application implements
         }
     }
 
-    private void checkSettings() {
-        if (currentActivity instanceof SettingsActivity) {
-            return;
-        }
-
-        if (!settingsHelper.hasBluetoothSettings() && !settingsHelper.hasWifiSettings()) {
-            launchSettingsActivity();
-            Log.i(TAG, "No settings defined, opening SettingsActivity");
-
-        } else if (mpdManager != null && !mpdManager.isConnected()) {
-            mpdManager.connect();
-        }
-    }
-
-    private void launchSettingsActivity() {
-        Intent intent = new Intent(currentActivity, SettingsActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-    }
-
     public AbstractMPDManager getMpdManager() {
         if (settingsHelper.getSettings().isBluetooth()) {
-            mpdManager = new BluetoothMPDManager();
+            if (mpdManager == null || mpdManager instanceof WifiMPDManager)
+                mpdManager = new BluetoothMPDManager();
         } else {
-            mpdManager = new WifiMPDManager();
+            if (mpdManager == null || mpdManager instanceof BluetoothMPDManager)
+                mpdManager = new WifiMPDManager();
         }
         return mpdManager;
     }
@@ -114,58 +120,35 @@ public class RemoteMPDApplication extends Application implements
 
     @Override
     public void connectionFailed(String message) {
-        if (reconnectAttemps < MAX_RECONNECT_ATTEMPTS) {
-            Log.i(TAG, "Connection Failed, reconnecting: " + ++reconnectAttemps);
-            mpdManager.connect();
-        } else {
-            showConnectionFailedDialog(message);
-        }
+        Log.i(TAG, "CurrentActivity: " + currentActivity);
+        maybeShowConnectionFailedDialog(message);
     }
 
-    private void showConnectionFailedDialog(String message) {
-        if (currentActivity == null || currentActivity instanceof SettingsActivity) {
+    private void maybeShowConnectionFailedDialog(String message) {
+        if (currentActivity == null
+                || currentActivity instanceof SettingsActivity
+                || mpdManager.isConnected()
+                || dialog != null && dialog.isShowing()) {
             return;
         }
-        final AlertDialog.Builder builder = new AlertDialog.Builder(currentActivity);
-        builder.setMessage(getString(R.string.connectionFailedDialogMessage) + message)
-                .setTitle(getString(R.string.connectionFailedDialogTitle));
-        builder.setPositiveButton(getString(R.string.connectionFailedSettingsOption),
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        launchSettingsActivity();
-                    }
-                });
-        builder.setNegativeButton(getString(R.string.connectionFailedQuitOption),
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        currentActivity.finish();
-                    }
-                });
-        builder.setNeutralButton(getString(R.string.connectionFailedRetryOption),
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        reconnectAttemps = 0;
-                        mpdManager.connect();
-                    }
-                });
+        AlertDialog.Builder builder = DialogBuilderFactory.getConnectionFailedDialog(currentActivity, message);
+        showDialog(builder);
+    }
 
+    private void showDialog(final AlertDialog.Builder builder) {
         currentActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                AlertDialog dialog = builder.create();
+                dialog = builder.create();
                 dialog.show();
             }
         });
-
     }
+
 
     @Override
     public void connectionSucceeded(String message) {
         Log.i(TAG, "Connection succeeded");
-        reconnectAttemps = 0;
     }
 
     private static void checkInstance() {

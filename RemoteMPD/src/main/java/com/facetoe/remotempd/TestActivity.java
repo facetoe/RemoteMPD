@@ -91,8 +91,9 @@ public class TestActivity extends ActionBarActivity {
         }
 
         @Override
-        public void onStop() {
-            super.onStop();
+        public void onPause() {
+            super.onPause();
+            Log.d(TAG, "onPause()");
             app.unregisterCurrentActivity();
         }
 

@@ -1,10 +1,13 @@
 package com.facetoe.remotempd;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
+import com.facetoe.remotempd.exceptions.NoBluetoothServerConnectionException;
 import com.facetoe.remotempd.helpers.SettingsHelper;
 import com.google.gson.Gson;
 import org.a0z.mpd.MPDCommand;
@@ -21,7 +24,6 @@ public class BluetoothController  {
     private static final UUID MY_UUID = UUID.fromString("04c6093b-0000-1000-8000-00805f9b34fb");
     protected static final String TAG = RemoteMPDApplication.APP_PREFIX + "BluetoothController";
 
-
     // Constants that indicate the current connection state
     protected static final int STATE_NONE = 0;       // we're doing nothing
     protected static final int STATE_CONNECTING = 1; // now initiating an outgoing connection
@@ -33,6 +35,7 @@ public class BluetoothController  {
     private BluetoothDevice device;
     private ConnectThread connectThread;
     private ConnectedThread connectedThread;
+    private RemoteMPDApplication app = RemoteMPDApplication.getInstance();
 
     // For sending JSON across the wire
     private Gson gson = new Gson();
@@ -44,23 +47,21 @@ public class BluetoothController  {
     public BluetoothController(BluetoothMPDStatusMonitor monitor) {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         this.monitor = monitor;
-        initDevice();
-    }
-
-    private void initDevice() {
-        RemoteMPDSettings settings = RemoteMPDApplication.getInstance().getSettings();
-        if(settings.getLastDevice().isEmpty()) {
-            //TODO handle no device.
-        } else {
-           device = bluetoothAdapter.getRemoteDevice(settings.getLastDevice());
-        }
     }
 
     /**
      * Start the ConnectThread to initiate a connection to a remote device.
      */
     public synchronized void connect() {
-        Log.d(TAG, "connect to: " + device);
+        String lastDevice = app.getSettings().getLastDevice();
+        if(lastDevice.isEmpty()) {
+            app.connectionFailed("No Bluetooth device selected");
+            Log.w(TAG, "No device selected");
+            return;
+        }
+
+        device = bluetoothAdapter.getRemoteDevice(lastDevice);
+        Log.i(TAG, "connecting to: " + device);
         // Cancel any thread attempting to make a connection
         if (CURRENT_STATE == STATE_CONNECTING) {
             if (connectThread != null) {
@@ -102,7 +103,10 @@ public class BluetoothController  {
         return connectedThread != null && connectedThread.isAlive();
     }
 
-    public void sendCommand(MPDCommand command) {
+    public void sendCommand(MPDCommand command) throws NoBluetoothServerConnectionException {
+        if(CURRENT_STATE != STATE_CONNECTED) {
+            throw new NoBluetoothServerConnectionException("No connection to Bluetooth Server");
+        }
         write(command.toString());
     }
 
@@ -127,7 +131,10 @@ public class BluetoothController  {
         ConnectedThread r;
         // Synchronize a copy of the ConnectedThread
         synchronized (this) {
-            if (CURRENT_STATE != STATE_CONNECTED) return;
+            if (CURRENT_STATE != STATE_CONNECTED) {
+                Log.w(TAG, "Attempted to write while not connected.");
+                return;
+            }
             r = connectedThread;
         }
         // Perform the write unsynchronized
@@ -220,7 +227,7 @@ public class BluetoothController  {
                 mmSocket.connect();
             } catch (IOException e) {
                 connectionFailed();
-                Log.e(TAG, "Exception in connectThread: ", e);
+
                 // Close the socket
                 try {
                     mmSocket.close();

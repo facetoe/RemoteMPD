@@ -1,12 +1,13 @@
 package com.facetoe.remotempd;
 
 import android.util.Log;
+import com.facetoe.remotempd.exceptions.NoBluetoothServerConnectionException;
 import org.a0z.mpd.MPDCommand;
 import org.a0z.mpd.event.StatusChangeListener;
 import org.a0z.mpd.event.TrackPositionListener;
 
 class BluetoothMPDManager extends AbstractMPDManager {
-    private static final String TAG = "BluetoothMPDManager";
+    private static final String TAG = RemoteMPDApplication.APP_PREFIX + "BluetoothMPDManager";
     private BluetoothController controller;
     private BluetoothMPDStatusMonitor bluetoothMonitor;
 
@@ -17,7 +18,7 @@ class BluetoothMPDManager extends AbstractMPDManager {
 
     @Override
     public void connect() {
-        if(!controller.isConnected())
+        if (!controller.isConnected())
             controller.connect();
     }
 
@@ -27,60 +28,25 @@ class BluetoothMPDManager extends AbstractMPDManager {
     }
 
     @Override
-    public void restart() {
-        controller.disconnect();
-        controller.connect();
-    }
-
-    @Override
     public void disconnect() {
         controller.disconnect();
         Log.i(TAG, "Disconnected from bluetooth: " + !controller.isConnected());
     }
 
     @Override
-    public void play() {
-        Log.d(TAG, MPDCommand.MPD_CMD_PLAY);
-        controller.sendCommand(new MPDCommand(MPDCommand.MPD_CMD_PLAY));
-    }
-
-    @Override
-    public void playID(int id) {
-        controller.sendCommand(new MPDCommand(MPDCommand.MPD_CMD_PLAY_ID, Integer.toString(id)));
-    }
-
-    @Override
-    public void stop() {
-        Log.d(TAG, MPDCommand.MPD_CMD_STOP);
-        controller.sendCommand(new MPDCommand(MPDCommand.MPD_CMD_STOP));
-    }
-
-    @Override
-    public void pause() {
-        Log.d(TAG, MPDCommand.MPD_CMD_PAUSE);
-        controller.sendCommand(new MPDCommand(MPDCommand.MPD_CMD_PAUSE));
-    }
-
-    @Override
-    public void next() {
-        Log.d(TAG, MPDCommand.MPD_CMD_NEXT);
-        controller.sendCommand(new MPDCommand(MPDCommand.MPD_CMD_NEXT));
-    }
-
-    @Override
-    public void prev() {
-        Log.d(TAG, MPDCommand.MPD_CMD_PREV);
-        controller.sendCommand(new MPDCommand(MPDCommand.MPD_CMD_PREV));
-    }
-
-    @Override
-    public void setVolume(int newVolume) {
-        if (newVolume < 0 || newVolume > 100) return;
-        MPDCommand command = new MPDCommand(
-                MPDCommand.MPD_CMD_VOLUME,
-                Integer.toString(newVolume));
-        controller.sendCommand(command);
-        Log.d(TAG, command.toString());
+    public void sendCommand(MPDCommand command) {
+        lastCommand = command;
+        try {
+            controller.sendCommand(command);
+            Log.i(TAG, "Sending command: " + command);
+            retryAttempts = 0;
+        } catch (Exception e) {
+            if (retryAttempts < MAX_COMMAND_RETRY_ATTEMPTS) {
+                attemptReconnect();
+            } else {
+                handleError(e);
+            }
+        }
     }
 
     @Override

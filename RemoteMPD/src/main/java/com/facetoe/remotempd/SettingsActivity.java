@@ -23,10 +23,10 @@ public class SettingsActivity extends PreferenceActivity {
                 .commit();
     }
 
-
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onPause() {
+        super.onPause();
         app.unregisterCurrentActivity();
+
     }
 }
