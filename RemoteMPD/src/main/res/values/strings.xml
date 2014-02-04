@@ -24,10 +24,12 @@
     <string name="noSettingsDialogOkOption">OK</string>
     <string name="noSettingsDialogQuitOption">Quit</string>
     <string name="noBluetoothDeviceDialogTitle">No Bluetooth Device!</string>
-    <string name="noBluetoothDeviceDialogMessage">No Bluetooth device selected. Please scan for and select a device.</string>
+    <string name="noBluetoothDeviceDialogMessage">Bluetooth is selected but there are no saved devices. Please scan for a device.</string>
     <string name="dialogQuitOption">Quit</string>
     <string name="dialogOpenSettingsOption">Settings</string>
     <string name="noWifiSettingsDialogTitle">No Wifi Settings!</string>
-    <string name="noWifiSettingsDialogMessage">Please configure Wifi connections to connect to MPD</string>
+    <string name="noWifiSettingsDialogMessage">Wifi is selected but no settings are configured.</string>
+    <string name="connectionProgressDialogTitle">Connecting to MPD</string>
+    <string name="connectionProgressDialogMessage">Connecting to MPD server...</string>
 
 </resources>

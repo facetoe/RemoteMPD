@@ -1,14 +1,11 @@
 package com.facetoe.remotempd;
 
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.util.Log;
 import com.facetoe.remotempd.exceptions.NoBluetoothServerConnectionException;
-import com.facetoe.remotempd.helpers.SettingsHelper;
+import com.facetoe.remotempd.helpers.MPDAsyncHelper;
 import com.google.gson.Gson;
 import org.a0z.mpd.MPDCommand;
 
@@ -19,7 +16,7 @@ import java.nio.charset.Charset;
 import java.util.UUID;
 
 
-public class BluetoothController  {
+public class BluetoothController implements MPDAsyncHelper.ConnectionListener {
     // Unique UUID for this application
     private static final UUID MY_UUID = UUID.fromString("04c6093b-0000-1000-8000-00805f9b34fb");
     protected static final String TAG = RemoteMPDApplication.APP_PREFIX + "BluetoothController";
@@ -49,19 +46,30 @@ public class BluetoothController  {
         this.monitor = monitor;
     }
 
+    @Override
+    public void connectionFailed(String message) {
+        app.connectionFailed(message);
+    }
+
+    @Override
+    public void connectionSucceeded(String message) {
+        app.connectionSucceeded(message);
+    }
+
     /**
      * Start the ConnectThread to initiate a connection to a remote device.
      */
     public synchronized void connect() {
         String lastDevice = app.getSettings().getLastDevice();
         if(lastDevice.isEmpty()) {
-            app.connectionFailed("No Bluetooth device selected");
+            connectionFailed("No Bluetooth device selected");
             Log.w(TAG, "No device selected");
             return;
         }
 
         device = bluetoothAdapter.getRemoteDevice(lastDevice);
         Log.i(TAG, "connecting to: " + device);
+
         // Cancel any thread attempting to make a connection
         if (CURRENT_STATE == STATE_CONNECTING) {
             if (connectThread != null) {
@@ -141,13 +149,14 @@ public class BluetoothController  {
         r.write(out);
     }
 
-    private void connectionFailed() {
+    private void bluetoothConnectionFailed() {
         setState(STATE_NONE);
-        RemoteMPDApplication.getInstance().connectionFailed("Failed to connect to bluetooth server");
+        connectionFailed("Failed to connect to Bluetooth server");
     }
 
     private void connectionLost() {
         setState(STATE_NONE);
+        connectionFailed("Lost connection to the Bluetooth server");
     }
 
     private synchronized void setState(int newState) {
@@ -182,14 +191,7 @@ public class BluetoothController  {
         connectedThread.start();
 
         setState(STATE_CONNECTED);
-    }
-
-    public BluetoothDevice getDevice() {
-        return device;
-    }
-
-    public void setDevice(BluetoothDevice device) {
-        this.device = device;
+        connectionSucceeded("");
     }
 
     /**
@@ -226,7 +228,7 @@ public class BluetoothController  {
                 // successful connection or an exception
                 mmSocket.connect();
             } catch (IOException e) {
-                connectionFailed();
+                bluetoothConnectionFailed();
 
                 // Close the socket
                 try {

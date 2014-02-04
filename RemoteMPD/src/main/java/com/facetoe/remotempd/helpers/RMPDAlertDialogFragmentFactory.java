@@ -1,12 +1,13 @@
-package com.facetoe.remotempd;
+package com.facetoe.remotempd.helpers;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.DialogFragment;
+import android.app.*;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import com.facetoe.remotempd.R;
+import com.facetoe.remotempd.RemoteMPDApplication;
+import com.facetoe.remotempd.SettingsActivity;
 
 /**
  * RemoteMPD
@@ -22,6 +23,8 @@ public class RMPDAlertDialogFragmentFactory extends DialogFragment {
     private static final int NO_SETTINGS = 1;
     private static final int NO_BLUETOOTH_SETTINGS = 2;
     private static final int NO_WIFI_SETTINGS = 3;
+    private static final int CONNECTION_PROGRESS = 4;
+    private static final String TAG = RemoteMPDApplication.APP_PREFIX + "RMPDAlertDialogFragmentFactory";
 
     public RMPDAlertDialogFragmentFactory() {
 
@@ -60,6 +63,14 @@ public class RMPDAlertDialogFragmentFactory extends DialogFragment {
         return fragment;
     }
 
+    public static RMPDAlertDialogFragmentFactory getConnectionProgressDialog() {
+        RMPDAlertDialogFragmentFactory fragment = new RMPDAlertDialogFragmentFactory();
+        Bundle args = new Bundle();
+        args.putInt(DIALOG_TYPE, CONNECTION_PROGRESS);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         int dialogType = getArguments().getInt(DIALOG_TYPE);
@@ -72,9 +83,21 @@ public class RMPDAlertDialogFragmentFactory extends DialogFragment {
                 return createNoBluetoothSettingsDialog();
             case NO_WIFI_SETTINGS:
                 return createNoWifiSettingsDialog();
+            case CONNECTION_PROGRESS:
+                return createConnectionProgressDialog();
             default:
+                Log.e(TAG, "Unknown dialog type: " + dialogType);
                 return null;
         }
+    }
+
+    private Dialog createConnectionProgressDialog() {
+        final ProgressDialog dialog = new ProgressDialog(getActivity());
+        dialog.setTitle(getString(R.string.connectionProgressDialogTitle));
+        dialog.setMessage(getString(R.string.connectionProgressDialogMessage));
+        dialog.setIndeterminate(true);
+        dialog.setCancelable(false);
+        return dialog;
     }
 
     private Dialog createNoWifiSettingsDialog() {

@@ -254,9 +254,7 @@ public class MPDAsyncHelper extends Handler {
                 case EVENT_CONNECT:
                     try {
                         RemoteMPDSettings settings = RemoteMPDApplication.getInstance().getSettings();
-                        Log.i(TAG, "Connecting with settings: " + settings.toString());
                         oMPD.connect(settings.getHost(), settings.getPort(), settings.getPassword());
-                        Log.i("MPDAsyncHelper", "Connection Succeeded: " + oMPD.isConnected());
                         MPDAsyncHelper.this.obtainMessage(EVENT_CONNECTSUCCEEDED).sendToTarget();
 
                     } catch (MPDServerException e) {

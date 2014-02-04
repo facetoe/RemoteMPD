@@ -4,6 +4,7 @@ import android.util.Log;
 import org.a0z.mpd.MPDCommand;
 import org.a0z.mpd.event.StatusChangeListener;
 import org.a0z.mpd.event.TrackPositionListener;
+import org.a0z.mpd.exception.MPDServerException;
 
 /**
  * Created by facetoe on 5/01/14.
@@ -122,6 +123,7 @@ public abstract class AbstractMPDManager implements MPDPlayerController, MPDConn
     }
 
     void handleError(Exception e) {
+        Log.w(TAG, "Failed to connect: " + e.getMessage());
         RemoteMPDApplication.getInstance().connectionFailed(e.getMessage());
     }
 

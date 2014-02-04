@@ -12,7 +12,7 @@ import org.a0z.mpd.exception.MPDServerException;
 /**
  * Created by facetoe on 2/01/14.
  */
-public class WifiMPDManager extends AbstractMPDManager {
+public class WifiMPDManager extends AbstractMPDManager implements MPDAsyncHelper.ConnectionListener {
 
     String TAG = RemoteMPDApplication.APP_PREFIX + "WifiMPDManager";
     MPD mpd;
@@ -21,7 +21,7 @@ public class WifiMPDManager extends AbstractMPDManager {
 
     public WifiMPDManager() {
         asyncHelper = new MPDAsyncHelper();
-        asyncHelper.addConnectionListener(app);
+        asyncHelper.addConnectionListener(this);
         mpd = asyncHelper.oMPD;
     }
 
@@ -29,8 +29,10 @@ public class WifiMPDManager extends AbstractMPDManager {
     public void connect() {
         Log.i(TAG, "WifiManager.connect()");
 
-        if (!mpd.isConnected())
+        if (!mpd.isConnected()) {
             asyncHelper.connect();
+            app.showConnectingProgressDialog();
+        }
 
         if (!asyncHelper.isMonitorAlive())
             asyncHelper.startMonitor();
@@ -53,6 +55,7 @@ public class WifiMPDManager extends AbstractMPDManager {
         lastCommand = command;
         try {
             mpd.sendCommand(command);
+            Log.i(TAG, "Sent command: " + command);
             retryAttempts = 0;
         } catch (MPDServerException e) {
             if (retryAttempts < MAX_COMMAND_RETRY_ATTEMPTS) {
@@ -61,6 +64,16 @@ public class WifiMPDManager extends AbstractMPDManager {
                 handleError(e);
             }
         }
+    }
+
+    @Override
+    public void connectionFailed(String message) {
+        app.connectionFailed(message);
+    }
+
+    @Override
+    public void connectionSucceeded(String message) {
+        app.connectionSucceeded(message);
     }
 
     @Override

@@ -18,8 +18,10 @@ class BluetoothMPDManager extends AbstractMPDManager {
 
     @Override
     public void connect() {
-        if (!controller.isConnected())
+        if (!controller.isConnected()) {
             controller.connect();
+            RemoteMPDApplication.getInstance().showConnectingProgressDialog();
+        }
     }
 
     @Override

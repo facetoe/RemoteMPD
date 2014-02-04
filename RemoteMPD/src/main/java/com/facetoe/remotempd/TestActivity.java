@@ -78,9 +78,8 @@ public class TestActivity extends ActionBarActivity {
             btnDisconnect.setOnClickListener(this);
             btnConnect.setOnClickListener(this);
 
-            mpdManager = app.getMpdManager();
             app.addMpdManagerChangeListener(this);
-
+            mpdManager = app.getMpdManager();
             return rootView;
         }
 
@@ -93,8 +92,13 @@ public class TestActivity extends ActionBarActivity {
         @Override
         public void onPause() {
             super.onPause();
-            Log.d(TAG, "onPause()");
             app.unregisterCurrentActivity();
+        }
+
+        @Override
+        public void onDestroyView() {
+            super.onDestroyView();
+            app.removeMpdManagerChangeListener(this);
         }
 
         @Override
