@@ -31,17 +31,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="68fe2dca-e1cb-4af2-8129-a2428a9493c1" name="Default" comment="Setting up repo&#10;">
-      <change type="MOVED" beforePath="$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/RMPDAlertDialogFragmentFactory.java" afterPath="$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/helpers/RMPDAlertDialogFragmentFactory.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/AbstractMPDManager.java" afterPath="$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/AbstractMPDManager.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/BluetoothController.java" afterPath="$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/BluetoothController.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/BluetoothMPDManager.java" afterPath="$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/BluetoothMPDManager.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/DeviceListActivity.java" afterPath="$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/DeviceListActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/helpers/MPDAsyncHelper.java" afterPath="$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/helpers/MPDAsyncHelper.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/RemoteMPDApplication.java" afterPath="$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/RemoteMPDApplication.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/SettingsFragment.java" afterPath="$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/SettingsFragment.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/TestActivity.java" afterPath="$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/TestActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/WifiMPDManager.java" afterPath="$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/WifiMPDManager.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RemoteMPD/src/main/res/values/strings.xml" afterPath="$PROJECT_DIR$/RemoteMPD/src/main/res/values/strings.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RemoteMPD/build.gradle" afterPath="$PROJECT_DIR$/RemoteMPD/build.gradle" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="RemoteMPD.iws" />
@@ -109,34 +99,43 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="TestActivity.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/TestActivity.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="89" column="0" selection-start="3175" selection-end="3175" vertical-scroll-proportion="0.0" vertical-offset="1602" max-vertical-offset="2484">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="DeviceListActivity.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/DeviceListActivity.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="167" column="6" selection-start="6513" selection-end="6513" vertical-scroll-proportion="0.0" vertical-offset="3006" max-vertical-offset="3618">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="RemoteMPDApplication.java" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="RemoteMPDApplication.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/RemoteMPDApplication.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="58" column="0" selection-start="1843" selection-end="1843" vertical-scroll-proportion="0.2639296" vertical-offset="756" max-vertical-offset="3150">
+            <state line="58" column="0" selection-start="1843" selection-end="1843" vertical-scroll-proportion="0.0" vertical-offset="756" max-vertical-offset="3150">
               <folding>
                 <element signature="e#1128#1154#0" expanded="true" />
                 <element signature="e#4203#4249#0" expanded="true" />
                 <element signature="e#5159#5319#0" expanded="true" />
                 <element signature="e#5304#5305#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="build.gradle" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/JMPDCommRemote/build.gradle">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="29" column="0" selection-start="549" selection-end="549" vertical-scroll-proportion="0.0" vertical-offset="204" max-vertical-offset="702">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="build.gradle" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/build.gradle">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="1" column="0" selection-start="100" selection-end="100" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="126">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="build.gradle" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/RemoteMPD/build.gradle">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="33" column="21" selection-start="603" selection-end="603" vertical-scroll-proportion="0.76901406" vertical-offset="321" max-vertical-offset="882">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -195,15 +194,6 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SettingsFragment.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/SettingsFragment.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="50" column="9" selection-start="1963" selection-end="1963" vertical-scroll-proportion="0.0" vertical-offset="900" max-vertical-offset="1188">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
     </leaf>
   </component>
   <component name="FindManager">
@@ -220,11 +210,25 @@
         <entry key="" value="true" />
         <entry key=":RemoteMPD/RemoteMPD/" value="true" />
         <entry key="JMPDCommRemote/" value="true" />
-        <entry key="RemoteMPD/" value="false" />
+        <entry key="RemoteMPD/" value="true" />
       </map>
     </option>
     <option name="recentTasks">
       <list>
+        <ExternalTaskExecutionInfo>
+          <option name="executorId" value="Run" />
+          <option name="settings">
+            <ExternalSystemSettings>
+              <option name="externalProjectPath" value="$PROJECT_DIR$/../JMPDCommRemote" />
+              <option name="externalSystemIdString" value="GRADLE" />
+              <option name="taskNames">
+                <list>
+                  <option value="assemble" />
+                </list>
+              </option>
+            </ExternalSystemSettings>
+          </option>
+        </ExternalTaskExecutionInfo>
         <ExternalTaskExecutionInfo>
           <option name="executorId" value="Run" />
           <option name="settings">
@@ -1930,7 +1934,6 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/../JMPDCommRemote/JMPDCommRemote/src/main/java/org/a0z/mpdremotee/Album.java" />
         <option value="$PROJECT_DIR$/../JMPDCommRemote/JMPDCommRemote/src/main/java/org/a0z/mpdremotee/AlbumInfo.java" />
         <option value="$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/SongListAdapter.java" />
         <option value="$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/adapters/SongListAdapter.java" />
@@ -1954,7 +1957,6 @@
         <option value="$PROJECT_DIR$/RemoteMPD/src/instrumentTest/java/com/facetoe/remotempd/SettingsFragmentTest.java" />
         <option value="$PROJECT_DIR$/RemoteMPD/src/main/res/xml/preferences.xml" />
         <option value="$PROJECT_DIR$/RemoteMPD/src/instrumentTest/java/com/facetoe/remotempd/SettingsActivityTest.java" />
-        <option value="$PROJECT_DIR$/RemoteMPD/build.gradle" />
         <option value="$PROJECT_DIR$/RemoteMPD/src/main/AndroidManifest.xml" />
         <option value="$PROJECT_DIR$/RemoteMPD/src/main/res/layout/fragment_test.xml" />
         <option value="$PROJECT_DIR$/RemoteMPD/src/main/res/values/preference_strings.xml" />
@@ -1981,6 +1983,8 @@
         <option value="$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/BluetoothController.java" />
         <option value="$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/BluetoothMPDManager.java" />
         <option value="$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/RemoteMPDApplication.java" />
+        <option value="$PROJECT_DIR$/build.gradle" />
+        <option value="$PROJECT_DIR$/RemoteMPD/build.gradle" />
       </list>
     </option>
   </component>
@@ -2506,6 +2510,25 @@
       <ConfigurationWrapper RunnerId="AndroidDebugRunner" />
       <method />
     </configuration>
+    <configuration default="false" name="RemoteMPD::home:facetoe:IdeaProjects:JMPDCommRemote [assemble]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/../JMPDCommRemote" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="assemble" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <RunnerSettings RunnerId="ExternalSystemTaskRunner" />
+      <ConfigurationWrapper RunnerId="ExternalSystemTaskRunner" />
+      <method />
+    </configuration>
     <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType" factoryName="Plugin" singleton="true">
       <module name="" />
       <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m -ea" />
@@ -2678,19 +2701,21 @@
       <ConfigurationWrapper RunnerId="AndroidDebugRunner" />
       <method />
     </configuration>
-    <list size="5">
+    <list size="6">
       <item index="0" class="java.lang.String" itemvalue="Android Application.RemoteMPD-RemoteMPD" />
       <item index="1" class="java.lang.String" itemvalue="Android Tests.PlaceholderFragmentT..." />
       <item index="2" class="java.lang.String" itemvalue="Android Tests.TestActivityTest" />
       <item index="3" class="java.lang.String" itemvalue="Gradle.RemoteMPD::home:facetoe:IdeaProjects:JMPDCommRemote [build]" />
       <item index="4" class="java.lang.String" itemvalue="Android Tests.SettingsActivityTest..." />
+      <item index="5" class="java.lang.String" itemvalue="Gradle.RemoteMPD::home:facetoe:IdeaProjects:JMPDCommRemote [assemble]" />
     </list>
     <recent_temporary>
-      <list size="4">
-        <item index="0" class="java.lang.String" itemvalue="Android Tests.SettingsActivityTest..." />
-        <item index="1" class="java.lang.String" itemvalue="Android Tests.TestActivityTest" />
-        <item index="2" class="java.lang.String" itemvalue="Gradle.RemoteMPD::home:facetoe:IdeaProjects:JMPDCommRemote [build]" />
-        <item index="3" class="java.lang.String" itemvalue="Android Tests.PlaceholderFragmentT..." />
+      <list size="5">
+        <item index="0" class="java.lang.String" itemvalue="Gradle.RemoteMPD::home:facetoe:IdeaProjects:JMPDCommRemote [assemble]" />
+        <item index="1" class="java.lang.String" itemvalue="Android Tests.SettingsActivityTest..." />
+        <item index="2" class="java.lang.String" itemvalue="Android Tests.TestActivityTest" />
+        <item index="3" class="java.lang.String" itemvalue="Gradle.RemoteMPD::home:facetoe:IdeaProjects:JMPDCommRemote [build]" />
+        <item index="4" class="java.lang.String" itemvalue="Android Tests.PlaceholderFragmentT..." />
       </list>
     </recent_temporary>
     <configuration name="&lt;template&gt;" type="WebApp" default="true" selected="false">
@@ -2726,10 +2751,10 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="3" y="22" width="1364" height="747" extended-state="0" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Changes" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32753164" sideWeight="0.5" order="15" side_tool="false" content_ui="tabs" />
+      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32753164" sideWeight="0.5" order="15" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
@@ -2741,8 +2766,8 @@
       <window_info id="Build Variants" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
       <window_info id="Gradle Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32698414" sideWeight="0.5" order="10" side_tool="true" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33544305" sideWeight="0.5" order="13" side_tool="false" content_ui="tabs" />
-      <window_info id="Android" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32594937" sideWeight="0.5" order="14" side_tool="false" content_ui="tabs" />
-      <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.19939578" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Android" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32594937" sideWeight="0.5" order="14" side_tool="false" content_ui="tabs" />
+      <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.19894099" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -2812,13 +2837,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/build.gradle">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="1" column="0" selection-start="100" selection-end="100" vertical-scroll-proportion="0.05421687" vertical-offset="0" max-vertical-offset="332">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/JMPDCommRemote/src/main/java/org/a0z/mpd/UnknownArtist.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="10" column="53" selection-start="276" selection-end="276" vertical-scroll-proportion="0.0" vertical-offset="70" max-vertical-offset="720" />
@@ -2832,13 +2850,6 @@
     <entry file="file://$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/MPDResponse.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="2" column="22" selection-start="54" selection-end="54" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1044">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/JMPDCommRemote/build.gradle">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="29" column="0" selection-start="549" selection-end="549" vertical-scroll-proportion="1.5675676" vertical-offset="0" max-vertical-offset="702">
           <folding />
         </state>
       </provider>
@@ -2893,13 +2904,6 @@
     <entry file="file://$PROJECT_DIR$/RemoteMPD/src/instrumentTest/java/com/facetoe/remotempd/TestActivityTest.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="21" column="13" selection-start="316" selection-end="379" vertical-scroll-proportion="0.0" vertical-offset="162" max-vertical-offset="738" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/RemoteMPD/build.gradle">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="8" column="0" selection-start="146" selection-end="146" vertical-scroll-proportion="0.0" vertical-offset="378" max-vertical-offset="810">
-          <folding />
-        </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/RemoteMPD/src/main/res/layout/fragment_test.xml">
@@ -3094,13 +3098,34 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/RemoteMPD/src/main/java/com/facetoe/remotempd/RemoteMPDApplication.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="58" column="0" selection-start="1843" selection-end="1843" vertical-scroll-proportion="0.2639296" vertical-offset="756" max-vertical-offset="3150">
+        <state line="58" column="0" selection-start="1843" selection-end="1843" vertical-scroll-proportion="0.0" vertical-offset="756" max-vertical-offset="3150">
           <folding>
             <element signature="e#1128#1154#0" expanded="true" />
             <element signature="e#4203#4249#0" expanded="true" />
             <element signature="e#5159#5319#0" expanded="true" />
             <element signature="e#5304#5305#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/JMPDCommRemote/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="29" column="0" selection-start="549" selection-end="549" vertical-scroll-proportion="0.0" vertical-offset="204" max-vertical-offset="702">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="1" column="0" selection-start="100" selection-end="100" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="126">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/RemoteMPD/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="33" column="21" selection-start="603" selection-end="603" vertical-scroll-proportion="0.76901406" vertical-offset="321" max-vertical-offset="882">
+          <folding />
         </state>
       </provider>
     </entry>
