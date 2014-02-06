@@ -103,6 +103,7 @@ public class BluetoothController implements ConnectionListener {
             connectedThread.cancel();
             connectedThread = null;
         }
+        Log.d(TAG, "Really disconnected");
         setState(STATE_NONE);
     }
 
@@ -114,7 +115,11 @@ public class BluetoothController implements ConnectionListener {
         if(CURRENT_STATE != STATE_CONNECTED) {
             throw new NoBluetoothServerConnectionException("No connection to Bluetooth Server");
         }
-        write(command.toString());
+        try {
+            write(command.toString());
+        } catch (IOException e) {
+            throw new NoBluetoothServerConnectionException("Failed to send command Bluetooth server");
+        }
     }
 
     /**
@@ -122,7 +127,7 @@ public class BluetoothController implements ConnectionListener {
      *
      * @param data The data to write
      */
-    private void write(String data) {
+    private void write(String data) throws IOException {
         Log.d("Writing: ", data);
         // Create temporary object
         ConnectedThread r;
@@ -249,7 +254,7 @@ public class BluetoothController implements ConnectionListener {
     private class ConnectedThread extends Thread {
         private final BluetoothSocket mmSocket;
         private BufferedReader inputReader;
-        private PrintWriter outputWriter;
+        private BufferedWriter outputWriter;
 
         public ConnectedThread(BluetoothSocket socket) {
             Log.d(TAG, "ConnectedThread()");
@@ -266,7 +271,7 @@ public class BluetoothController implements ConnectionListener {
             }
 
             inputReader = new BufferedReader(new InputStreamReader(tmpIn));
-            outputWriter = new PrintWriter(new BufferedOutputStream(tmpOut), true);
+            outputWriter = new BufferedWriter(new OutputStreamWriter(tmpOut));
         }
 
         public void run() {
@@ -276,8 +281,7 @@ public class BluetoothController implements ConnectionListener {
             // Keep listening to the InputStream while spawnConnectedThread
             while (true) {
                 try {
-                    // Messages are terminated with a newline
-                    // so this should read the whole message.
+                    // Messages from the server are terminated with a newline.
                     input = inputReader.readLine();
                     handleMessage(input);
 
@@ -295,16 +299,17 @@ public class BluetoothController implements ConnectionListener {
             monitor.handleMessage(response);
         }
 
-        // Write to the output stream. The writer will flush the stream automatically
-        public void write(String data) {
-            outputWriter.println(data);
+        // Append a newline here as the server uses them to determine the end of commands.
+        public void write(String data) throws IOException {
+            outputWriter.write(data + "\n");
+            outputWriter.flush();
         }
 
         public void cancel() {
             try {
+                mmSocket.close();
                 inputReader.close();
                 outputWriter.close();
-                mmSocket.close();
             } catch (IOException e) {
                 Log.e(TAG, "close() of connect socket failed", e);
             }
