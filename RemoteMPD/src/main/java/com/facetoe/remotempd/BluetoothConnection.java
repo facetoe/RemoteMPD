@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothSocket;
 import android.content.SharedPreferences;
 import android.util.Log;
 import com.facetoe.remotempd.helpers.MPDAsyncHelper;
+import com.facetoe.remotempd.listeners.ConnectionListener;
 import com.google.gson.Gson;
 import org.a0z.mpd.MPDCommand;
 
@@ -16,7 +17,7 @@ import java.nio.charset.Charset;
 import java.util.UUID;
 
 
-public class BluetoothConnection implements MPDAsyncHelper.ConnectionListener {
+public class BluetoothConnection implements ConnectionListener {
     // Unique UUID for this application
     private static final UUID MY_UUID = UUID.fromString("04c6093b-0000-1000-8000-00805f9b34fb");
     protected static final String TAG = "BluetoothConnection";

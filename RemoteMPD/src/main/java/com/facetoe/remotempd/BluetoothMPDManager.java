@@ -19,8 +19,8 @@ class BluetoothMPDManager extends AbstractMPDManager {
     @Override
     public void connect() {
         if (!controller.isConnected()) {
-            controller.connect();
             RemoteMPDApplication.getInstance().showConnectingProgressDialog();
+            controller.connect();
         }
     }
 
@@ -37,17 +37,11 @@ class BluetoothMPDManager extends AbstractMPDManager {
 
     @Override
     public void sendCommand(MPDCommand command) {
-        lastCommand = command;
         try {
             controller.sendCommand(command);
             Log.i(TAG, "Sending command: " + command);
-            retryAttempts = 0;
         } catch (Exception e) {
-            if (retryAttempts < MAX_COMMAND_RETRY_ATTEMPTS) {
-                attemptReconnect();
-            } else {
-                handleError(e);
-            }
+            controller.connectionFailed(e.getMessage());
         }
     }
 

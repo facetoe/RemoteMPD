@@ -5,18 +5,15 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 import com.facetoe.remotempd.exceptions.NoBluetoothServerConnectionException;
-import com.facetoe.remotempd.helpers.MPDAsyncHelper;
+import com.facetoe.remotempd.listeners.ConnectionListener;
 import com.google.gson.Gson;
 import org.a0z.mpd.MPDCommand;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.charset.Charset;
+import java.io.*;
 import java.util.UUID;
 
 
-public class BluetoothController implements MPDAsyncHelper.ConnectionListener {
+public class BluetoothController implements ConnectionListener {
     // Unique UUID for this application
     private static final UUID MY_UUID = UUID.fromString("04c6093b-0000-1000-8000-00805f9b34fb");
     protected static final String TAG = RemoteMPDApplication.APP_PREFIX + "BluetoothController";
@@ -48,12 +45,14 @@ public class BluetoothController implements MPDAsyncHelper.ConnectionListener {
 
     @Override
     public void connectionFailed(String message) {
-        app.connectionFailed(message);
+        Log.w(TAG, "Connection failed in BluetoothController: " + message);
+        app.notifyConnectionFailed(message);
     }
 
     @Override
     public void connectionSucceeded(String message) {
-        app.connectionSucceeded(message);
+        Log.i(TAG, "Connection succeeded in BluetoothController: " + message );
+        app.notifyConnectionSucceeded(message);
     }
 
     /**
@@ -119,34 +118,20 @@ public class BluetoothController implements MPDAsyncHelper.ConnectionListener {
     }
 
     /**
-     * Send a string to the server.
-     *
-     * @param message The responseType to write.
-     */
-    public void write(String message) {
-        write(message.getBytes(Charset.forName("UTF-8")));
-    }
-
-    /**
      * Write to the ConnectedThread in an unsynchronized manner
      *
-     * @param out The bytes to write
-     * @see ConnectedThread#write(byte[])
+     * @param data The data to write
      */
-    private void write(byte[] out) {
-        Log.d("Writing: ", new String(out));
+    private void write(String data) {
+        Log.d("Writing: ", data);
         // Create temporary object
         ConnectedThread r;
         // Synchronize a copy of the ConnectedThread
         synchronized (this) {
-            if (CURRENT_STATE != STATE_CONNECTED) {
-                Log.w(TAG, "Attempted to write while not connected.");
-                return;
-            }
             r = connectedThread;
         }
         // Perform the write unsynchronized
-        r.write(out);
+        r.write(data);
     }
 
     private void bluetoothConnectionFailed() {
@@ -263,8 +248,8 @@ public class BluetoothController implements MPDAsyncHelper.ConnectionListener {
      */
     private class ConnectedThread extends Thread {
         private final BluetoothSocket mmSocket;
-        private final InputStream mmInStream;
-        private final OutputStream mmOutStream;
+        private BufferedReader inputReader;
+        private PrintWriter outputWriter;
 
         public ConnectedThread(BluetoothSocket socket) {
             Log.d(TAG, "ConnectedThread()");
@@ -280,28 +265,21 @@ public class BluetoothController implements MPDAsyncHelper.ConnectionListener {
                 Log.e(TAG, "temp sockets not created", e);
             }
 
-            mmInStream = tmpIn;
-            mmOutStream = tmpOut;
+            inputReader = new BufferedReader(new InputStreamReader(tmpIn));
+            outputWriter = new PrintWriter(new BufferedOutputStream(tmpOut), true);
         }
 
         public void run() {
             Log.d(TAG, "ConnectedThread running");
-            int bytesRead;
+            String input;
 
-            StringBuilder builder = new StringBuilder();
             // Keep listening to the InputStream while spawnConnectedThread
             while (true) {
                 try {
-                    // Read from the InputStream
-                    int ch;
-                    bytesRead = 0;
-                    while ((ch = mmInStream.read()) != 10) {
-                        bytesRead++;
-                        builder.append((char) ch);
-                    }
-                    Log.i(TAG, "READ " + bytesRead + " bytes.");
-                    handleMessage(builder.toString());
-                    builder.setLength(0);
+                    // Messages are terminated with a newline
+                    // so this should read the whole message.
+                    input = inputReader.readLine();
+                    handleMessage(input);
 
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected");
@@ -317,21 +295,15 @@ public class BluetoothController implements MPDAsyncHelper.ConnectionListener {
             monitor.handleMessage(response);
         }
 
-        /**
-         * Write to the spawnConnectedThread OutStream.
-         *
-         * @param buffer The bytes to write
-         */
-        public void write(byte[] buffer) {
-            try {
-                mmOutStream.write(buffer);
-            } catch (IOException e) {
-                Log.e(TAG, "write() failed", e);
-            }
+        // Write to the output stream. The writer will flush the stream automatically
+        public void write(String data) {
+            outputWriter.println(data);
         }
 
         public void cancel() {
             try {
+                inputReader.close();
+                outputWriter.close();
                 mmSocket.close();
             } catch (IOException e) {
                 Log.e(TAG, "close() of connect socket failed", e);
