@@ -73,6 +73,7 @@ public class RMPDAlertDialogFragmentFactory extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        super.onCreateDialog(savedInstanceState);
         int dialogType = getArguments().getInt(DIALOG_TYPE);
         switch (dialogType) {
             case CONNECTION_FAILED:

@@ -871,7 +871,6 @@ public class MPD {
         if(!isConnected()) {
             throw new MPDServerException("MPD Connection is not established");
         }
-
         mpdConnection.sendCommand(command);
     }
 

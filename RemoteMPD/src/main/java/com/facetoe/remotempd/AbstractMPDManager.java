@@ -17,11 +17,7 @@ interface MPDConnectionController {
 }
 public abstract class AbstractMPDManager implements MPDPlayerController, MPDConnectionController {
     private static final String TAG = RemoteMPDApplication.APP_PREFIX + "AbstractMPDManager";
-
     RemoteMPDApplication app = RemoteMPDApplication.getInstance();
-    protected static final int MAX_COMMAND_RETRY_ATTEMPTS = 3;
-    protected int retryAttempts;
-    protected MPDCommand lastCommand;
 
     abstract public void addStatusChangeListener(StatusChangeListener listener);
     abstract public void removeStatusChangeListener(StatusChangeListener listener);
@@ -72,59 +68,4 @@ public abstract class AbstractMPDManager implements MPDPlayerController, MPDConn
                 Integer.toString(newVolume));
         sendCommand(command);
     }
-
-    void attemptReconnect() {
-        Log.w(TAG, "Attempting reconnect: " + retryAttempts);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                for (int i = 0; i < MAX_COMMAND_RETRY_ATTEMPTS; i++) {
-                    retryAttempts++;
-                    connect();
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        Log.d(TAG, "Reconnect interrupted");
-                    }
-
-                    if (isConnected()) {
-                        Log.d(TAG, "Reconnect succeeded");
-                        sendCommand(lastCommand);
-                        return;
-                    } else {
-                        Log.d(TAG, "Reconnect failed");
-                    }
-                }
-                app.connectionFailed(buildErrorMessage());
-            }
-        }).start();
-    }
-
-    private String buildErrorMessage() {
-        RemoteMPDSettings settings = app.getSettings();
-        String errMsg;
-        if(settings.isBluetooth()) {
-            if(settings.getLastDevice().isEmpty()) {
-                errMsg = "No Bluetooth device selected!";
-            } else {
-                errMsg = "Failed to connect to Bluetooth server at: "
-                        + settings.getLastDevice()
-                        + ". Is it running?";
-            }
-        } else {
-            if(settings.getHost().isEmpty()) {
-                errMsg = "No host IP defined!";
-            } else {
-                errMsg = "Failed to connect to " + settings.getHost()
-                        + " on port " + settings.getPort();
-            }
-        }
-        return errMsg;
-    }
-
-    void handleError(Exception e) {
-        Log.w(TAG, "Failed to connect: " + e.getMessage());
-        RemoteMPDApplication.getInstance().connectionFailed(e.getMessage());
-    }
-
 }

@@ -2,6 +2,7 @@ package com.facetoe.remotempd;
 
 import android.util.Log;
 import com.facetoe.remotempd.helpers.MPDAsyncHelper;
+import com.facetoe.remotempd.listeners.ConnectionListener;
 import org.a0z.mpd.MPD;
 import org.a0z.mpd.MPDCommand;
 import org.a0z.mpd.event.StatusChangeListener;
@@ -12,8 +13,7 @@ import org.a0z.mpd.exception.MPDServerException;
 /**
  * Created by facetoe on 2/01/14.
  */
-public class WifiMPDManager extends AbstractMPDManager implements MPDAsyncHelper.ConnectionListener {
-
+public class WifiMPDManager extends AbstractMPDManager implements ConnectionListener {
     String TAG = RemoteMPDApplication.APP_PREFIX + "WifiMPDManager";
     MPD mpd;
     RemoteMPDApplication app = RemoteMPDApplication.getInstance();
@@ -30,8 +30,8 @@ public class WifiMPDManager extends AbstractMPDManager implements MPDAsyncHelper
         Log.i(TAG, "WifiManager.connect()");
 
         if (!mpd.isConnected()) {
-            asyncHelper.connect();
             app.showConnectingProgressDialog();
+            asyncHelper.connect();
         }
 
         if (!asyncHelper.isMonitorAlive())
@@ -47,33 +47,28 @@ public class WifiMPDManager extends AbstractMPDManager implements MPDAsyncHelper
     public void disconnect() {
         asyncHelper.stopMonitor();
         asyncHelper.disconnect();
-        asyncHelper.removeConnectionListener(app);
     }
 
     @Override
     public void sendCommand(MPDCommand command) {
-        lastCommand = command;
         try {
             mpd.sendCommand(command);
             Log.i(TAG, "Sent command: " + command);
-            retryAttempts = 0;
         } catch (MPDServerException e) {
-            if (retryAttempts < MAX_COMMAND_RETRY_ATTEMPTS) {
-                attemptReconnect();
-            } else {
-                handleError(e);
-            }
+            connectionFailed(e.getMessage());
         }
     }
 
     @Override
     public void connectionFailed(String message) {
-        app.connectionFailed(message);
+        Log.w(TAG, "Connection failed in WifiMPDManager: " + message);
+        app.notifyConnectionFailed(message);
     }
 
     @Override
     public void connectionSucceeded(String message) {
-        app.connectionSucceeded(message);
+        Log.i(TAG, "Connection succeeded in WifiMPDManager: " + message);
+        app.notifyConnectionSucceeded(message);
     }
 
     @Override

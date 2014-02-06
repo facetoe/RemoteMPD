@@ -2,11 +2,10 @@ package com.facetoe.remotempd;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
-import android.view.*;
-import android.widget.Button;
+import android.view.Menu;
+import android.view.MenuItem;
+import com.facetoe.remotempd.fragments.PlayerBarFragment;
 
 public class TestActivity extends ActionBarActivity {
     private static final String TAG = RemoteMPDApplication.APP_PREFIX + "TestActivity";
@@ -18,7 +17,7 @@ public class TestActivity extends ActionBarActivity {
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
+                    .add(R.id.container, new PlayerBarFragment())
                     .commit();
         }
     }
@@ -48,85 +47,5 @@ public class TestActivity extends ActionBarActivity {
     @Override
     protected void onStop() {
         super.onStop();
-    }
-
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment implements View.OnClickListener,
-            MPDManagerChangeListener {
-        private Button btnPlay;
-        private Button btnStop;
-        private Button btnDisconnect;
-        private Button btnConnect;
-        private RemoteMPDApplication app = RemoteMPDApplication.getInstance();
-        private AbstractMPDManager mpdManager;
-        public PlaceholderFragment() {
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_test, container, false);
-            btnPlay = (Button) rootView.findViewById(R.id.btnPlay);
-            btnStop = (Button) rootView.findViewById(R.id.btnStop);
-            btnDisconnect = (Button) rootView.findViewById(R.id.btnDisconnect);
-            btnConnect = (Button) rootView.findViewById(R.id.btnConnect);
-
-            btnPlay.setOnClickListener(this);
-            btnStop.setOnClickListener(this);
-            btnDisconnect.setOnClickListener(this);
-            btnConnect.setOnClickListener(this);
-
-            app.addMpdManagerChangeListener(this);
-            mpdManager = app.getMpdManager();
-            return rootView;
-        }
-
-        @Override
-        public void onStart() {
-            super.onStart();
-            app.registerCurrentActivity(getActivity());
-        }
-
-        @Override
-        public void onPause() {
-            super.onPause();
-            app.unregisterCurrentActivity();
-        }
-
-        @Override
-        public void onDestroyView() {
-            super.onDestroyView();
-            app.removeMpdManagerChangeListener(this);
-        }
-
-        @Override
-        public void onClick(View view) {
-            switch (view.getId()) {
-                case R.id.btnPlay:
-                    mpdManager.play();
-                    break;
-                case R.id.btnStop:
-                    mpdManager.stop();
-                    break;
-                case R.id.btnDisconnect:
-                    mpdManager.disconnect();
-                    break;
-                case R.id.btnConnect:
-                    mpdManager.connect();
-                    break;
-                default:
-                    Log.i(TAG, "Unknown: " + view.getId());
-            }
-        }
-
-        @Override
-        public void mpdManagerChanged() {
-            Log.i(TAG, "MPDManagerChanged()");
-            mpdManager.disconnect();
-            mpdManager = app.getMpdManager();
-            mpdManager.connect();
-        }
     }
 }

@@ -5,6 +5,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
+import com.facetoe.remotempd.listeners.ConnectionListener;
 import com.facetoe.remotempd.RemoteMPDApplication;
 import com.facetoe.remotempd.RemoteMPDSettings;
 import com.facetoe.remotempd.tools.Tools;
@@ -58,13 +59,6 @@ public class MPDAsyncHelper extends Handler {
     //TODO you did this!
     public Handler getHandler() {
         return oMPDAsyncWorker;
-    }
-
-    // PMix internal ConnectionListener interface
-    public interface ConnectionListener {
-        public void connectionFailed(String message);
-
-        public void connectionSucceeded(String message);
     }
 
     // Interface for callback when Asynchronous operations are finished
