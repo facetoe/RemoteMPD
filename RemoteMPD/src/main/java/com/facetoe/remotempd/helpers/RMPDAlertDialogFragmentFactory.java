@@ -15,7 +15,7 @@ import com.facetoe.remotempd.SettingsActivity;
  * RemoteMPD
  * Created by facetoe on 4/02/14.
  */
-public class RMPDAlertDialogFragment extends DialogFragment {
+public class RMPDAlertDialogFragmentFactory extends DialogFragment {
 
     private static final String TITLE = "title";
     private static final String MESSAGE = "message";
@@ -28,48 +28,48 @@ public class RMPDAlertDialogFragment extends DialogFragment {
     private static final int CONNECTION_PROGRESS = 4;
     private static final int REFUSE_BT_ENABLE = 5;
 
-    private static final String TAG = RMPDApplication.APP_PREFIX + "RMPDAlertDialogFragment";
+    private static final String TAG = RMPDApplication.APP_PREFIX + "RMPDAlertDialogFragmentFactory";
 
     /**
      * This shouldn't be called, use the static methods to create a dialog.
      */
-    public RMPDAlertDialogFragment() {
+    public RMPDAlertDialogFragmentFactory() {
     }
 
-    public static RMPDAlertDialogFragment getConnectionFailedDialog(String message) {
+    public static RMPDAlertDialogFragmentFactory getConnectionFailedDialog(String message) {
         return createDialogFragment(CONNECTION_FAILED, message);
     }
 
-    public static RMPDAlertDialogFragment getNoSettingsDialog() {
+    public static RMPDAlertDialogFragmentFactory getNoSettingsDialog() {
         return createDialogFragment(NO_SETTINGS);
     }
 
-    public static RMPDAlertDialogFragment getNoBluetoothSettingsDialog() {
+    public static RMPDAlertDialogFragmentFactory getNoBluetoothSettingsDialog() {
         return createDialogFragment(NO_BLUETOOTH_SETTINGS);
     }
 
-    public static RMPDAlertDialogFragment getNoWifiSettingsDialog() {
+    public static RMPDAlertDialogFragmentFactory getNoWifiSettingsDialog() {
         return createDialogFragment(NO_WIFI_SETTINGS);
     }
 
-    public static RMPDAlertDialogFragment getConnectionProgressDialog() {
+    public static RMPDAlertDialogFragmentFactory getConnectionProgressDialog() {
         return createDialogFragment(CONNECTION_PROGRESS);
     }
 
-    public static RMPDAlertDialogFragment getRefuseBluetoothEnableDialog() {
+    public static RMPDAlertDialogFragmentFactory getRefuseBluetoothEnableDialog() {
         return createDialogFragment(REFUSE_BT_ENABLE);
     }
 
-    private static RMPDAlertDialogFragment createDialogFragment(int dialogType) {
-        RMPDAlertDialogFragment fragment = new RMPDAlertDialogFragment();
+    private static RMPDAlertDialogFragmentFactory createDialogFragment(int dialogType) {
+        RMPDAlertDialogFragmentFactory fragment = new RMPDAlertDialogFragmentFactory();
         Bundle args = new Bundle();
         args.putInt(DIALOG_TYPE_KEY, dialogType);
         fragment.setArguments(args);
         return fragment;
     }
 
-    private static RMPDAlertDialogFragment createDialogFragment(int dialogType, String message) {
-        RMPDAlertDialogFragment fragment = new RMPDAlertDialogFragment();
+    private static RMPDAlertDialogFragmentFactory createDialogFragment(int dialogType, String message) {
+        RMPDAlertDialogFragmentFactory fragment = new RMPDAlertDialogFragmentFactory();
         Bundle args = new Bundle();
         args.putInt(DIALOG_TYPE_KEY, dialogType);
         args.putString(MESSAGE, message);
