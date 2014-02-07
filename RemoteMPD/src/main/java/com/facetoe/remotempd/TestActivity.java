@@ -73,10 +73,10 @@ public class TestActivity extends ActionBarActivity {
         if (requestCode == REQUEST_ENABLE_BT) {
             if (resultCode == Activity.RESULT_OK) {
                 Log.d(TAG, "Bluetooth enabled");
-                app.connectMPDManager();
+                app.notifyEvent(RemoteMPDApplication.Event.CONNECT);
             } else {
                 Log.d(TAG, "Bluetooth not enabled");
-                app.notifyRefusedBluetoothConnection();
+                app.notifyEvent(RemoteMPDApplication.Event.REFUSED_BT_ENABLE);
             }
         }
     }

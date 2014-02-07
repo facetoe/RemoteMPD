@@ -22,7 +22,7 @@ import java.util.TimerTask;
  * a progress spinner. If no connection is established within CONNECTION_TIMEOUT, the user is directed to
  * the Android Wifi settings in order to choose a network. if a connection is established within CONNECTION_TIMEOUT
  * the dialog is dismissed and control is returned to the calling activity.
- *
+ * <p/>
  * Regardless of whether or not the connection succeeded, connectMPDManager() is called in onPostExecute.
  * This means a failed connection will result in an error on returning to the calling activity.
  */
@@ -51,22 +51,18 @@ public class WifiConnectionAsyncTask extends AsyncTask<Void, String, Boolean> {
     }
 
     @Override
-    protected Boolean doInBackground(Void... params) {
-        Log.i(TAG, "doInBackground");
-        WifiManager wifi = (WifiManager) activity.getSystemService(Context.WIFI_SERVICE);
-        if (!wifi.isWifiEnabled()) {
-            wifi.setWifiEnabled(true);
-        }
-        timer = new Timer("connectionTimer");
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Intent intent = new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK);
-                activity.startActivity(intent);
-                keepWaiting = false;
-            }
-        }, CONNECTION_TIMEOUT);
+    protected void onPostExecute(Boolean aBoolean) {
+        super.onPostExecute(aBoolean);
+        Log.i(TAG, "onPostExecute");
+        dialog.dismiss();
+        timer.cancel();
+        RemoteMPDApplication.getInstance().notifyEvent(RemoteMPDApplication.Event.CONNECT);
+    }
 
+    @Override
+    protected Boolean doInBackground(Void... params) {
+        enableWifi();
+        initTimer();
         while (!isConnected() && keepWaiting) {
             Log.d(TAG, "Not connected...");
             try {
@@ -79,6 +75,25 @@ public class WifiConnectionAsyncTask extends AsyncTask<Void, String, Boolean> {
         return Boolean.TRUE;
     }
 
+    private void enableWifi() {
+        WifiManager wifi = (WifiManager) activity.getSystemService(Context.WIFI_SERVICE);
+        if (!wifi.isWifiEnabled()) {
+            wifi.setWifiEnabled(true);
+        }
+    }
+
+    private void initTimer() {
+        timer = new Timer("connectionTimer");
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Intent intent = new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK);
+                activity.startActivity(intent);
+                keepWaiting = false;
+            }
+        }, CONNECTION_TIMEOUT);
+    }
+
     private boolean isConnected() {
         ConnectivityManager connectivityManager = (ConnectivityManager)
                 activity.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -88,14 +103,5 @@ public class WifiConnectionAsyncTask extends AsyncTask<Void, String, Boolean> {
         }
 
         return networkInfo != null && networkInfo.getState() == NetworkInfo.State.CONNECTED;
-    }
-
-    @Override
-    protected void onPostExecute(Boolean aBoolean) {
-        super.onPostExecute(aBoolean);
-        Log.i(TAG, "onPostExecute");
-        dialog.dismiss();
-        timer.cancel();
-        RemoteMPDApplication.getInstance().connectMPDManager();
     }
 }

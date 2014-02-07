@@ -32,6 +32,14 @@ public class RemoteMPDApplication extends Application implements
     private final ArrayList<MPDManagerChangeListener> mpdManagerChangeListeners = new ArrayList<MPDManagerChangeListener>();
     private boolean connectionInProgress = false;
 
+    public enum Event {
+        CONNECT,
+        CONNECTING,
+        CONNECTION_FAILED,
+        CONNECTION_SUCCEEDED,
+        REFUSED_BT_ENABLE
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -54,6 +62,60 @@ public class RemoteMPDApplication extends Application implements
     public void unregisterCurrentActivity() {
         Log.d(TAG, "Unregistering: " + currentActivity);
         currentActivity = null;
+    }
+
+    public AbstractMPDManager getMpdManager() {
+        if (SettingsHelper.isBluetooth()) {
+            if (mpdManager == null || mpdManager instanceof WifiMPDManager)
+                mpdManager = new BluetoothMPDManager();
+        } else {
+            if (mpdManager == null || mpdManager instanceof BluetoothMPDManager)
+                mpdManager = new WifiMPDManager();
+        }
+        return mpdManager;
+    }
+
+    public void notifyEvent(Event event) {
+        switch (event) {
+            case CONNECT:
+                connectMPDManager();
+                break;
+            case CONNECTING:
+                showConnectingProgressDialog();
+                break;
+            case CONNECTION_SUCCEEDED:
+                dismissDialog();
+                connectionInProgress = false;
+                break;
+            case REFUSED_BT_ENABLE:
+                showRefusedBluetoothEnableDialog();
+                connectionInProgress = false;
+                break;
+            default:
+                Log.w(TAG, "Unknown event: " + event);
+                break;
+        }
+    }
+
+    public void notifyEvent(Event event, String message) {
+        switch (event) {
+            case CONNECTION_FAILED:
+                maybeShowConnectionFailedDialog(message);
+                connectionInProgress = false;
+                break;
+            default:
+                Log.w(TAG, "Unknown event: " + event);
+                break;
+        }
+    }
+
+    private void connectMPDManager() {
+        getMpdManager();
+        checkState();
+        if(!mpdManager.isConnected() && !connectionInProgress) {
+            mpdManager.connect();
+            connectionInProgress = true;
+        }
     }
 
     private void checkState() {
@@ -118,6 +180,29 @@ public class RemoteMPDApplication extends Application implements
         }
     }
 
+    private void showRefusedBluetoothEnableDialog() {
+        DialogFragment dialog = RMPDAlertDialogFragment.getRefuseBluetoothEnableDialog();
+        showDialog(dialog);
+    }
+
+    private void maybeShowConnectionFailedDialog(String message) {
+        if (currentActivity == null
+                || currentActivity instanceof SettingsActivity
+                || mpdManager.isConnected()) {
+            return;
+        }
+        DialogFragment dialog = RMPDAlertDialogFragment.getConnectionFailedDialog(message);
+        showDialog(dialog);
+    }
+
+    private void showConnectingProgressDialog() {
+        if (currentActivity instanceof SettingsActivity) {
+            return;
+        }
+        DialogFragment dialog = RMPDAlertDialogFragment.getConnectionProgressDialog();
+        showDialog(dialog);
+    }
+
     private void showDialog(DialogFragment dialog) {
         if(currentActivity == null) {
             Log.e(TAG, "currentActivity was null");
@@ -133,7 +218,7 @@ public class RemoteMPDApplication extends Application implements
         dialog.show(currentActivity.getFragmentManager(), "dialog");
     }
 
-    public void dismissDialog() {
+    private void dismissDialog() {
         FragmentTransaction ft = currentActivity.getFragmentManager().beginTransaction();
         Fragment fragment = currentActivity.getFragmentManager().findFragmentByTag("dialog");
         if (fragment != null) {
@@ -144,66 +229,6 @@ public class RemoteMPDApplication extends Application implements
             ft.remove(fragment);
         }
         ft.addToBackStack(null);
-    }
-
-    public AbstractMPDManager getMpdManager() {
-        if (SettingsHelper.isBluetooth()) {
-            if (mpdManager == null || mpdManager instanceof WifiMPDManager)
-                mpdManager = new BluetoothMPDManager();
-        } else {
-            if (mpdManager == null || mpdManager instanceof BluetoothMPDManager)
-                mpdManager = new WifiMPDManager();
-        }
-        return mpdManager;
-    }
-
-    public void connectMPDManager() {
-        getMpdManager();
-        checkState();
-        if(!mpdManager.isConnected() && !connectionInProgress) {
-            mpdManager.connect();
-            connectionInProgress = true;
-        }
-    }
-
-    public void notifyConnectionFailed(String message) {
-        if (currentActivity != null) {
-            dismissDialog();
-            maybeShowConnectionFailedDialog(message);
-        }
-        connectionInProgress = false;
-    }
-
-    public void notifyConnectionSucceeded(String message) {
-        if (currentActivity != null) {
-            dismissDialog();
-        } else {
-            Log.w(TAG, "notifyConnectionSucceeded called with null currentActivity");
-        }
-        connectionInProgress = false;
-    }
-
-    public void notifyRefusedBluetoothConnection() {
-        DialogFragment dialog = RMPDAlertDialogFragment.getRefuseBluetoothEnableDialog();
-        showDialog(dialog);
-    }
-
-    private void maybeShowConnectionFailedDialog(String message) {
-        if (currentActivity == null
-                || currentActivity instanceof SettingsActivity
-                || mpdManager.isConnected()) {
-            return;
-        }
-        DialogFragment dialog = RMPDAlertDialogFragment.getConnectionFailedDialog(message);
-        showDialog(dialog);
-    }
-
-    public void showConnectingProgressDialog() {
-        if (currentActivity instanceof SettingsActivity) {
-            return;
-        }
-        DialogFragment dialog = RMPDAlertDialogFragment.getConnectionProgressDialog();
-        showDialog(dialog);
     }
 
     public void addMpdManagerChangeListener(MPDManagerChangeListener listener) {

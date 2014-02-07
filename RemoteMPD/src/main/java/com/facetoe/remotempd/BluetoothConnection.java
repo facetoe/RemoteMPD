@@ -45,13 +45,13 @@ public class BluetoothConnection implements ConnectionListener {
     @Override
     public void connectionFailed(String message) {
         Log.w(TAG, "Connection failed in BluetoothConnection: " + message);
-        app.notifyConnectionFailed(message);
+        app.notifyEvent(RemoteMPDApplication.Event.CONNECTION_FAILED, message);
     }
 
     @Override
     public void connectionSucceeded(String message) {
         Log.i(TAG, "Connection succeeded in BluetoothConnection: " + message );
-        app.notifyConnectionSucceeded(message);
+        app.notifyEvent(RemoteMPDApplication.Event.CONNECTION_SUCCEEDED);
     }
 
     /**

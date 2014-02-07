@@ -161,7 +161,7 @@ public class RMPDAlertDialogFragment extends DialogFragment {
             public void onClick(DialogInterface dialog, int which) {
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
                 prefs.edit().putString(getString(R.string.remoteMpdConnectionTypeKey), "wifi").commit();
-                RemoteMPDApplication.getInstance().connectMPDManager();
+                RemoteMPDApplication.getInstance().notifyEvent(RemoteMPDApplication.Event.CONNECT);
             }
         });
         builder.setNegativeButton(getString(R.string.dialogQuitOption), new DialogInterface.OnClickListener() {
