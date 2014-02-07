@@ -26,16 +26,16 @@ public class WifiMPDManager extends AbstractMPDManager implements ConnectionList
     }
 
     @Override
-    public void connect() {
+    protected void connectInternal() {
         Log.i(TAG, "WifiManager.connect()");
 
         if (!mpd.isConnected()) {
-            app.notifyEvent(RMPDApplication.Event.CONNECTING);
             asyncHelper.connect();
         }
 
-        if (!asyncHelper.isMonitorAlive())
+        if (!asyncHelper.isMonitorAlive()) {
             asyncHelper.startMonitor();
+        }
     }
 
     @Override
@@ -61,13 +61,13 @@ public class WifiMPDManager extends AbstractMPDManager implements ConnectionList
 
     @Override
     public void connectionFailed(String message) {
-        Log.w(TAG, "Connection failed in WifiMPDManager: " + message);
+        Log.i(TAG, "Connection failed in WifiMPDManager: " + message);
         app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED, message);
     }
 
     @Override
     public void connectionSucceeded(String message) {
-        Log.i(TAG, "Connection succeeded in WifiMPDManager: " + message);
+        Log.d(TAG, "Connection succeeded in WifiMPDManager: " + message);
         app.notifyEvent(RMPDApplication.Event.CONNECTION_SUCCEEDED);
     }
 

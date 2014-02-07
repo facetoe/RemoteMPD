@@ -79,6 +79,7 @@ public class RMPDApplication extends Application implements
         switch (event) {
             case CONNECT:
                 connectMPDManager();
+                connectionInProgress = true;
                 break;
             case CONNECTING:
                 showConnectingProgressDialog();
@@ -112,9 +113,8 @@ public class RMPDApplication extends Application implements
     private void connectMPDManager() {
         getMpdManager();
         checkState();
-        if(!mpdManager.isConnected() && !connectionInProgress) {
+        if (!mpdManager.isConnected() && !connectionInProgress) {
             mpdManager.connect();
-            connectionInProgress = true;
         }
     }
 
@@ -123,7 +123,7 @@ public class RMPDApplication extends Application implements
             return;
         }
 
-            // Show Bluetooth specific dialog.
+        // Show Bluetooth specific dialog.
         if (SettingsHelper.isBluetooth() && !SettingsHelper.hasBluetoothSettings()) {
             DialogFragment dialog = RMPDAlertDialogFragment.getNoBluetoothSettingsDialog();
             showDialog(dialog);
@@ -141,6 +141,7 @@ public class RMPDApplication extends Application implements
             showDialog(dialog);
             return;
         }
+
 
         if (SettingsHelper.isWifi() && !wifiIsEnabled()) {
             enableAndConnectWifi();
@@ -204,7 +205,7 @@ public class RMPDApplication extends Application implements
     }
 
     private void showDialog(DialogFragment dialog) {
-        if(currentActivity == null) {
+        if (currentActivity == null) {
             Log.e(TAG, "currentActivity was null");
             return;
         }

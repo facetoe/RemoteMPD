@@ -196,7 +196,7 @@ public class RMPDAlertDialogFragment extends DialogFragment {
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        app.getMpdManager().connect();
+                        app.notifyEvent(RMPDApplication.Event.CONNECT);
                     }
                 });
         return builder.create();

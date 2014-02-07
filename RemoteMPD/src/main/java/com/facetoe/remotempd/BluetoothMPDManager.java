@@ -7,9 +7,9 @@ import org.a0z.mpd.event.TrackPositionListener;
 
 class BluetoothMPDManager extends AbstractMPDManager {
     private static final String TAG = RMPDApplication.APP_PREFIX + "BluetoothMPDManager";
-    RMPDApplication app = RMPDApplication.getInstance();
-    private BluetoothConnection btConnection;
-    private BluetoothMPDStatusMonitor bluetoothMonitor;
+
+    private final BluetoothConnection btConnection;
+    private final BluetoothMPDStatusMonitor bluetoothMonitor;
 
     public BluetoothMPDManager() {
         bluetoothMonitor = new BluetoothMPDStatusMonitor();
@@ -17,9 +17,8 @@ class BluetoothMPDManager extends AbstractMPDManager {
     }
 
     @Override
-    public void connect() {
+    protected void connectInternal() {
         if (!btConnection.isConnected()) {
-            app.notifyEvent(RMPDApplication.Event.CONNECTING);
             btConnection.connect();
         }
     }

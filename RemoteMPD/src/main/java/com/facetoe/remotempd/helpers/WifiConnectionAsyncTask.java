@@ -23,7 +23,7 @@ import java.util.TimerTask;
  * the Android Wifi settings in order to choose a network. if a connection is established within CONNECTION_TIMEOUT
  * the dialog is dismissed and control is returned to the calling activity.
  * <p/>
- * Regardless of whether or not the connection succeeded, connectMPDManager() is called in onPostExecute.
+ * Regardless of whether or not the connection succeeded, connect() is called in onPostExecute.
  * This means a failed connection will result in an error on returning to the calling activity.
  */
 public class WifiConnectionAsyncTask extends AsyncTask<Void, String, Boolean> {

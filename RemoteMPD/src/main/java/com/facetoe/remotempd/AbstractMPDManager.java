@@ -8,14 +8,8 @@ import org.a0z.mpd.event.TrackPositionListener;
  * Created by facetoe on 5/01/14.
  */
 
-interface MPDConnectionController {
-    void connect();
-    boolean isConnected();
-    void disconnect();
-}
-public abstract class AbstractMPDManager implements MPDPlayerController, MPDConnectionController {
-    private static final String TAG = RMPDApplication.APP_PREFIX + "AbstractMPDManager";
-    RMPDApplication app = RMPDApplication.getInstance();
+public abstract class AbstractMPDManager implements MPDPlayerController {
+    private final RMPDApplication app = RMPDApplication.getInstance();
 
     abstract public void addStatusChangeListener(StatusChangeListener listener);
     abstract public void removeStatusChangeListener(StatusChangeListener listener);
@@ -27,6 +21,15 @@ public abstract class AbstractMPDManager implements MPDPlayerController, MPDConn
      * @param command
      */
     abstract void sendCommand(MPDCommand command);
+
+    abstract protected void connectInternal();
+    abstract public boolean isConnected();
+    abstract public void disconnect();
+
+    public void connect() {
+        connectInternal();
+        app.notifyEvent(RMPDApplication.Event.CONNECTING);
+    }
 
     @Override
     public void play() {
