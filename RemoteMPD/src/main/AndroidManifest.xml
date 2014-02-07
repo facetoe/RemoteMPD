@@ -16,7 +16,7 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/Theme.AppCompat"
-        android:name=".RemoteMPDApplication">
+        android:name=".RMPDApplication">
         <activity
             android:name="com.facetoe.remotempd.SettingsActivity"
             android:label="@string/app_name" >

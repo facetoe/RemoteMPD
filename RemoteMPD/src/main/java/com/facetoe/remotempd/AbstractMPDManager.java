@@ -1,10 +1,8 @@
 package com.facetoe.remotempd;
 
-import android.util.Log;
 import org.a0z.mpd.MPDCommand;
 import org.a0z.mpd.event.StatusChangeListener;
 import org.a0z.mpd.event.TrackPositionListener;
-import org.a0z.mpd.exception.MPDServerException;
 
 /**
  * Created by facetoe on 5/01/14.
@@ -16,8 +14,8 @@ interface MPDConnectionController {
     void disconnect();
 }
 public abstract class AbstractMPDManager implements MPDPlayerController, MPDConnectionController {
-    private static final String TAG = RemoteMPDApplication.APP_PREFIX + "AbstractMPDManager";
-    RemoteMPDApplication app = RemoteMPDApplication.getInstance();
+    private static final String TAG = RMPDApplication.APP_PREFIX + "AbstractMPDManager";
+    RMPDApplication app = RMPDApplication.getInstance();
 
     abstract public void addStatusChangeListener(StatusChangeListener listener);
     abstract public void removeStatusChangeListener(StatusChangeListener listener);

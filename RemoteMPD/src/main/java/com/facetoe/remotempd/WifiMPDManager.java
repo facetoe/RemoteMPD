@@ -14,9 +14,9 @@ import org.a0z.mpd.exception.MPDServerException;
  * Cre ated by facetoe on 2/01/14.
  */
 public class WifiMPDManager extends AbstractMPDManager implements ConnectionListener {
-    private final String TAG = RemoteMPDApplication.APP_PREFIX + "WifiMPDManager";
+    private final String TAG = RMPDApplication.APP_PREFIX + "WifiMPDManager";
     private final MPD mpd;
-    private final RemoteMPDApplication app = RemoteMPDApplication.getInstance();
+    private final RMPDApplication app = RMPDApplication.getInstance();
     private final MPDAsyncHelper asyncHelper;
 
     public WifiMPDManager() {
@@ -30,7 +30,7 @@ public class WifiMPDManager extends AbstractMPDManager implements ConnectionList
         Log.i(TAG, "WifiManager.connect()");
 
         if (!mpd.isConnected()) {
-            app.notifyEvent(RemoteMPDApplication.Event.CONNECTING);
+            app.notifyEvent(RMPDApplication.Event.CONNECTING);
             asyncHelper.connect();
         }
 
@@ -62,13 +62,13 @@ public class WifiMPDManager extends AbstractMPDManager implements ConnectionList
     @Override
     public void connectionFailed(String message) {
         Log.w(TAG, "Connection failed in WifiMPDManager: " + message);
-        app.notifyEvent(RemoteMPDApplication.Event.CONNECTION_FAILED, message);
+        app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED, message);
     }
 
     @Override
     public void connectionSucceeded(String message) {
         Log.i(TAG, "Connection succeeded in WifiMPDManager: " + message);
-        app.notifyEvent(RemoteMPDApplication.Event.CONNECTION_SUCCEEDED);
+        app.notifyEvent(RMPDApplication.Event.CONNECTION_SUCCEEDED);
     }
 
     @Override

@@ -17,7 +17,7 @@ import java.util.UUID;
 public class BluetoothConnection implements ConnectionListener {
     // Unique UUID for this application
     private static final UUID MY_UUID = UUID.fromString("04c6093b-0000-1000-8000-00805f9b34fb");
-    private static final String TAG = RemoteMPDApplication.APP_PREFIX + "BluetoothConnection";
+    private static final String TAG = RMPDApplication.APP_PREFIX + "BluetoothConnection";
 
     // Constants that indicate the current connection state
     private static final int STATE_NONE = 0;
@@ -28,7 +28,7 @@ public class BluetoothConnection implements ConnectionListener {
     private final BluetoothAdapter bluetoothAdapter;
     private ConnectThread connectThread;
     private ConnectedThread connectedThread;
-    private final RemoteMPDApplication app = RemoteMPDApplication.getInstance();
+    private final RMPDApplication app = RMPDApplication.getInstance();
 
     // For sending JSON across the wire
     private final Gson gson = new Gson();
@@ -45,13 +45,13 @@ public class BluetoothConnection implements ConnectionListener {
     @Override
     public void connectionFailed(String message) {
         Log.w(TAG, "Connection failed in BluetoothConnection: " + message);
-        app.notifyEvent(RemoteMPDApplication.Event.CONNECTION_FAILED, message);
+        app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED, message);
     }
 
     @Override
     public void connectionSucceeded(String message) {
         Log.i(TAG, "Connection succeeded in BluetoothConnection: " + message );
-        app.notifyEvent(RemoteMPDApplication.Event.CONNECTION_SUCCEEDED);
+        app.notifyEvent(RMPDApplication.Event.CONNECTION_SUCCEEDED);
     }
 
     /**

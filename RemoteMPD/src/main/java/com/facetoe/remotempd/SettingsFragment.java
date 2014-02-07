@@ -1,11 +1,8 @@
 package com.facetoe.remotempd;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
@@ -13,15 +10,13 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import com.facetoe.remotempd.helpers.SettingsHelper;
 
-import java.util.Set;
-
 /**
  * RemoteMPDNew
  * Created by facetoe on 1/02/14.
  */
 public class SettingsFragment extends PreferenceFragment {
 
-    private static final String TAG = RemoteMPDApplication.APP_PREFIX + "SettingsFragment";
+    private static final String TAG = RMPDApplication.APP_PREFIX + "SettingsFragment";
     public static final int REQUEST_SCAN_DEVICE = 1;
 
     @Override

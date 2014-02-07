@@ -10,8 +10,8 @@ import android.view.MenuItem;
 import com.facetoe.remotempd.fragments.PlayerBarFragment;
 
 public class TestActivity extends ActionBarActivity {
-    private static final String TAG = RemoteMPDApplication.APP_PREFIX + "TestActivity";
-    private final RemoteMPDApplication app = RemoteMPDApplication.getInstance();
+    private static final String TAG = RMPDApplication.APP_PREFIX + "TestActivity";
+    private final RMPDApplication app = RMPDApplication.getInstance();
 
     private static final int REQUEST_ENABLE_BT = 2;
 
@@ -73,10 +73,10 @@ public class TestActivity extends ActionBarActivity {
         if (requestCode == REQUEST_ENABLE_BT) {
             if (resultCode == Activity.RESULT_OK) {
                 Log.d(TAG, "Bluetooth enabled");
-                app.notifyEvent(RemoteMPDApplication.Event.CONNECT);
+                app.notifyEvent(RMPDApplication.Event.CONNECT);
             } else {
                 Log.d(TAG, "Bluetooth not enabled");
-                app.notifyEvent(RemoteMPDApplication.Event.REFUSED_BT_ENABLE);
+                app.notifyEvent(RMPDApplication.Event.REFUSED_BT_ENABLE);
             }
         }
     }

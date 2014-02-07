@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class BluetoothMPDStatusMonitor {
 
-    private static final String TAG = RemoteMPDApplication.APP_PREFIX + "BluetoothMPDStatusMonitor";
+    private static final String TAG = RMPDApplication.APP_PREFIX + "BluetoothMPDStatusMonitor";
     private final LinkedList<StatusChangeListener> statusChangedListeners = new LinkedList<StatusChangeListener>();
     private final LinkedList<TrackPositionListener> trackPositionChangedListeners = new LinkedList<TrackPositionListener>();
     private final Gson gson;
@@ -102,7 +102,7 @@ public class BluetoothMPDStatusMonitor {
     private void extractSonglist(MPDResponse response) {
         Type listType = new TypeToken<List<Music>>() {}.getType();
         List<Music> songList = gson.fromJson(response.getObjectJSON(0), listType);
-        //RemoteMPDApplication.getInstance().setSongList(songList);
+        //RMPDApplication.getInstance().setSongList(songList);
         Log.i(TAG, "Added " + songList.size() + " songs");
     }
 

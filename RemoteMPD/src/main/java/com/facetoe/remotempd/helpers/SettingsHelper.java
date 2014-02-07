@@ -2,7 +2,7 @@ package com.facetoe.remotempd.helpers;
 
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import com.facetoe.remotempd.RemoteMPDApplication;
+import com.facetoe.remotempd.RMPDApplication;
 
 /**
  * RemoteMPD
@@ -54,7 +54,7 @@ public class SettingsHelper {
     private static RemoteMPDSettings getSettings() {
         RemoteMPDSettings mpdSettings = new RemoteMPDSettings();
         SharedPreferences prefs = PreferenceManager
-                .getDefaultSharedPreferences(RemoteMPDApplication.getInstance());
+                .getDefaultSharedPreferences(RMPDApplication.getInstance());
 
         String btPrefValue = prefs.getString(CONNECTION_TYPE_KEY, "none");
         mpdSettings.isBluetooth = btPrefValue.equals(BT_CONNECTION_TYPE_VALUE);

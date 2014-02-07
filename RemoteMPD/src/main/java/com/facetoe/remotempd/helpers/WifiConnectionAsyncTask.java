@@ -9,7 +9,7 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.util.Log;
-import com.facetoe.remotempd.RemoteMPDApplication;
+import com.facetoe.remotempd.RMPDApplication;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -29,7 +29,7 @@ import java.util.TimerTask;
 public class WifiConnectionAsyncTask extends AsyncTask<Void, String, Boolean> {
     Activity activity;
     ProgressDialog dialog;
-    private static final String TAG = RemoteMPDApplication.APP_PREFIX + "WifiConnectionAsyncTask";
+    private static final String TAG = RMPDApplication.APP_PREFIX + "WifiConnectionAsyncTask";
     private static final int CONNECTION_TIMEOUT = 10000;
     private boolean keepWaiting = true;
     private Timer timer;
@@ -56,7 +56,7 @@ public class WifiConnectionAsyncTask extends AsyncTask<Void, String, Boolean> {
         Log.i(TAG, "onPostExecute");
         dialog.dismiss();
         timer.cancel();
-        RemoteMPDApplication.getInstance().notifyEvent(RemoteMPDApplication.Event.CONNECT);
+        RMPDApplication.getInstance().notifyEvent(RMPDApplication.Event.CONNECT);
     }
 
     @Override

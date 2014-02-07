@@ -13,9 +13,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import com.facetoe.remotempd.AbstractMPDManager;
+import com.facetoe.remotempd.RMPDApplication;
 import com.facetoe.remotempd.listeners.MPDManagerChangeListener;
 import com.facetoe.remotempd.R;
-import com.facetoe.remotempd.RemoteMPDApplication;
 import org.a0z.mpd.MPDStatus;
 import org.a0z.mpd.event.StatusChangeListener;
 
@@ -26,14 +26,14 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
         MPDManagerChangeListener,
         StatusChangeListener {
 
-    private static final String TAG = RemoteMPDApplication.APP_PREFIX + "PlayerBarFragment";
+    private static final String TAG = RMPDApplication.APP_PREFIX + "PlayerBarFragment";
     private ImageButton btnPlay;
     private ImageButton btnNext;
     private ImageButton btnPrev;
     private ImageButton btnShuffle;
     private ImageButton btnRepeat;
 
-    private RemoteMPDApplication app = RemoteMPDApplication.getInstance();
+    private RMPDApplication app = RMPDApplication.getInstance();
     private AbstractMPDManager mpdManager;
     public PlayerBarFragment() {
     }

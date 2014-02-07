@@ -5,8 +5,8 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
+import com.facetoe.remotempd.RMPDApplication;
 import com.facetoe.remotempd.listeners.ConnectionListener;
-import com.facetoe.remotempd.RemoteMPDApplication;
 import com.facetoe.remotempd.tools.Tools;
 import com.facetoe.remotempd.tools.WeakLinkedList;
 import org.a0z.mpd.MPD;
@@ -48,7 +48,7 @@ public class MPDAsyncHelper extends Handler {
     private static final int EVENT_VOLUME = 18;
     private static final int EVENT_TRACKPOSITION = 19;
 
-    private static final String TAG = RemoteMPDApplication.APP_PREFIX + "MPDAsyncHelper";
+    private static final String TAG = RMPDApplication.APP_PREFIX + "MPDAsyncHelper";
     private MPDAsyncWorker oMPDAsyncWorker;
     private HandlerThread oMPDAsyncWorkerThread;
     private MPDStatusMonitor oMonitor;

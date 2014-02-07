@@ -8,7 +8,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import com.facetoe.remotempd.R;
-import com.facetoe.remotempd.RemoteMPDApplication;
+import com.facetoe.remotempd.RMPDApplication;
 import com.facetoe.remotempd.SettingsActivity;
 
 /**
@@ -28,7 +28,7 @@ public class RMPDAlertDialogFragment extends DialogFragment {
     private static final int CONNECTION_PROGRESS = 4;
     private static final int REFUSE_BT_ENABLE = 5;
 
-    private static final String TAG = RemoteMPDApplication.APP_PREFIX + "RMPDAlertDialogFragment";
+    private static final String TAG = RMPDApplication.APP_PREFIX + "RMPDAlertDialogFragment";
 
     /**
      * This shouldn't be called, use the static methods to create a dialog.
@@ -161,7 +161,7 @@ public class RMPDAlertDialogFragment extends DialogFragment {
             public void onClick(DialogInterface dialog, int which) {
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
                 prefs.edit().putString(getString(R.string.remoteMpdConnectionTypeKey), "wifi").commit();
-                RemoteMPDApplication.getInstance().notifyEvent(RemoteMPDApplication.Event.CONNECT);
+                RMPDApplication.getInstance().notifyEvent(RMPDApplication.Event.CONNECT);
             }
         });
         builder.setNegativeButton(getString(R.string.dialogQuitOption), new DialogInterface.OnClickListener() {
@@ -175,7 +175,7 @@ public class RMPDAlertDialogFragment extends DialogFragment {
 
     private Dialog createConnectionFailedDialog(String message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        final RemoteMPDApplication app = RemoteMPDApplication.getInstance();
+        final RMPDApplication app = RMPDApplication.getInstance();
         builder.setMessage(getString(R.string.connectionFailedDialogMessage) + message)
                 .setTitle(getString(R.string.connectionFailedDialogTitle));
         builder.setPositiveButton(getString(R.string.dialogOpenSettingsOption),

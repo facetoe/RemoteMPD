@@ -20,14 +20,12 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.*;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.*;
 import android.widget.AdapterView.OnItemClickListener;
-import com.facetoe.remotempd.helpers.SettingsHelper;
 
 import java.util.Set;
 
@@ -39,7 +37,7 @@ import java.util.Set;
  */
 public class DeviceListActivity extends Activity {
     // Debugging
-    private static final String TAG = RemoteMPDApplication.APP_PREFIX + "DeviceListActivity";
+    private static final String TAG = RMPDApplication.APP_PREFIX + "DeviceListActivity";
     private static final boolean D = true;
 
     // Return Intent extra

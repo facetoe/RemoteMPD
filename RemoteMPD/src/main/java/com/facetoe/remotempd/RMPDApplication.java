@@ -19,12 +19,12 @@ import java.util.ArrayList;
  * Created by facetoe on 31/12/13.
  */
 
-public class RemoteMPDApplication extends Application implements
+public class RMPDApplication extends Application implements
         SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private static RemoteMPDApplication instance;
+    private static RMPDApplication instance;
     public final static String APP_PREFIX = "RMPD-";
-    private static final String TAG = APP_PREFIX + "RemoteMPDApplication";
+    private static final String TAG = APP_PREFIX + "RMPDApplication";
     private static final int REQUEST_ENABLE_BT = 2;
 
     private Activity currentActivity;
@@ -48,7 +48,7 @@ public class RemoteMPDApplication extends Application implements
                 .registerOnSharedPreferenceChangeListener(this);
     }
 
-    public static RemoteMPDApplication getInstance() {
+    public static RMPDApplication getInstance() {
         checkInstance();
         return instance;
     }
