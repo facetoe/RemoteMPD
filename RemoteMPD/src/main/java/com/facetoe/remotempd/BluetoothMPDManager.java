@@ -1,47 +1,46 @@
 package com.facetoe.remotempd;
 
 import android.util.Log;
-import com.facetoe.remotempd.exceptions.NoBluetoothServerConnectionException;
 import org.a0z.mpd.MPDCommand;
 import org.a0z.mpd.event.StatusChangeListener;
 import org.a0z.mpd.event.TrackPositionListener;
 
 class BluetoothMPDManager extends AbstractMPDManager {
     private static final String TAG = RemoteMPDApplication.APP_PREFIX + "BluetoothMPDManager";
-    private BluetoothController controller;
+    private BluetoothConnection btConnection;
     private BluetoothMPDStatusMonitor bluetoothMonitor;
 
     public BluetoothMPDManager() {
         bluetoothMonitor = new BluetoothMPDStatusMonitor();
-        controller = new BluetoothController(bluetoothMonitor);
+        btConnection = new BluetoothConnection(bluetoothMonitor);
     }
 
     @Override
     public void connect() {
-        if (!controller.isConnected()) {
+        if (!btConnection.isConnected()) {
             RemoteMPDApplication.getInstance().showConnectingProgressDialog();
-            controller.connect();
+            btConnection.connect();
         }
     }
 
     @Override
     public boolean isConnected() {
-        return controller.isConnected();
+        return btConnection.isConnected();
     }
 
     @Override
     public void disconnect() {
-        controller.disconnect();
-        Log.i(TAG, "Disconnected from bluetooth: " + !controller.isConnected());
+        btConnection.disconnect();
+        Log.i(TAG, "Disconnected from bluetooth: " + !btConnection.isConnected());
     }
 
     @Override
     public void sendCommand(MPDCommand command) {
         try {
-            controller.sendCommand(command);
-            Log.i(TAG, "Sending command: " + command);
+            btConnection.sendCommand(command);
+            Log.i(TAG, "Sent command: " + command);
         } catch (Exception e) {
-            controller.connectionFailed(e.getMessage());
+            btConnection.connectionFailed(e.getMessage());
         }
     }
 

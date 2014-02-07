@@ -18,9 +18,9 @@ import java.util.List;
 public class BluetoothMPDStatusMonitor {
 
     private static final String TAG = RemoteMPDApplication.APP_PREFIX + "BluetoothMPDStatusMonitor";
-    private LinkedList<StatusChangeListener> statusChangedListeners = new LinkedList<StatusChangeListener>();
-    private LinkedList<TrackPositionListener> trackPositionChangedListeners = new LinkedList<TrackPositionListener>();
-    Gson gson;
+    private final LinkedList<StatusChangeListener> statusChangedListeners = new LinkedList<StatusChangeListener>();
+    private final LinkedList<TrackPositionListener> trackPositionChangedListeners = new LinkedList<TrackPositionListener>();
+    private final Gson gson;
     public BluetoothMPDStatusMonitor() {
         gson = new Gson();
     }
@@ -30,38 +30,45 @@ public class BluetoothMPDStatusMonitor {
         String secondJSONObject = null;
         if(response.getNumObjects() > 1)
             secondJSONObject = response.getObjectJSON(1);
+
         MPDStatus status;
         boolean random;
         boolean repeating;
         int volume;
         int oldTrack;
         int oldPlaylistVersion;
+
         switch (response.getResponseType()) {
             case MPDResponse.EVENT_UPDATE_PLAYLIST:
                 extractSonglist(response);
             break;
+
             case MPDResponse.EVENT_TRACK:
                 status = gson.fromJson(firstJSONObject, MPDStatus.class);
                 oldTrack = gson.fromJson(secondJSONObject, int.class);
                 for (StatusChangeListener listener : statusChangedListeners)
                     listener.trackChanged(status, oldTrack);
                 break;
+
             case MPDResponse.EVENT_PLAYLIST:
                 status = gson.fromJson(firstJSONObject, MPDStatus.class);
                 oldPlaylistVersion = gson.fromJson(secondJSONObject, int.class);
                 for (StatusChangeListener listener : statusChangedListeners)
                     listener.playlistChanged(status, oldPlaylistVersion);
                 break;
+
             case MPDResponse.EVENT_RANDOM:
                 random = gson.fromJson(firstJSONObject, boolean.class);
                 for (StatusChangeListener listener : statusChangedListeners)
                     listener.randomChanged(random);
                 break;
+
             case MPDResponse.EVENT_REPEAT:
                 repeating = gson.fromJson(firstJSONObject, boolean.class);
                 for (StatusChangeListener listener : statusChangedListeners)
                     listener.repeatChanged(repeating);
                 break;
+
             case MPDResponse.EVENT_VOLUME:
                 status = gson.fromJson(firstJSONObject, MPDStatus.class);
                 volume = gson.fromJson(secondJSONObject, int.class);
@@ -69,6 +76,7 @@ public class BluetoothMPDStatusMonitor {
                     listener.volumeChanged(status, volume);
                 }
                 break;
+
             case MPDResponse.EVENT_STATE:
                 status = gson.fromJson(firstJSONObject, MPDStatus.class);
                 String oldState = gson.fromJson(secondJSONObject, String.class);
@@ -76,12 +84,14 @@ public class BluetoothMPDStatusMonitor {
                     listener.stateChanged(status, oldState);
                 }
                 break;
+
             case MPDResponse.EVENT_TRACKPOSITION:
                 status = gson.fromJson(firstJSONObject, MPDStatus.class);
                 for (TrackPositionListener listener : trackPositionChangedListeners) {
                     listener.trackPositionChanged(status);
                 }
                 break;
+
             default:
                 Log.i(TAG, "Unknown message type: " + response.getResponseType());
                 break;
