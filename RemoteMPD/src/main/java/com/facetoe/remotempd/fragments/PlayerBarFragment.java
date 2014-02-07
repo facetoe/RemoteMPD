@@ -55,24 +55,13 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
         btnShuffle.setOnClickListener(this);
 
         app.addMpdManagerChangeListener(this);
+
         mpdManager = app.getMpdManager();
+        mpdManager.addStatusChangeListener(this);
 
         // Don't kill the fragment on configuration change
         setRetainInstance(true);
         return rootView;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        app.registerCurrentActivity(getActivity());
-        mpdManager.addStatusChangeListener(this);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        app.unregisterCurrentActivity();
     }
 
     @Override
@@ -146,6 +135,7 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
                 break;
             default:
                 Log.i(TAG, "Unknown: " + view.getId());
+                break;
         }
     }
 }
