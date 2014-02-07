@@ -1,0 +1,3 @@
+Figure out connecting to a wifi network with progress
+Get caching Library working
+Add generic notify method with enum for notification type
