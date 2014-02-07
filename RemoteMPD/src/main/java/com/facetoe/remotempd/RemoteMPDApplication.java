@@ -21,7 +21,6 @@ public class RemoteMPDApplication extends Application implements
     public final static String APP_PREFIX = "RMPD-";
     private static final String TAG = APP_PREFIX + "RemoteMPDApplication";
 
-    private SettingsHelper settingsHelper;
     private Activity currentActivity;
     private AbstractMPDManager mpdManager;
     private final ArrayList<MPDManagerChangeListener> mpdManagerChangeListeners = new ArrayList<MPDManagerChangeListener>();
@@ -30,7 +29,6 @@ public class RemoteMPDApplication extends Application implements
     public void onCreate() {
         super.onCreate();
         instance = this;
-        settingsHelper = new SettingsHelper(this);
         PreferenceManager.getDefaultSharedPreferences(this)
                 .registerOnSharedPreferenceChangeListener(this);
     }
@@ -57,19 +55,19 @@ public class RemoteMPDApplication extends Application implements
         }
 
         // Show Bluetooth specific dialog.
-        if (settingsHelper.getSettings().isBluetooth() && !settingsHelper.hasBluetoothSettings()) {
+        if (SettingsHelper.isBluetooth() && !SettingsHelper.hasBluetoothSettings()) {
             DialogFragment dialog = RMPDAlertDialogFragmentFactory.getNoBluetoothSettingsDialog();
             showDialog(dialog);
             return;
 
-            // No settings at all, show no settings dialog
-        } else if (!settingsHelper.hasBluetoothSettings() && !settingsHelper.hasWifiSettings()) {
+        // No settings at all, show no settings dialog
+        } else if (!SettingsHelper.hasBluetoothSettings() && !SettingsHelper.hasWifiSettings()) {
             DialogFragment dialog = RMPDAlertDialogFragmentFactory.getNoSettingsDialog();
             showDialog(dialog);
             return;
 
-            // Show wifi specific dialog.
-        } else if (!settingsHelper.getSettings().isBluetooth() && !settingsHelper.hasWifiSettings()) {
+        // Show wifi specific dialog.
+        } else if (SettingsHelper.isWifi() && !SettingsHelper.hasWifiSettings()) {
             DialogFragment dialog = RMPDAlertDialogFragmentFactory.getNoWifiSettingsDialog();
             showDialog(dialog);
             return;
@@ -95,6 +93,9 @@ public class RemoteMPDApplication extends Application implements
     }
 
     public void dismissDialog() {
+        if(currentActivity == null) {
+            return;
+        }
         FragmentTransaction ft = currentActivity.getFragmentManager().beginTransaction();
         Fragment fragment = currentActivity.getFragmentManager().findFragmentByTag("dialog");
         if (fragment != null) {
@@ -108,7 +109,7 @@ public class RemoteMPDApplication extends Application implements
     }
 
     public AbstractMPDManager getMpdManager() {
-        if (settingsHelper.getSettings().isBluetooth()) {
+        if (SettingsHelper.isBluetooth()) {
             if (mpdManager == null || mpdManager instanceof WifiMPDManager)
                 mpdManager = new BluetoothMPDManager();
         } else {
@@ -119,18 +120,18 @@ public class RemoteMPDApplication extends Application implements
     }
 
     public RemoteMPDSettings getSettings() {
-        return settingsHelper.getSettings();
+        return SettingsHelper.getSettings();
     }
 
     public void notifyConnectionFailed(String message) {
-        if(currentActivity != null) {
+        if (currentActivity != null) {
             dismissDialog();
             maybeShowConnectionFailedDialog(message);
         }
     }
 
     public void notifyConnectionSucceeded(String message) {
-        if(currentActivity != null) {
+        if (currentActivity != null) {
             dismissDialog();
         }
     }
