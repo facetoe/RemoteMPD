@@ -300,7 +300,8 @@ public class BluetoothConnection implements ConnectionListener {
         }
 
         public void write(String data) throws IOException {
-            outputWriter.write(data + "\n"); // Append a newline here as the server uses them to determine the end of commands.
+            // Append a newline here as the server uses them to determine the end of commands.
+            outputWriter.write(data + "\n");
             outputWriter.flush();
         }
 

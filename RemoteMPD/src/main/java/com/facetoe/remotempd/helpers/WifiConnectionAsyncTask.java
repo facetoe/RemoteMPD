@@ -30,6 +30,7 @@ public class WifiConnectionAsyncTask extends AsyncTask<Void, String, Boolean> {
     Activity activity;
     ProgressDialog dialog;
     private static final String TAG = RMPDApplication.APP_PREFIX + "WifiConnectionAsyncTask";
+    private final RMPDApplication app = RMPDApplication.getInstance();
     private static final int CONNECTION_TIMEOUT = 10000;
     private boolean keepWaiting = true;
     private Timer timer;
@@ -43,6 +44,7 @@ public class WifiConnectionAsyncTask extends AsyncTask<Void, String, Boolean> {
     protected void onPreExecute() {
         super.onPreExecute();
         Log.i(TAG, "onPreExecute");
+        app.notifyEvent(RMPDApplication.Event.LOCK_CONNECTIONS);
         dialog = new ProgressDialog(activity);
         dialog.setTitle("Connecting to Wifi");
         dialog.setMessage("Please wait, connecting to Wifi network");
@@ -56,7 +58,8 @@ public class WifiConnectionAsyncTask extends AsyncTask<Void, String, Boolean> {
         Log.i(TAG, "onPostExecute");
         dialog.dismiss();
         timer.cancel();
-        RMPDApplication.getInstance().notifyEvent(RMPDApplication.Event.CONNECT);
+        app.notifyEvent(RMPDApplication.Event.RELEASE_CONNECTION_LOCK);
+        app.notifyEvent(RMPDApplication.Event.CONNECT);
     }
 
     @Override

@@ -16,6 +16,7 @@ import com.facetoe.remotempd.SettingsActivity;
  * Created by facetoe on 4/02/14.
  */
 public class RMPDAlertDialogFragmentFactory extends DialogFragment {
+    private static RMPDApplication app = RMPDApplication.getInstance();
 
     private static final String TITLE = "title";
     private static final String MESSAGE = "message";
@@ -160,8 +161,10 @@ public class RMPDAlertDialogFragmentFactory extends DialogFragment {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                prefs.edit().putString(getString(R.string.remoteMpdConnectionTypeKey), "wifi").commit();
-                RMPDApplication.getInstance().notifyEvent(RMPDApplication.Event.CONNECT);
+                prefs.edit().putString(SettingsHelper.CONNECTION_TYPE_KEY,
+                        SettingsHelper.WIFI_CONNECTION_TYPE_VALUE)
+                        .commit();
+                app.notifyEvent(RMPDApplication.Event.CONNECT);
             }
         });
         builder.setNegativeButton(getString(R.string.dialogQuitOption), new DialogInterface.OnClickListener() {
@@ -175,7 +178,6 @@ public class RMPDAlertDialogFragmentFactory extends DialogFragment {
 
     private Dialog createConnectionFailedDialog(String message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        final RMPDApplication app = RMPDApplication.getInstance();
         builder.setMessage(getString(R.string.connectionFailedDialogMessage) + message)
                 .setTitle(getString(R.string.connectionFailedDialogTitle));
         builder.setPositiveButton(getString(R.string.dialogOpenSettingsOption),

@@ -25,14 +25,16 @@ public class RMPDApplication extends Application implements
     private static RMPDApplication instance;
     public final static String APP_PREFIX = "RMPD-";
     private static final String TAG = APP_PREFIX + "RMPDApplication";
-    private static final int REQUEST_ENABLE_BT = 2;
+    public static final int REQUEST_ENABLE_BT = 2;
 
     private Activity currentActivity;
     private AbstractMPDManager mpdManager;
     private final ArrayList<MPDManagerChangeListener> mpdManagerChangeListeners = new ArrayList<MPDManagerChangeListener>();
-    private boolean connectionInProgress = false;
+    private boolean connectionsLocked = false;
 
     public enum Event {
+        LOCK_CONNECTIONS,
+        RELEASE_CONNECTION_LOCK,
         CONNECT,
         CONNECTING,
         CONNECTION_FAILED,
@@ -66,20 +68,26 @@ public class RMPDApplication extends Application implements
 
     public void notifyEvent(Event event) {
         switch (event) {
+            case LOCK_CONNECTIONS:
+                connectionsLocked = true;
+                break;
+            case RELEASE_CONNECTION_LOCK:
+                connectionsLocked = false;
+                break;
             case CONNECT:
                 connectMPDManager();
-                connectionInProgress = true;
+                connectionsLocked = true;
                 break;
             case CONNECTING:
                 showConnectingProgressDialog();
                 break;
             case CONNECTION_SUCCEEDED:
                 dismissDialog();
-                connectionInProgress = false;
+                connectionsLocked = false;
                 break;
             case REFUSED_BT_ENABLE:
                 showRefusedBluetoothEnableDialog();
-                connectionInProgress = false;
+                connectionsLocked = false;
                 break;
             default:
                 Log.w(TAG, "Unknown event: " + event);
@@ -91,7 +99,7 @@ public class RMPDApplication extends Application implements
         switch (event) {
             case CONNECTION_FAILED:
                 maybeShowConnectionFailedDialog(message);
-                connectionInProgress = false;
+                connectionsLocked = false;
                 break;
             default:
                 Log.w(TAG, "Unknown event: " + event);
@@ -102,7 +110,7 @@ public class RMPDApplication extends Application implements
     private void connectMPDManager() {
         getMpdManager(); // Ensure we have the right manager
         checkState();
-        if (!mpdManager.isConnected() && !connectionInProgress) {
+        if (!mpdManager.isConnected() && !connectionsLocked) {
             mpdManager.connect();
         }
     }
@@ -129,26 +137,26 @@ public class RMPDApplication extends Application implements
             showDialog(dialog);
             return;
 
-            // No settings at all, show no settings dialog
+            // No settings at all, show no settings dialog.
         } else if (!SettingsHelper.hasBluetoothSettings() && !SettingsHelper.hasWifiSettings()) {
             DialogFragment dialog = RMPDAlertDialogFragmentFactory.getNoSettingsDialog();
             showDialog(dialog);
             return;
 
-            // Show wifi specific dialog.
+            // Show Wifi specific dialog.
         } else if (SettingsHelper.isWifi() && !SettingsHelper.hasWifiSettings()) {
             DialogFragment dialog = RMPDAlertDialogFragmentFactory.getNoWifiSettingsDialog();
             showDialog(dialog);
             return;
         }
 
-
+        // Check that we can connect to MPD via Wifi or Bluetooth.
+        // If not, enable the connection and connect,
+        // if so, check that we are connected.
         if (SettingsHelper.isWifi() && !wifiIsEnabled()) {
             enableAndConnectWifi();
-
         } else if (SettingsHelper.isBluetooth() && !bluetoothIsEnabled()) {
             enableAndConnectBluetooth();
-
         } else {
             checkConnection();
         }
@@ -175,9 +183,9 @@ public class RMPDApplication extends Application implements
     }
 
     private void checkConnection() {
-        if (mpdManager != null && !mpdManager.isConnected() && !connectionInProgress) {
+        if (mpdManager != null && !mpdManager.isConnected() && !connectionsLocked) {
             mpdManager.connect();
-            connectionInProgress = true;
+            connectionsLocked = true;
         }
     }
 
@@ -206,16 +214,10 @@ public class RMPDApplication extends Application implements
 
     private void showDialog(DialogFragment dialog) {
         if (currentActivity == null) {
-            Log.e(TAG, "currentActivity was null");
+            Log.e(TAG, "Can't show dialog, currentActivity is null");
             return;
         }
         dismissDialog();
-        FragmentTransaction ft = currentActivity.getFragmentManager().beginTransaction();
-        Fragment prev = currentActivity.getFragmentManager().findFragmentByTag("dialog");
-        if (prev != null) {
-            ft.remove(prev);
-        }
-        ft.addToBackStack(null);
         dialog.show(currentActivity.getFragmentManager(), "dialog");
     }
 

@@ -13,8 +13,6 @@ public class TestActivity extends ActionBarActivity {
     private static final String TAG = RMPDApplication.APP_PREFIX + "TestActivity";
     private final RMPDApplication app = RMPDApplication.getInstance();
 
-    private static final int REQUEST_ENABLE_BT = 2;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,7 +68,7 @@ public class TestActivity extends ActionBarActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Log.i(TAG, "On activity result called");
-        if (requestCode == REQUEST_ENABLE_BT) {
+        if (requestCode == RMPDApplication.REQUEST_ENABLE_BT) {
             if (resultCode == Activity.RESULT_OK) {
                 Log.d(TAG, "Bluetooth enabled");
                 app.notifyEvent(RMPDApplication.Event.CONNECT);
