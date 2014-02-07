@@ -28,6 +28,7 @@ public class MPDResponse implements Serializable {
     public static final int EVENT_VOLUME = 18;
     public static final int EVENT_TRACKPOSITION = 19;
     public static final int EVENT_UPDATE_PLAYLIST = 20;
+    public static final int EVENT_CHECK_PLAYLIST_HASH = 21;
 
     private int responseType;
     private int numObjects;
