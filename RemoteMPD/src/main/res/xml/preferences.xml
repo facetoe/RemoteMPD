@@ -9,7 +9,7 @@
         android:summary="@string/remoteMpdConnectionTypeSummary"
         android:entries="@array/remoteMpdConnectionOptions"
         android:entryValues="@array/remoteMpdConnectionOptionsValues"
-        android:defaultValue="@string/defaultConnectionValue"/>
+        android:defaultValue="@string/defaultConnectionKey"/>
 
     <PreferenceScreen
         android:key="@string/wifiConSettingsKey"
