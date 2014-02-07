@@ -7,7 +7,6 @@ import android.os.Message;
 import android.util.Log;
 import com.facetoe.remotempd.listeners.ConnectionListener;
 import com.facetoe.remotempd.RemoteMPDApplication;
-import com.facetoe.remotempd.RemoteMPDSettings;
 import com.facetoe.remotempd.tools.Tools;
 import com.facetoe.remotempd.tools.WeakLinkedList;
 import org.a0z.mpd.MPD;
@@ -247,8 +246,10 @@ public class MPDAsyncHelper extends Handler {
             switch (msg.what) {
                 case EVENT_CONNECT:
                     try {
-                        RemoteMPDSettings settings = RemoteMPDApplication.getInstance().getSettings();
-                        oMPD.connect(settings.getHost(), settings.getPort(), settings.getPassword());
+                        oMPD.connect(SettingsHelper.getHost(),
+                                SettingsHelper.getPort(),
+                                SettingsHelper.getPassword());
+
                         MPDAsyncHelper.this.obtainMessage(EVENT_CONNECTSUCCEEDED).sendToTarget();
 
                     } catch (MPDServerException e) {

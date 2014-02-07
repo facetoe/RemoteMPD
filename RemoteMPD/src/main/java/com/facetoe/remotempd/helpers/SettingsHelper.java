@@ -3,7 +3,6 @@ package com.facetoe.remotempd.helpers;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import com.facetoe.remotempd.RemoteMPDApplication;
-import com.facetoe.remotempd.RemoteMPDSettings;
 
 /**
  * RemoteMPD
@@ -19,18 +18,6 @@ public class SettingsHelper {
     private static final String WIFI_PORT_KEY = "mpdPort";
     private static final String WIFI_PASS_KEY = "mpdPassword";
     private static final String WIFI_HOST_KEY = "mpdIp";
-
-    public static RemoteMPDSettings getSettings() {
-        RemoteMPDSettings mpdSettings = new RemoteMPDSettings();
-        SharedPreferences prefs = PreferenceManager
-                .getDefaultSharedPreferences(RemoteMPDApplication.getInstance());
-        mpdSettings.setBluetooth(isBluetooth(prefs));
-        mpdSettings.setHost(getWifiIP(prefs));
-        mpdSettings.setPassword(getWifiMPDPassword(prefs));
-        mpdSettings.setPort(Integer.parseInt(getWifiPort(prefs)));
-        mpdSettings.setLastDevice(getLastBTDeviceAddress(prefs));
-        return mpdSettings;
-    }
 
     public static boolean hasWifiSettings() {
         return !getSettings().getHost().trim().isEmpty();
@@ -48,24 +35,75 @@ public class SettingsHelper {
         return !getSettings().isBluetooth();
     }
 
-    private static boolean isBluetooth(SharedPreferences prefs) {
-        String prefValue = prefs.getString(CONNECTION_TYPE_KEY, "none");
-        return prefValue.equals(BT_CONNECTION_TYPE_VALUE);
+    public static String getHost() {
+        return getSettings().getHost();
     }
 
-    private static String getWifiPort(SharedPreferences prefs) {
-        return prefs.getString(WIFI_PORT_KEY, WIFI_PORT_DEFAULT);
+    public static String getPassword() {
+        return getSettings().getPassword();
     }
 
-    private static String getWifiIP(SharedPreferences prefs) {
-        return prefs.getString(WIFI_HOST_KEY, "");
+    public static int getPort() {
+        return getSettings().getPort();
     }
 
-    private static String getWifiMPDPassword(SharedPreferences prefs) {
-        return prefs.getString(WIFI_PASS_KEY, "");
+    public static String getLastDevice() {
+        return getSettings().getLastDevice();
     }
 
-    private static String getLastBTDeviceAddress(SharedPreferences prefs) {
-        return prefs.getString(BT_LAST_BTDEVICE, "");
+    private static RemoteMPDSettings getSettings() {
+        RemoteMPDSettings mpdSettings = new RemoteMPDSettings();
+        SharedPreferences prefs = PreferenceManager
+                .getDefaultSharedPreferences(RemoteMPDApplication.getInstance());
+
+        String btPrefValue = prefs.getString(CONNECTION_TYPE_KEY, "none");
+        mpdSettings.isBluetooth = btPrefValue.equals(BT_CONNECTION_TYPE_VALUE);
+        mpdSettings.host = prefs.getString(WIFI_HOST_KEY, "");
+        mpdSettings.password = prefs.getString(WIFI_PASS_KEY, "");
+        mpdSettings.port = Integer.parseInt(prefs.getString(WIFI_PORT_KEY, WIFI_PORT_DEFAULT));
+        mpdSettings.lastDevice = prefs.getString(BT_LAST_BTDEVICE, "");
+        return mpdSettings;
+    }
+
+    private static class RemoteMPDSettings {
+        private String host = "";
+        private int port;
+        private String password = "";
+        private boolean isBluetooth;
+        private String lastDevice = "";
+
+        public RemoteMPDSettings() {
+        }
+
+        public String getHost() {
+            return host;
+        }
+
+        public int getPort() {
+            return port;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public boolean isBluetooth() {
+            return isBluetooth;
+        }
+
+        public String getLastDevice() {
+            return lastDevice;
+        }
+
+        @Override
+        public String toString() {
+            return "\nRemoteMPDSettings{" +
+                    "\nhost='" + host + '\'' +
+                    "\nport=" + port +
+                    "\npassword='" + password + '\'' +
+                    "\nisBluetooth=" + isBluetooth +
+                    "\nlastDevice='" + lastDevice + '\'' +
+                    '}';
+        }
     }
 }

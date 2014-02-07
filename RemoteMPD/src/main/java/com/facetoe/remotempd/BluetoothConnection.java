@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 import com.facetoe.remotempd.exceptions.NoBluetoothServerConnectionException;
+import com.facetoe.remotempd.helpers.SettingsHelper;
 import com.facetoe.remotempd.listeners.ConnectionListener;
 import com.google.gson.Gson;
 import org.a0z.mpd.MPDCommand;
@@ -62,7 +63,7 @@ public class BluetoothConnection implements ConnectionListener {
             return;
         }
 
-        String lastDevice = app.getSettings().getLastDevice();
+        String lastDevice = SettingsHelper.getLastDevice();
         if(lastDevice.isEmpty()) {
             connectionFailed("No Bluetooth device selected");
             Log.w(TAG, "No device selected");
@@ -72,12 +73,10 @@ public class BluetoothConnection implements ConnectionListener {
         BluetoothDevice device = bluetoothAdapter.getRemoteDevice(lastDevice);
         Log.i(TAG, "connecting to: " + device);
 
-        // Cancel any thread attempting to make a connection
+        // Don't connect if we are already connecting
         if (CURRENT_STATE == STATE_CONNECTING) {
-            if (connectThread != null) {
-                connectThread.cancel();
-                connectThread = null;
-            }
+            Log.w(TAG, "Connection already in progress");
+            return;
         }
 
         // Cancel any thread currently running a connection

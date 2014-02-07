@@ -69,6 +69,7 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
         super.onDestroyView();
         app.removeMpdManagerChangeListener(this);
         mpdManager.removeStatusChangeListener(this);
+        mpdManager.disconnect();
     }
 
     @Override
