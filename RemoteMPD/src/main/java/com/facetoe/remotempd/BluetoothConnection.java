@@ -3,45 +3,35 @@ package com.facetoe.remotempd;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.SharedPreferences;
 import android.util.Log;
-import com.facetoe.remotempd.helpers.MPDAsyncHelper;
+import com.facetoe.remotempd.exceptions.NoBluetoothServerConnectionException;
 import com.facetoe.remotempd.listeners.ConnectionListener;
 import com.google.gson.Gson;
 import org.a0z.mpd.MPDCommand;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.charset.Charset;
+import java.io.*;
 import java.util.UUID;
 
 
 public class BluetoothConnection implements ConnectionListener {
     // Unique UUID for this application
     private static final UUID MY_UUID = UUID.fromString("04c6093b-0000-1000-8000-00805f9b34fb");
-    protected static final String TAG = "BluetoothConnection";
-
+    private static final String TAG = RemoteMPDApplication.APP_PREFIX + "BluetoothConnection";
 
     // Constants that indicate the current connection state
-    protected static final int STATE_NONE = 0;       // we're doing nothing
-    protected static final int STATE_CONNECTING = 1; // now initiating an outgoing connection
-    protected static final int STATE_CONNECTED = 2;  // now spawnConnectedThread to a remote device
-    protected static int CURRENT_STATE = STATE_NONE;
+    private static final int STATE_NONE = 0;
+    private static final int STATE_CONNECTING = 1;
+    private static final int STATE_CONNECTED = 2;
+    private static int CURRENT_STATE = STATE_NONE;
 
-    // For saving and retrieving the last device
-    public static final String LAST_DEVICE_KEY = "lastDevice";
-
-    // Member fields
-    private BluetoothAdapter bluetoothAdapter;
-    private BluetoothDevice device;
+    private final BluetoothAdapter bluetoothAdapter;
     private ConnectThread connectThread;
     private ConnectedThread connectedThread;
-    private SharedPreferences prefs;
+    private final RemoteMPDApplication app = RemoteMPDApplication.getInstance();
 
     // For sending JSON across the wire
-    private Gson gson = new Gson();
-    BluetoothMPDStatusMonitor monitor;
+    private final Gson gson = new Gson();
+    private final BluetoothMPDStatusMonitor monitor;
 
     /**
      * Constructor. Prepares a new BluetoothConnection session.
@@ -49,23 +39,39 @@ public class BluetoothConnection implements ConnectionListener {
     public BluetoothConnection(BluetoothMPDStatusMonitor monitor) {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         this.monitor = monitor;
-        initDevice();
     }
 
-    private void initDevice() {
-        String lastDeviceAddress = prefs.getString(LAST_DEVICE_KEY, "NONE");
-        if(lastDeviceAddress.equals("NONE")) {
-            //TODO handle no device.
-        } else {
-           device = bluetoothAdapter.getRemoteDevice(lastDeviceAddress);
-        }
+    @Override
+    public void connectionFailed(String message) {
+        Log.w(TAG, "Connection failed in BluetoothConnection: " + message);
+        app.notifyConnectionFailed(message);
+    }
+
+    @Override
+    public void connectionSucceeded(String message) {
+        Log.i(TAG, "Connection succeeded in BluetoothConnection: " + message );
+        app.notifyConnectionSucceeded(message);
     }
 
     /**
      * Start the ConnectThread to initiate a connection to a remote device.
      */
     public synchronized void connect() {
-        Log.d(TAG, "connect to: " + device);
+        if (bluetoothAdapter == null) {
+            connectionFailed("Bluetooth is not supported");
+            return;
+        }
+
+        String lastDevice = app.getSettings().getLastDevice();
+        if(lastDevice.isEmpty()) {
+            connectionFailed("No Bluetooth device selected");
+            Log.w(TAG, "No device selected");
+            return;
+        }
+
+        BluetoothDevice device = bluetoothAdapter.getRemoteDevice(lastDevice);
+        Log.i(TAG, "connecting to: " + device);
+
         // Cancel any thread attempting to make a connection
         if (CURRENT_STATE == STATE_CONNECTING) {
             if (connectThread != null) {
@@ -82,14 +88,9 @@ public class BluetoothConnection implements ConnectionListener {
 
         // Start the thread to connect with the given device
         connectThread = new ConnectThread(device);
+        connectThread.start();
+        setState(STATE_CONNECTING);
 
-        if(connectedThread == null) {
-            connectionFailed("Failed to connect to bluetooth");
-        } else {
-            connectionSucceeded("Bluetooth connection succesful");
-            connectThread.start();
-            setState(STATE_CONNECTING);
-        }
     }
 
     /**
@@ -105,6 +106,7 @@ public class BluetoothConnection implements ConnectionListener {
             connectedThread.cancel();
             connectedThread = null;
         }
+        Log.d(TAG, "Really disconnected");
         setState(STATE_NONE);
     }
 
@@ -112,40 +114,42 @@ public class BluetoothConnection implements ConnectionListener {
         return connectedThread != null && connectedThread.isAlive();
     }
 
-    public void sendCommand(MPDCommand command) {
-        write(command.toString());
-    }
-
-    /**
-     * Send a string to the server.
-     *
-     * @param message The responseType to write.
-     */
-    public void write(String message) {
-        write(message.getBytes(Charset.forName("UTF-8")));
+    public void sendCommand(MPDCommand command) throws NoBluetoothServerConnectionException {
+        if(CURRENT_STATE != STATE_CONNECTED) {
+            throw new NoBluetoothServerConnectionException("No connection to Bluetooth Server");
+        }
+        try {
+            write(command.toString());
+        } catch (IOException e) {
+            throw new NoBluetoothServerConnectionException("Failed to send command to Bluetooth server");
+        }
     }
 
     /**
      * Write to the ConnectedThread in an unsynchronized manner
      *
-     * @param out The bytes to write
-     * @see ConnectedThread#write(byte[])
+     * @param data The data to write
      */
-    private void write(byte[] out) {
-        Log.d("Writing: ", new String(out));
+    private void write(String data) throws IOException {
+        Log.d("Writing: ", data);
         // Create temporary object
         ConnectedThread r;
         // Synchronize a copy of the ConnectedThread
         synchronized (this) {
-            if (CURRENT_STATE != STATE_CONNECTED) return;
             r = connectedThread;
         }
         // Perform the write unsynchronized
-        r.write(out);
+        r.write(data);
+    }
+
+    private void bluetoothConnectionFailed() {
+        setState(STATE_NONE);
+        connectionFailed("Failed to connect to Bluetooth server");
     }
 
     private void connectionLost() {
         setState(STATE_NONE);
+        connectionFailed("Lost connection to the Bluetooth server");
     }
 
     private synchronized void setState(int newState) {
@@ -153,14 +157,12 @@ public class BluetoothConnection implements ConnectionListener {
         CURRENT_STATE = newState;
     }
 
-    public synchronized int getState() { return CURRENT_STATE; }
-
     /**
      * Start the ConnectedThread to begin managing a Bluetooth connection
      *
      * @param socket The BluetoothSocket on which the connection was made
      */
-    public synchronized void spawnConnectedThread(BluetoothSocket socket) {
+    synchronized void spawnConnectedThread(BluetoothSocket socket) {
         Log.d(TAG, "spawnConnectedThread()");
 
         // Cancel the thread that completed the connection
@@ -180,14 +182,7 @@ public class BluetoothConnection implements ConnectionListener {
         connectedThread.start();
 
         setState(STATE_CONNECTED);
-    }
-
-    public BluetoothDevice getDevice() {
-        return device;
-    }
-
-    public void setDevice(BluetoothDevice device) {
-        this.device = device;
+        connectionSucceeded("");
     }
 
     /**
@@ -224,8 +219,8 @@ public class BluetoothConnection implements ConnectionListener {
                 // successful connection or an exception
                 mmSocket.connect();
             } catch (IOException e) {
-                connectionFailed("Failed to connect to bluetooth device: " + device.getAddress());
-                Log.e(TAG, "Exception in connectThread: ", e);
+                bluetoothConnectionFailed();
+
                 // Close the socket
                 try {
                     mmSocket.close();
@@ -258,46 +253,38 @@ public class BluetoothConnection implements ConnectionListener {
      * It handles all incoming and outgoing transmissions.
      */
     private class ConnectedThread extends Thread {
-        private final BluetoothSocket mmSocket;
-        private final InputStream mmInStream;
-        private final OutputStream mmOutStream;
+        private final BluetoothSocket bluetoothSocket;
+        private final BufferedReader inputReader;
+        private final BufferedWriter outputWriter;
 
         public ConnectedThread(BluetoothSocket socket) {
             Log.d(TAG, "ConnectedThread()");
-            mmSocket = socket;
+            bluetoothSocket = socket;
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
 
             // Get the BluetoothSocket input and output streams
             try {
-                tmpIn = socket.getInputStream();
-                tmpOut = socket.getOutputStream();
+                tmpIn = bluetoothSocket.getInputStream();
+                tmpOut = bluetoothSocket.getOutputStream();
             } catch (IOException e) {
                 Log.e(TAG, "temp sockets not created", e);
             }
 
-            mmInStream = tmpIn;
-            mmOutStream = tmpOut;
+            inputReader = new BufferedReader(new InputStreamReader(tmpIn));
+            outputWriter = new BufferedWriter(new OutputStreamWriter(tmpOut));
         }
 
         public void run() {
             Log.d(TAG, "ConnectedThread running");
-            int bytesRead;
+            String input;
 
-            StringBuilder builder = new StringBuilder();
-            // Keep listening to the InputStream while spawnConnectedThread
+            // Keep listening to the InputStream while connected with the Server
             while (true) {
                 try {
-                    // Read from the InputStream
-                    int ch;
-                    bytesRead = 0;
-                    while ((ch = mmInStream.read()) != 10) {
-                        bytesRead++;
-                        builder.append((char) ch);
-                    }
-                    Log.i(TAG, "READ " + bytesRead + " bytes.");
-                    handleMessage(builder.toString());
-                    builder.setLength(0);
+                    // Messages from the server are terminated with a newline.
+                    input = inputReader.readLine();
+                    handleMessage(input);
 
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected");
@@ -308,41 +295,24 @@ public class BluetoothConnection implements ConnectionListener {
         }
 
         private void handleMessage(String message) {
-            Log.i(TAG, "Message Received: " + message);
+            Log.d(TAG, "Message Received: " + message);
             MPDResponse response = gson.fromJson(message, MPDResponse.class);
             monitor.handleMessage(response);
         }
 
-        /**
-         * Write to the spawnConnectedThread OutStream.
-         *
-         * @param buffer The bytes to write
-         */
-        public void write(byte[] buffer) {
-            try {
-                mmOutStream.write(buffer);
-            } catch (IOException e) {
-                Log.e(TAG, "write() failed", e);
-            }
+        public void write(String data) throws IOException {
+            outputWriter.write(data + "\n"); // Append a newline here as the server uses them to determine the end of commands.
+            outputWriter.flush();
         }
 
         public void cancel() {
             try {
-                mmSocket.close();
+                bluetoothSocket.close();
+                inputReader.close();
+                outputWriter.close();
             } catch (IOException e) {
                 Log.e(TAG, "close() of connect socket failed", e);
             }
         }
-    }
-
-    @Override
-    public void connectionFailed(String message) {
-         Log.i(TAG, "Connection failed: " + message);
-        setState(STATE_NONE);
-    }
-
-    @Override
-    public void connectionSucceeded(String message) {
-
     }
 }
