@@ -11,13 +11,13 @@ import org.a0z.mpd.exception.MPDServerException;
 
 
 /**
- * Created by facetoe on 2/01/14.
+ * Cre ated by facetoe on 2/01/14.
  */
 public class WifiMPDManager extends AbstractMPDManager implements ConnectionListener {
-    String TAG = RemoteMPDApplication.APP_PREFIX + "WifiMPDManager";
-    MPD mpd;
-    RemoteMPDApplication app = RemoteMPDApplication.getInstance();
-    MPDAsyncHelper asyncHelper;
+    private final String TAG = RemoteMPDApplication.APP_PREFIX + "WifiMPDManager";
+    private final MPD mpd;
+    private final RemoteMPDApplication app = RemoteMPDApplication.getInstance();
+    private final MPDAsyncHelper asyncHelper;
 
     public WifiMPDManager() {
         asyncHelper = new MPDAsyncHelper();
