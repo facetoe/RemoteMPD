@@ -55,14 +55,19 @@ public class RMPDApplication extends Application implements
         return instance;
     }
 
+    private static void checkInstance() {
+        if (instance == null)
+            throw new IllegalStateException("Application not created yet!");
+    }
+
     public void registerCurrentActivity(Activity activity) {
-        Log.d(TAG, "Registering: " + activity);
+        Log.d(TAG, "Register: " + activity);
         currentActivity = activity;
         checkState();
     }
 
     public void unregisterCurrentActivity() {
-        Log.d(TAG, "Unregistering: " + currentActivity);
+        Log.d(TAG, "Unregister: " + currentActivity);
         currentActivity = null;
     }
 
@@ -254,10 +259,5 @@ public class RMPDApplication extends Application implements
         for (MPDManagerChangeListener listener : mpdManagerChangeListeners) {
             listener.mpdManagerChanged();
         }
-    }
-
-    private static void checkInstance() {
-        if (instance == null)
-            throw new IllegalStateException("Application not created yet!");
     }
 }

@@ -1,6 +1,7 @@
 package com.facetoe.remotempd;
 
 import android.util.Log;
+import com.facetoe.remotempd.listeners.BluetoothPlaylistUpdateListener;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.a0z.mpd.MPDStatus;
@@ -20,8 +21,10 @@ public class BluetoothMPDStatusMonitor {
     private static final String TAG = RMPDApplication.APP_PREFIX + "BluetoothMPDStatusMonitor";
     private final LinkedList<StatusChangeListener> statusChangedListeners = new LinkedList<StatusChangeListener>();
     private final LinkedList<TrackPositionListener> trackPositionChangedListeners = new LinkedList<TrackPositionListener>();
+    private BluetoothPlaylistUpdateListener bluetoothPlaylistUpdateListener;
     private final Gson gson;
-    public BluetoothMPDStatusMonitor() {
+    public BluetoothMPDStatusMonitor(BluetoothPlaylistUpdateListener bluetoothPlaylistUpdateListener) {
+        this.bluetoothPlaylistUpdateListener = bluetoothPlaylistUpdateListener;
         gson = new Gson();
     }
 
@@ -39,8 +42,14 @@ public class BluetoothMPDStatusMonitor {
         int oldPlaylistVersion;
 
         switch (response.getResponseType()) {
+
+            case MPDResponse.EVENT_CHECK_PLAYLIST_HASH:
+                String hash = gson.fromJson(firstJSONObject, String.class);
+                Log.i(TAG, "Received new hash: " + hash);
+                break;
+
             case MPDResponse.EVENT_UPDATE_PLAYLIST:
-                extractSonglist(response);
+                bluetoothPlaylistUpdateListener.updatePlayList(new MPDCachedPlaylist(firstJSONObject));
             break;
 
             case MPDResponse.EVENT_TRACK:

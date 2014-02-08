@@ -3,6 +3,7 @@ package com.facetoe.remotempd;
 import android.util.Log;
 import com.facetoe.remotempd.helpers.MPDAsyncHelper;
 import com.facetoe.remotempd.listeners.ConnectionListener;
+import org.a0z.mpd.AbstractCommand;
 import org.a0z.mpd.MPD;
 import org.a0z.mpd.MPDCommand;
 import org.a0z.mpd.event.StatusChangeListener;
@@ -50,7 +51,7 @@ public class WifiMPDManager extends AbstractMPDManager implements ConnectionList
     }
 
     @Override
-    public void sendCommand(MPDCommand command) {
+    public void sendCommand(AbstractCommand command) {
         try {
             mpd.sendCommand(command);
             Log.d(TAG, "Sent command: " + command);

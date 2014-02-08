@@ -8,13 +8,15 @@ import com.facetoe.remotempd.exceptions.NoBluetoothServerConnectionException;
 import com.facetoe.remotempd.helpers.SettingsHelper;
 import com.facetoe.remotempd.listeners.ConnectionListener;
 import com.google.gson.Gson;
+import org.a0z.mpd.AbstractCommand;
 import org.a0z.mpd.MPDCommand;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.util.UUID;
 
 
-public class BluetoothConnection implements ConnectionListener {
+public class BluetoothConnection {
     // Unique UUID for this application
     private static final UUID MY_UUID = UUID.fromString("04c6093b-0000-1000-8000-00805f9b34fb");
     private static final String TAG = RMPDApplication.APP_PREFIX + "BluetoothConnection";
@@ -28,7 +30,7 @@ public class BluetoothConnection implements ConnectionListener {
     private final BluetoothAdapter bluetoothAdapter;
     private ConnectThread connectThread;
     private ConnectedThread connectedThread;
-    private final RMPDApplication app = RMPDApplication.getInstance();
+    private ConnectionListener connectionListener;
 
     // For sending JSON across the wire
     private final Gson gson = new Gson();
@@ -37,21 +39,10 @@ public class BluetoothConnection implements ConnectionListener {
     /**
      * Constructor. Prepares a new BluetoothConnection session.
      */
-    public BluetoothConnection(BluetoothMPDStatusMonitor monitor) {
+    public BluetoothConnection(BluetoothMPDStatusMonitor monitor, ConnectionListener listener) {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         this.monitor = monitor;
-    }
-
-    @Override
-    public void connectionFailed(String message) {
-        Log.w(TAG, "Connection failed in BluetoothConnection: " + message);
-        app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED, message);
-    }
-
-    @Override
-    public void connectionSucceeded(String message) {
-        Log.i(TAG, "Connection succeeded in BluetoothConnection: " + message );
-        app.notifyEvent(RMPDApplication.Event.CONNECTION_SUCCEEDED);
+        this.connectionListener = listener;
     }
 
     /**
@@ -59,13 +50,13 @@ public class BluetoothConnection implements ConnectionListener {
      */
     public synchronized void connect() {
         if (bluetoothAdapter == null) {
-            connectionFailed("Bluetooth is not supported");
+            connectionListener.connectionFailed("Bluetooth is not supported");
             return;
         }
 
         String lastDevice = SettingsHelper.getLastDevice();
         if(lastDevice.isEmpty()) {
-            connectionFailed("No Bluetooth device selected");
+            connectionListener.connectionFailed("No Bluetooth device selected");
             Log.w(TAG, "No device selected");
             return;
         }
@@ -89,7 +80,6 @@ public class BluetoothConnection implements ConnectionListener {
         connectThread = new ConnectThread(device);
         connectThread.start();
         setState(STATE_CONNECTING);
-
     }
 
     /**
@@ -113,7 +103,7 @@ public class BluetoothConnection implements ConnectionListener {
         return connectedThread != null && connectedThread.isAlive();
     }
 
-    public void sendCommand(MPDCommand command) throws NoBluetoothServerConnectionException {
+    public void sendCommand(AbstractCommand command) throws NoBluetoothServerConnectionException {
         if(CURRENT_STATE != STATE_CONNECTED) {
             throw new NoBluetoothServerConnectionException("No connection to Bluetooth Server");
         }
@@ -143,12 +133,12 @@ public class BluetoothConnection implements ConnectionListener {
 
     private void bluetoothConnectionFailed() {
         setState(STATE_NONE);
-        connectionFailed("Failed to connect to Bluetooth server");
+        connectionListener.connectionFailed("Failed to connect to Bluetooth server");
     }
 
     private void connectionLost() {
         setState(STATE_NONE);
-        connectionFailed("Lost connection to the Bluetooth server");
+        connectionListener.connectionFailed("Lost connection to the Bluetooth server");
     }
 
     private synchronized void setState(int newState) {
@@ -181,7 +171,7 @@ public class BluetoothConnection implements ConnectionListener {
         connectedThread.start();
 
         setState(STATE_CONNECTED);
-        connectionSucceeded("");
+        connectionListener.connectionSucceeded("");
     }
 
     /**
@@ -270,8 +260,8 @@ public class BluetoothConnection implements ConnectionListener {
                 Log.e(TAG, "temp sockets not created", e);
             }
 
-            inputReader = new BufferedReader(new InputStreamReader(tmpIn));
-            outputWriter = new BufferedWriter(new OutputStreamWriter(tmpOut));
+            inputReader = new BufferedReader(new InputStreamReader(tmpIn, Charset.forName("UTF-8")));
+            outputWriter = new BufferedWriter(new OutputStreamWriter(tmpOut, Charset.forName("UTF-8")));
         }
 
         public void run() {
@@ -282,7 +272,13 @@ public class BluetoothConnection implements ConnectionListener {
             while (true) {
                 try {
                     // Messages from the server are terminated with a newline.
+                    long startTime = System.nanoTime();
                     input = inputReader.readLine();
+                    long endTime = System.nanoTime();
+                    Log.d(TAG, String.format("Read %d bytes in %.3f seconds",
+                            input.getBytes().length,
+                            (endTime - startTime) / 1000000000.0F));
+
                     handleMessage(input);
 
                 } catch (IOException e) {
@@ -294,7 +290,7 @@ public class BluetoothConnection implements ConnectionListener {
         }
 
         private void handleMessage(String message) {
-            Log.d(TAG, "Message Received: " + message);
+            Log.v(TAG, "Message Received: " + message);
             MPDResponse response = gson.fromJson(message, MPDResponse.class);
             monitor.handleMessage(response);
         }
