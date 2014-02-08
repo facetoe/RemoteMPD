@@ -197,7 +197,7 @@ public abstract class MPDConnection {
         return hostPort;
     }
 
-    public List<String> sendCommand(MPDCommand command) throws MPDServerException {
+    public List<String> sendCommand(AbstractCommand command) throws MPDServerException {
         return sendRawCommand(command);
     }
 
@@ -250,7 +250,7 @@ public abstract class MPDConnection {
         return sendRawCommand(new MPDCommand(commandstr));
     }
 
-    public List<String> sendRawCommand(MPDCommand command) throws MPDServerException {
+    public List<String> sendRawCommand(AbstractCommand command) throws MPDServerException {
         return syncedWriteRead(command);
     }
 
@@ -332,7 +332,7 @@ public abstract class MPDConnection {
         return processRequest(command);
     }
 
-    private List<String> syncedWriteRead(MPDCommand command) throws MPDServerException {
+    private List<String> syncedWriteRead(AbstractCommand command) throws MPDServerException {
         command.setSynchronous(true);
         return processRequest(command);
     }
@@ -359,7 +359,7 @@ public abstract class MPDConnection {
         return result;
     }
 
-    private List<String> processRequest(MPDCommand command) throws MPDServerException {
+    private List<String> processRequest(AbstractCommand command) throws MPDServerException {
 
         MPDCommandResult result;
 
@@ -387,7 +387,7 @@ public abstract class MPDConnection {
 
         private int retry = 0;
 
-        public MpdCallable(MPDCommand mpdCommand) {
+        public MpdCallable(AbstractCommand mpdCommand) {
             super(mpdCommand.command, mpdCommand.args, mpdCommand.isSynchronous());
         }
 
