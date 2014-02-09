@@ -2,7 +2,6 @@ package org.a0z.mpd;
 
 import android.util.Log;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**

@@ -81,7 +81,6 @@ public class MPDPlaylist extends AbstractStatusChangeListener {
 	 *
 	 * @param url streams's URL
 	 * @throws MPDServerException
-	 * @throws MPDClientException.
 	 */
 	public void add(URL url) throws MPDServerException, MPDClientException {
 		this.mpd.getMpdConnection().sendCommand(MPD_CMD_PLAYLIST_ADD, url.toString());

@@ -4,8 +4,10 @@ import com.google.gson.Gson;
 
 import java.io.Serializable;
 
+/**
+ * Created by facetoe on 26/12/13.
+ */
 public class MPDResponse implements Serializable {
-    private static final String TAG = MPDResponse.class.getSimpleName();
 
     // Event-ID's for PMix internal events...
     public static final int EVENT_CONNECT = 0;
@@ -27,8 +29,9 @@ public class MPDResponse implements Serializable {
     public static final int EVENT_UPDATESTATE = 17;
     public static final int EVENT_VOLUME = 18;
     public static final int EVENT_TRACKPOSITION = 19;
-    public static final int EVENT_UPDATE_PLAYLIST = 20;
-    public static final int EVENT_CHECK_PLAYLIST_HASH = 21;
+
+    // Events I've added for Bluetooth
+    public static final int EVENT_GET_PLAYLIST_CHANGES = 20;
 
     private int responseType;
     private int numObjects;
@@ -38,21 +41,31 @@ public class MPDResponse implements Serializable {
         this.responseType = responseType;
         numObjects = obj.length;
         objectJSON = new String[numObjects];
+        Gson gson = new Gson();
         for (int i = 0; i < numObjects; i++) {
-            objectJSON[i] = new Gson().toJson(obj[i]);
+            objectJSON[i] = gson.toJson(obj[i]);
         }
     }
 
     public String getObjectJSON(int index) {
-        if(index >= numObjects || index < 0)
+        if (index >= numObjects || index < 0)
             throw new IndexOutOfBoundsException("Index out of bounds: " + index);
         return objectJSON[index];
     }
+
     public int getResponseType() {
         return responseType;
     }
 
     public int getNumObjects() {
         return numObjects;
+    }
+
+    @Override
+    public String toString() {
+        return "MPDResponse{" +
+                "responseType=" + responseType +
+                ", numObjects=" + numObjects +
+                '}';
     }
 }

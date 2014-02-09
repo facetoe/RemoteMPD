@@ -1,27 +1,26 @@
 package com.facetoe.remotempd;
 
 import android.util.Log;
-import com.facetoe.remotempd.listeners.BluetoothPlaylistUpdateListener;
 import com.facetoe.remotempd.listeners.ConnectionListener;
 import org.a0z.mpd.AbstractCommand;
-import org.a0z.mpd.MPDCommand;
 import org.a0z.mpd.event.StatusChangeListener;
 import org.a0z.mpd.event.TrackPositionListener;
 
 class BluetoothMPDManager extends AbstractMPDManager implements
-        BluetoothPlaylistUpdateListener,
         ConnectionListener {
 
     private static final String TAG = RMPDApplication.APP_PREFIX + "BluetoothMPDManager";
     private RMPDApplication app = RMPDApplication.getInstance();
 
     private final BluetoothConnection btConnection;
-    private final BluetoothMPDStatusMonitor bluetoothMonitor;
-    private MPDCachedPlaylist songList;
+    private final BluetoothMPDStatusMonitor btMonitor;
+    private BluetoothMPDPlaylist playlist;
 
     public BluetoothMPDManager() {
-        bluetoothMonitor = new BluetoothMPDStatusMonitor(this);
-        btConnection = new BluetoothConnection(bluetoothMonitor, this);
+        btMonitor = new BluetoothMPDStatusMonitor();
+        btConnection = new BluetoothConnection(btMonitor, this);
+        playlist = new BluetoothMPDPlaylist(this);
+        btMonitor.addStatusChangeListener(playlist);
     }
 
     @Override
@@ -66,28 +65,22 @@ class BluetoothMPDManager extends AbstractMPDManager implements
     }
 
     @Override
-    public void updatePlayList(MPDCachedPlaylist newSongList) {
-        Log.d(TAG, "Received " + newSongList.getMusicList().size() + " songs from server.");
-        songList = newSongList;
-    }
-
-    @Override
     public void addStatusChangeListener(StatusChangeListener listener) {
-        bluetoothMonitor.addStatusChangeListener(listener);
+        btMonitor.addStatusChangeListener(listener);
     }
 
     @Override
     public void removeStatusChangeListener(StatusChangeListener listener) {
-        bluetoothMonitor.removeStatusChangeListener(listener);
+        btMonitor.removeStatusChangeListener(listener);
     }
 
     @Override
     public void addTrackPositionListener(TrackPositionListener listener) {
-        bluetoothMonitor.addTrackPositionListener(listener);
+        btMonitor.addTrackPositionListener(listener);
     }
 
     @Override
     public void removeTrackPositionListener(TrackPositionListener listener) {
-        bluetoothMonitor.removeTrackPositionListener(listener);
+        btMonitor.removeTrackPositionListener(listener);
     }
 }

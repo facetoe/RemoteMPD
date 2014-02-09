@@ -1,11 +1,11 @@
 package com.facetoe.remotempd;
 
 import android.util.Log;
-import com.facetoe.remotempd.listeners.BluetoothPlaylistUpdateListener;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.a0z.mpd.MPDStatus;
 import org.a0z.mpd.Music;
+import org.a0z.mpd.event.AbstractStatusChangeListener;
 import org.a0z.mpd.event.StatusChangeListener;
 import org.a0z.mpd.event.TrackPositionListener;
 
@@ -16,15 +16,14 @@ import java.util.List;
 /**
  * Created by facetoe on 4/01/14.
  */
-public class BluetoothMPDStatusMonitor {
+public class BluetoothMPDStatusMonitor extends AbstractStatusChangeListener {
 
     private static final String TAG = RMPDApplication.APP_PREFIX + "BluetoothMPDStatusMonitor";
     private final LinkedList<StatusChangeListener> statusChangedListeners = new LinkedList<StatusChangeListener>();
     private final LinkedList<TrackPositionListener> trackPositionChangedListeners = new LinkedList<TrackPositionListener>();
-    private BluetoothPlaylistUpdateListener bluetoothPlaylistUpdateListener;
     private final Gson gson;
-    public BluetoothMPDStatusMonitor(BluetoothPlaylistUpdateListener bluetoothPlaylistUpdateListener) {
-        this.bluetoothPlaylistUpdateListener = bluetoothPlaylistUpdateListener;
+
+    public BluetoothMPDStatusMonitor() {
         gson = new Gson();
     }
 
@@ -43,14 +42,10 @@ public class BluetoothMPDStatusMonitor {
 
         switch (response.getResponseType()) {
 
-            case MPDResponse.EVENT_CHECK_PLAYLIST_HASH:
-                String hash = gson.fromJson(firstJSONObject, String.class);
-                Log.i(TAG, "Received new hash: " + hash);
+            case MPDResponse.EVENT_GET_PLAYLIST_CHANGES:
+                List<Music> changes = extractMusicList(response);
+                Log.i(TAG, "Got " + changes.size() + " changed songs");
                 break;
-
-            case MPDResponse.EVENT_UPDATE_PLAYLIST:
-                bluetoothPlaylistUpdateListener.updatePlayList(new MPDCachedPlaylist(firstJSONObject));
-            break;
 
             case MPDResponse.EVENT_TRACK:
                 status = gson.fromJson(firstJSONObject, MPDStatus.class);
@@ -104,15 +99,12 @@ public class BluetoothMPDStatusMonitor {
             default:
                 Log.i(TAG, "Unknown message type: " + response.getResponseType());
                 break;
-
         }
     }
 
-    private void extractSonglist(MPDResponse response) {
+    private List<Music> extractMusicList(MPDResponse response) {
         Type listType = new TypeToken<List<Music>>() {}.getType();
-        List<Music> songList = gson.fromJson(response.getObjectJSON(0), listType);
-        //RMPDApplication.getInstance().setSongList(songList);
-        Log.i(TAG, "Added " + songList.size() + " songs");
+        return gson.fromJson(response.getObjectJSON(0), listType);
     }
 
     /**

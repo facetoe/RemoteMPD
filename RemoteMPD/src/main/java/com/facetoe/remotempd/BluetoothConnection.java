@@ -10,9 +10,11 @@ import com.facetoe.remotempd.listeners.ConnectionListener;
 import com.google.gson.Gson;
 import org.a0z.mpd.AbstractCommand;
 import org.a0z.mpd.MPDCommand;
+import org.a0z.mpd.event.AbstractStatusChangeListener;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.UUID;
 
 
@@ -64,10 +66,13 @@ public class BluetoothConnection {
         BluetoothDevice device = bluetoothAdapter.getRemoteDevice(lastDevice);
         Log.i(TAG, "connecting to: " + device);
 
-        // Don't connect if we are already connecting
+        // Cancel connection if we are attempting to connect
         if (CURRENT_STATE == STATE_CONNECTING) {
-            Log.w(TAG, "Connection already in progress");
-            return;
+            Log.w(TAG, "Connection was already in progress, cancelling");
+            if (connectThread != null) {
+                connectThread.cancel();
+                connectThread = null;
+            }
         }
 
         // Cancel any thread currently running a connection
@@ -95,7 +100,6 @@ public class BluetoothConnection {
             connectedThread.cancel();
             connectedThread = null;
         }
-        Log.d(TAG, "Really disconnected");
         setState(STATE_NONE);
     }
 
@@ -245,6 +249,7 @@ public class BluetoothConnection {
         private final BluetoothSocket bluetoothSocket;
         private final BufferedReader inputReader;
         private final BufferedWriter outputWriter;
+        private boolean isCanceled = false;
 
         public ConnectedThread(BluetoothSocket socket) {
             Log.d(TAG, "ConnectedThread()");
@@ -269,16 +274,10 @@ public class BluetoothConnection {
             String input;
 
             // Keep listening to the InputStream while connected with the Server
-            while (true) {
+            while (!isCanceled) {
                 try {
                     // Messages from the server are terminated with a newline.
-                    long startTime = System.nanoTime();
                     input = inputReader.readLine();
-                    long endTime = System.nanoTime();
-                    Log.d(TAG, String.format("Read %d bytes in %.3f seconds",
-                            input.getBytes().length,
-                            (endTime - startTime) / 1000000000.0F));
-
                     handleMessage(input);
 
                 } catch (IOException e) {
@@ -296,12 +295,16 @@ public class BluetoothConnection {
         }
 
         public void write(String data) throws IOException {
-            // Append a newline here as the server uses them to determine the end of commands.
-            outputWriter.write(data + "\n");
+            outputWriter.write(data);
             outputWriter.flush();
         }
 
         public void cancel() {
+            isCanceled = true;
+            innerDisconnect();
+        }
+
+        private void innerDisconnect() {
             try {
                 bluetoothSocket.close();
                 inputReader.close();
