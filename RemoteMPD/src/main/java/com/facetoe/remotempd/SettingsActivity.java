@@ -2,6 +2,7 @@ package com.facetoe.remotempd;
 
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
+import com.facetoe.remotempd.fragments.SettingsFragment;
 
 /**
  * RemoteMPDNew

@@ -4,6 +4,7 @@ import android.util.Log;
 import com.facetoe.remotempd.helpers.MPDAsyncHelper;
 import com.facetoe.remotempd.listeners.ConnectionListener;
 import org.a0z.mpd.AbstractCommand;
+import org.a0z.mpd.AbstractMPDPlaylist;
 import org.a0z.mpd.MPD;
 import org.a0z.mpd.MPDCommand;
 import org.a0z.mpd.event.StatusChangeListener;
@@ -59,6 +60,11 @@ public class WifiMPDManager extends AbstractMPDManager implements ConnectionList
         } catch (MPDServerException e) {
             connectionFailed(e.getMessage());
         }
+    }
+
+    @Override
+    public AbstractMPDPlaylist getPlaylist() {
+        return mpd.getPlaylist();
     }
 
     @Override

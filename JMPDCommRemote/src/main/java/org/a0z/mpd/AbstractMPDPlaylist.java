@@ -14,8 +14,6 @@ import java.util.List;
 public abstract class AbstractMPDPlaylist extends AbstractStatusChangeListener {
     protected MusicList list;
     protected int lastPlaylistVersion;
-    protected boolean firstRefreash = true;
-
     /**
      * Adds a <code>Collection</code> of <code>Music</code> to playlist.
      *
@@ -29,7 +27,7 @@ public abstract class AbstractMPDPlaylist extends AbstractStatusChangeListener {
      * Adds a music to playlist.
      *
      * @param entry music/directory/playlist to be added.
-     * @MPDException if an error occur while contacting server.
+     * @throws org.a0z.mpd.exception.MPDException if an error occur while contacting server.
      */
     public abstract void add(FilesystemTreeEntry entry) throws MPDException;
 
@@ -37,7 +35,7 @@ public abstract class AbstractMPDPlaylist extends AbstractStatusChangeListener {
      * Adds a stream to playlist.
      *
      * @param url streams's URL
-     * @MPDException
+     * @throws org.a0z.mpd.exception.MPDException
      */
     public abstract void add(URL url) throws MPDException;
 
@@ -201,9 +199,9 @@ public abstract class AbstractMPDPlaylist extends AbstractStatusChangeListener {
      * @see java.lang.Object#toString()
      */
     public String toString() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (Music m : list.getMusic()) {
-            sb.append(m.toString() + "\n");
+            sb.append(m.toString()).append("\n");
         }
         return sb.toString();
     }

@@ -1,7 +1,6 @@
 package org.a0z.mpd;
 
 import android.util.Log;
-import org.a0z.mpd.event.AbstractStatusChangeListener;
 import org.a0z.mpd.exception.MPDClientException;
 import org.a0z.mpd.exception.MPDServerException;
 
@@ -32,8 +31,6 @@ public class MPDPlaylist extends AbstractMPDPlaylist {
 	public static final String MPD_CMD_PLAYLIST_SWAP_ID = "swapid";
 
 	private MPD mpd;
-	private MusicList list;
-	private int lastPlaylistVersion = -1;
 	private boolean firstRefreash = true;
     private static final boolean DEBUG = false;
 
@@ -427,19 +424,4 @@ public class MPDPlaylist extends AbstractMPDPlaylist {
 		this.mpd.getMpdConnection().sendCommand(MPD_CMD_PLAYLIST_SWAP_ID, Integer.toString(song1Id), Integer.toString(song2Id));
 		this.refresh();
 	}
-
-	/**
-	 * Retrieves a string representation of the object.
-	 *
-	 * @return a string representation of the object.
-	 * @see java.lang.Object#toString()
-	 */
-	public String toString() {
-		StringBuffer sb = new StringBuffer();
-		for (Music m : list.getMusic()) {
-			sb.append(m.toString() + "\n");
-		}
-		return sb.toString();
-	}
-
 }

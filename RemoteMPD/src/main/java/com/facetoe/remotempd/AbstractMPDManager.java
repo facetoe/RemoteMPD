@@ -1,6 +1,7 @@
 package com.facetoe.remotempd;
 
 import org.a0z.mpd.AbstractCommand;
+import org.a0z.mpd.AbstractMPDPlaylist;
 import org.a0z.mpd.MPDCommand;
 import org.a0z.mpd.event.StatusChangeListener;
 import org.a0z.mpd.event.TrackPositionListener;
@@ -26,6 +27,8 @@ public abstract class AbstractMPDManager implements MPDPlayerController {
     abstract protected void connectInternal();
     abstract public boolean isConnected();
     abstract public void disconnect();
+
+    abstract public AbstractMPDPlaylist getPlaylist();
 
     public void connect() {
         connectInternal();

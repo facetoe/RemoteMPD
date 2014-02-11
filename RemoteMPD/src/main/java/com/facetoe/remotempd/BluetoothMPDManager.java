@@ -3,15 +3,9 @@ package com.facetoe.remotempd;
 import android.util.Log;
 import com.facetoe.remotempd.listeners.ConnectionListener;
 import org.a0z.mpd.AbstractCommand;
-import org.a0z.mpd.Music;
+import org.a0z.mpd.AbstractMPDPlaylist;
 import org.a0z.mpd.event.StatusChangeListener;
 import org.a0z.mpd.event.TrackPositionListener;
-
-import java.util.List;
-
-interface PlaylistUpdateListener {
-    void updatePlaylist(List<Music> changes);
-}
 
 class BluetoothMPDManager extends AbstractMPDManager implements
         ConnectionListener {
@@ -71,6 +65,11 @@ class BluetoothMPDManager extends AbstractMPDManager implements
         } catch (Exception e) {
             connectionFailed(e.getMessage());
         }
+    }
+
+    @Override
+    public AbstractMPDPlaylist getPlaylist() {
+        return playlist;
     }
 
     @Override

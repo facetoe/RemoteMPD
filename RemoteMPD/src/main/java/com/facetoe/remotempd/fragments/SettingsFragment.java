@@ -1,4 +1,4 @@
-package com.facetoe.remotempd;
+package com.facetoe.remotempd.fragments;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -8,6 +8,9 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import com.facetoe.remotempd.DeviceListActivity;
+import com.facetoe.remotempd.R;
+import com.facetoe.remotempd.RMPDApplication;
 import com.facetoe.remotempd.helpers.SettingsHelper;
 
 /**

@@ -1,6 +1,7 @@
 package com.facetoe.remotempd;
 
 import android.util.Log;
+import com.facetoe.remotempd.listeners.PlaylistUpdateListener;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.a0z.mpd.MPDStatus;

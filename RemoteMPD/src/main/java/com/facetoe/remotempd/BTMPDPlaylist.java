@@ -2,6 +2,7 @@ package com.facetoe.remotempd;
 
 import android.util.Log;
 import com.facetoe.remotempd.exceptions.NoBluetoothServerConnectionException;
+import com.facetoe.remotempd.listeners.PlaylistUpdateListener;
 import org.a0z.mpd.*;
 
 import java.net.URL;
@@ -16,18 +17,17 @@ import java.util.List;
 public class BTMPDPlaylist extends AbstractMPDPlaylist implements
         PlaylistUpdateListener {
 
-    private String TAG = RMPDApplication.APP_PREFIX + "BTMPDPlaylist";
-    RMPDApplication app = RMPDApplication.getInstance();
+    private final String TAG = RMPDApplication.APP_PREFIX + "BTMPDPlaylist";
+    private final RMPDApplication app = RMPDApplication.getInstance();
 
     private static final String LAST_PLAYLIST_VERSION = "lastPlaylistVersion";
 
-    private MusicList list = new MusicList(); //TODO This should be loaded from JSON
+    private final MusicList list = new MusicList(); //TODO This should be loaded from JSON
     private int lastPlaylistVersion;
-    private boolean firstRefreash = true;
 
     private static final boolean DEBUG = true;
     private MPDStatus status;
-    BluetoothConnection btConnection;
+    private final BluetoothConnection btConnection;
 
     public BTMPDPlaylist(BluetoothConnection btConnection) {
         this.btConnection = btConnection;
@@ -38,7 +38,7 @@ public class BTMPDPlaylist extends AbstractMPDPlaylist implements
      * Adds a <code>Collection</code> of <code>Music</code> to playlist.
      *
      * @param c <code>Collection</code> of <code>Music</code> to be added to playlist.
-     * @throws org.a0z.mpd.exception.MPDServerException if an error occur while contacting server.
+     * @throws NoBluetoothServerConnectionException if an error occur while contacting server.
      * @see Music
      */
     public void addAll(Collection<Music> c) throws NoBluetoothServerConnectionException {
@@ -53,7 +53,7 @@ public class BTMPDPlaylist extends AbstractMPDPlaylist implements
      * Adds a music to playlist.
      *
      * @param entry music/directory/playlist to be added.
-     * @NoBluetoothServerConnectionException if an error occur while contacting server.
+     * @throws com.facetoe.remotempd.exceptions.NoBluetoothServerConnectionException if an error occur while contacting server.
      */
     public void add(FilesystemTreeEntry entry) throws NoBluetoothServerConnectionException {
         btConnection.sendCommand(BTServerCommand.MPD_CMD_PLAYLIST_ADD, entry.getFullpath());
@@ -63,8 +63,8 @@ public class BTMPDPlaylist extends AbstractMPDPlaylist implements
     /**
      * Adds a stream to playlist.
      *
-     * @param url streams's URL
-     * @NoBluetoothServerConnectionException
+     * @param url streams URL
+     * @throws NoBluetoothServerConnectionException
      */
     public void add(URL url) throws NoBluetoothServerConnectionException {
         btConnection.sendCommand(BTServerCommand.MPD_CMD_PLAYLIST_ADD, url.toString());
@@ -359,19 +359,5 @@ public class BTMPDPlaylist extends AbstractMPDPlaylist implements
     public void swap(int song1Id, int song2Id) throws NoBluetoothServerConnectionException {
         btConnection.sendCommand(BTServerCommand.MPD_CMD_PLAYLIST_SWAP_ID, Integer.toString(song1Id), Integer.toString(song2Id));
         this.refresh();
-    }
-
-    /**
-     * Retrieves a string representation of the object.
-     *
-     * @return a string representation of the object.
-     * @see java.lang.Object#toString()
-     */
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
-        for (Music m : list.getMusic()) {
-            sb.append(m.toString() + "\n");
-        }
-        return sb.toString();
     }
 }
