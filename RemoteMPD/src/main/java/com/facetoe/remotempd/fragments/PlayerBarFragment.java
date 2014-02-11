@@ -84,42 +84,42 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
 
     @Override
     public void volumeChanged(MPDStatus mpdStatus, int oldVolume) {
-        Log.d(TAG, "VolumeChanged: " + oldVolume);
+        //Log.d(TAG, "VolumeChanged: " + oldVolume);
     }
 
     @Override
     public void playlistChanged(MPDStatus mpdStatus, int oldPlaylistVersion) {
-        Log.d(TAG, "playlistChanged: " + oldPlaylistVersion);
+        //Log.d(TAG, "playlistChanged: " + oldPlaylistVersion);
     }
 
     @Override
     public void trackChanged(MPDStatus mpdStatus, int oldTrack) {
-        Log.d(TAG, "trackChanged: " + oldTrack);
+        //Log.d(TAG, "trackChanged: " + oldTrack);
     }
 
     @Override
     public void stateChanged(MPDStatus mpdStatus, String oldState) {
-        Log.d(TAG, "stateChanged: " + oldState);
+        //Log.d(TAG, "stateChanged: " + oldState);
     }
 
     @Override
     public void repeatChanged(boolean repeating) {
-        Log.d(TAG, "repeatChanged: " + repeating);
+        //Log.d(TAG, "repeatChanged: " + repeating);
     }
 
     @Override
     public void randomChanged(boolean random) {
-        Log.d(TAG, "randomChanged: " + random);
+        //Log.d(TAG, "randomChanged: " + random);
     }
 
     @Override
     public void connectionStateChanged(boolean connected, boolean connectionLost) {
-        Log.d(TAG, "connectionStateChanged: " + (connected ? "connected": "connectionLost"));
+        //Log.d(TAG, "connectionStateChanged: " + (connected ? "connected": "connectionLost"));
     }
 
     @Override
     public void libraryStateChanged(boolean updating) {
-        Log.d(TAG, "libraryStateChanged - updateing: " + updating);
+        //Log.d(TAG, "libraryStateChanged - updateing: " + updating);
     }
 
     @Override

@@ -867,7 +867,7 @@ public class MPD {
      *
      * @throws MPDServerException
      */
-    public void sendCommand(AbstractCommand command) throws MPDServerException {
+    private void sendCommand(MPDCommand command) throws MPDServerException {
         if(!isConnected()) {
             throw new MPDServerException("MPD Connection is not established");
         }
