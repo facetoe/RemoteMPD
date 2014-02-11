@@ -53,7 +53,8 @@ public class WifiMPDManager extends AbstractMPDManager implements ConnectionList
     @Override
     public void sendCommand(AbstractCommand command) {
         try {
-            mpd.sendCommand(command);
+            MPDCommand mpdCommand = new MPDCommand(command.getCommand(), command.getArgs());
+            mpd.getMpdConnection().sendCommand(mpdCommand);
             Log.d(TAG, "Sent command: " + command);
         } catch (MPDServerException e) {
             connectionFailed(e.getMessage());

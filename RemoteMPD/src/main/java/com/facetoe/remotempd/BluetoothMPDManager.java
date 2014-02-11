@@ -3,8 +3,15 @@ package com.facetoe.remotempd;
 import android.util.Log;
 import com.facetoe.remotempd.listeners.ConnectionListener;
 import org.a0z.mpd.AbstractCommand;
+import org.a0z.mpd.Music;
 import org.a0z.mpd.event.StatusChangeListener;
 import org.a0z.mpd.event.TrackPositionListener;
+
+import java.util.List;
+
+interface PlaylistUpdateListener {
+    void updatePlaylist(List<Music> changes);
+}
 
 class BluetoothMPDManager extends AbstractMPDManager implements
         ConnectionListener {
@@ -19,7 +26,8 @@ class BluetoothMPDManager extends AbstractMPDManager implements
     public BluetoothMPDManager() {
         btMonitor = new BluetoothMPDStatusMonitor();
         btConnection = new BluetoothConnection(btMonitor, this);
-        playlist = new BluetoothMPDPlaylist(this);
+        playlist = new BluetoothMPDPlaylist(btConnection);
+        btMonitor.setPlaylistUpdateListener(playlist);
         btMonitor.addStatusChangeListener(playlist);
     }
 
@@ -45,7 +53,6 @@ class BluetoothMPDManager extends AbstractMPDManager implements
     public void connectionSucceeded(String message) {
         Log.i(TAG, "Connection succeeded in BluetoothConnection: " + message);
         app.notifyEvent(RMPDApplication.Event.CONNECTION_SUCCEEDED);
-        sendCommand(new BTServerCommand(BTServerCommand.REQUEST_PLAYLIST_HASH));
     }
 
     @Override
@@ -57,7 +64,9 @@ class BluetoothMPDManager extends AbstractMPDManager implements
     @Override
     public void sendCommand(AbstractCommand command) {
         try {
-            btConnection.sendCommand(command);
+            // Need to convert it here to make life easier on the other end.
+            BTServerCommand serverCommand = new BTServerCommand(command.getCommand(), command.getArgs());
+            btConnection.sendCommand(serverCommand);
             Log.i(TAG, "Sent command: " + command);
         } catch (Exception e) {
             connectionFailed(e.getMessage());
