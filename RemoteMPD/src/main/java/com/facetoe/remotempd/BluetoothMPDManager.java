@@ -21,12 +21,12 @@ class BluetoothMPDManager extends AbstractMPDManager implements
 
     private final BluetoothConnection btConnection;
     private final BluetoothMPDStatusMonitor btMonitor;
-    private BluetoothMPDPlaylist playlist;
+    private BTMPDPlaylist playlist;
 
     public BluetoothMPDManager() {
         btMonitor = new BluetoothMPDStatusMonitor();
         btConnection = new BluetoothConnection(btMonitor, this);
-        playlist = new BluetoothMPDPlaylist(btConnection);
+        playlist = new BTMPDPlaylist(btConnection);
         btMonitor.setPlaylistUpdateListener(playlist);
         btMonitor.addStatusChangeListener(playlist);
     }

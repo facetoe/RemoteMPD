@@ -15,7 +15,7 @@ import java.util.List;
  *
  * @version $Id: MPDPlaylist.java 2716 2004-11-20 17:37:20Z galmeida $
  */
-public class MPDPlaylist extends AbstractStatusChangeListener {
+public class MPDPlaylist extends AbstractMPDPlaylist {
 	public static final String MPD_CMD_PLAYLIST_ADD = "add";
 	public static final String MPD_CMD_PLAYLIST_CLEAR = "clear";
 	public static final String MPD_CMD_PLAYLIST_DELETE = "rm";
@@ -184,7 +184,7 @@ public class MPDPlaylist extends AbstractStatusChangeListener {
 	 *            if an error occur while contacting server.
 	 * @return current playlist version.
 	 */
-	private int refresh() throws MPDServerException {
+	protected int refresh() throws MPDServerException {
 		if (firstRefreash) {
 			// TODO should be atomic
 			MPDStatus status = this.mpd.getStatus();
@@ -245,7 +245,6 @@ public class MPDPlaylist extends AbstractStatusChangeListener {
 	 *           position of the entry to be removed.
 	 * @throws MPDServerException
 	 *            if an error occur while contacting server.
-	 * @see #removeId(int)
 	 */
 	public void removeByIndex(int position) throws MPDServerException {
 		this.mpd.getMpdConnection().sendCommand(MPD_CMD_PLAYLIST_REMOVE, Integer.toString(position));
@@ -304,8 +303,7 @@ public class MPDPlaylist extends AbstractStatusChangeListener {
 
 	/**
 	 * Removes album of given ID from playlist.
-	 *
-	 * @param songs
+	 *@param songId
 	 *           entries positions.
 	 * @throws MPDServerException
 	 *            if an error occur while contacting server.
