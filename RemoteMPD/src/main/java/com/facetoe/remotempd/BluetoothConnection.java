@@ -8,13 +8,11 @@ import com.facetoe.remotempd.exceptions.NoBluetoothServerConnectionException;
 import com.facetoe.remotempd.helpers.SettingsHelper;
 import com.facetoe.remotempd.listeners.ConnectionListener;
 import com.google.gson.Gson;
-import org.a0z.mpd.AbstractCommand;
-import org.a0z.mpd.MPDCommand;
-import org.a0z.mpd.event.AbstractStatusChangeListener;
 
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -33,6 +31,7 @@ public class BluetoothConnection {
     private ConnectThread connectThread;
     private ConnectedThread connectedThread;
     private ConnectionListener connectionListener;
+    private List<BTServerCommand> commandQueue = new ArrayList<BTServerCommand>();
 
     // For sending JSON across the wire
     private final Gson gson = new Gson();
@@ -57,7 +56,7 @@ public class BluetoothConnection {
         }
 
         String lastDevice = SettingsHelper.getLastDevice();
-        if(lastDevice.isEmpty()) {
+        if (lastDevice.isEmpty()) {
             connectionListener.connectionFailed("No Bluetooth device selected");
             Log.w(TAG, "No device selected");
             return;
@@ -107,12 +106,46 @@ public class BluetoothConnection {
         return connectedThread != null && connectedThread.isAlive();
     }
 
-    public void sendCommand(AbstractCommand command) throws NoBluetoothServerConnectionException {
-        if(CURRENT_STATE != STATE_CONNECTED) {
+    public void queueCommand(String command, String... args) {
+        queueCommand(new BTServerCommand(command, args));
+    }
+
+    private void queueCommand(BTServerCommand command) {
+        commandQueue.add(command);
+    }
+
+    public void sendCommandQueue() throws NoBluetoothServerConnectionException {
+        sendCommandQueue(false);
+    }
+
+    public void sendCommandQueue(boolean withSeparator) throws NoBluetoothServerConnectionException {
+        String commandstr;
+
+        if (withSeparator) {
+            commandstr = BTServerCommand.MPD_CMD_START_BULK_OK + "\n";
+        } else {
+            commandstr = BTServerCommand.MPD_CMD_START_BULK + "\n";
+        }
+
+        for (BTServerCommand command : commandQueue) {
+            commandstr += command.toString();
+        }
+        commandstr += BTServerCommand.MPD_CMD_END_BULK + "\n";
+        commandQueue = new ArrayList<BTServerCommand>();
+        sendCommand(new BTServerCommand(commandstr));
+    }
+
+    public void sendCommand(String command, String... args) throws NoBluetoothServerConnectionException {
+        sendCommand(new BTServerCommand(command, args));
+    }
+
+    public void sendCommand(BTServerCommand command) throws NoBluetoothServerConnectionException {
+        if (CURRENT_STATE != STATE_CONNECTED) {
             throw new NoBluetoothServerConnectionException("No connection to Bluetooth Server");
         }
         try {
-            write(command.toString());
+            String commandJSON = gson.toJson(command);
+            write(commandJSON);
         } catch (IOException e) {
             throw new NoBluetoothServerConnectionException("Failed to send command to Bluetooth server");
         }
@@ -295,7 +328,7 @@ public class BluetoothConnection {
         }
 
         public void write(String data) throws IOException {
-            outputWriter.write(data);
+            outputWriter.write(data + "\n");
             outputWriter.flush();
         }
 

@@ -21,10 +21,15 @@ public class BluetoothMPDStatusMonitor extends AbstractStatusChangeListener {
     private static final String TAG = RMPDApplication.APP_PREFIX + "BluetoothMPDStatusMonitor";
     private final LinkedList<StatusChangeListener> statusChangedListeners = new LinkedList<StatusChangeListener>();
     private final LinkedList<TrackPositionListener> trackPositionChangedListeners = new LinkedList<TrackPositionListener>();
+    private PlaylistUpdateListener plUpdateListener;
     private final Gson gson;
 
     public BluetoothMPDStatusMonitor() {
         gson = new Gson();
+    }
+
+    public void setPlaylistUpdateListener(PlaylistUpdateListener listener) {
+        plUpdateListener = listener;
     }
 
     public void handleMessage(MPDResponse response) {
@@ -44,7 +49,7 @@ public class BluetoothMPDStatusMonitor extends AbstractStatusChangeListener {
 
             case MPDResponse.EVENT_GET_PLAYLIST_CHANGES:
                 List<Music> changes = extractMusicList(response);
-                Log.i(TAG, "Got " + changes.size() + " changed songs");
+                plUpdateListener.updatePlaylist(changes);
                 break;
 
             case MPDResponse.EVENT_TRACK:

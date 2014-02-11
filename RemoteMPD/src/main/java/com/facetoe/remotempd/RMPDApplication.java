@@ -112,6 +112,17 @@ public class RMPDApplication extends Application implements
         }
     }
 
+    // TODO refactory this out to the SettingHelper
+    public int getPref(String key, int defaultValue) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        return prefs.getInt(key, defaultValue);
+    }
+
+    public void setPref(String key, int value) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs.edit().putInt(key, value).commit();
+    }
+
     private void connectMPDManager() {
         getMpdManager(); // Ensure we have the right manager
         checkState();
