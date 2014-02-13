@@ -7,7 +7,6 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import com.facetoe.remotempd.fragments.PlayerBarFragment;
 
 public class TestActivity extends ActionBarActivity {
     private static final String TAG = RMPDApplication.APP_PREFIX + "TestActivity";
@@ -17,12 +16,6 @@ public class TestActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
-
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlayerBarFragment())
-                    .commit();
-        }
     }
 
     @Override

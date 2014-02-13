@@ -11,9 +11,20 @@ import java.util.List;
  * RemoteMPD
  * Created by facetoe on 9/02/14.
  */
+
+
 public abstract class AbstractMPDPlaylist extends AbstractStatusChangeListener {
     protected MusicList list;
     protected int lastPlaylistVersion;
+    public interface PlaylistUpdateListener {
+        void playlistUpdated();
+    }
+
+    protected PlaylistUpdateListener updateListener;
+
+    public void setPlaylistUpdateListener(PlaylistUpdateListener listener) {
+        updateListener = listener;
+    }
     /**
      * Adds a <code>Collection</code> of <code>Music</code> to playlist.
      *

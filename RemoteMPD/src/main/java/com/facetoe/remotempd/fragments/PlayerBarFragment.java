@@ -6,25 +6,22 @@ package com.facetoe.remotempd.fragments;
  */
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import com.facetoe.remotempd.AbstractMPDManager;
+import com.facetoe.remotempd.R;
 import com.facetoe.remotempd.RMPDApplication;
 import com.facetoe.remotempd.listeners.MPDManagerChangeListener;
-import com.facetoe.remotempd.R;
-import org.a0z.mpd.MPDStatus;
-import org.a0z.mpd.event.StatusChangeListener;
 
 /**
- * A placeholder fragment containing a simple view.
+ * RemoteMPD
+ *
+ * PlayerBarFragment handles controlling the MPD player.
  */
-public class PlayerBarFragment extends Fragment implements View.OnClickListener,
-        MPDManagerChangeListener,
-        StatusChangeListener {
+public class PlayerBarFragment extends AbstractRMPDFragment implements View.OnClickListener,
+        MPDManagerChangeListener {
 
     private static final String TAG = RMPDApplication.APP_PREFIX + "PlayerBarFragment";
     private ImageButton btnPlay;
@@ -32,11 +29,6 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
     private ImageButton btnPrev;
     private ImageButton btnShuffle;
     private ImageButton btnRepeat;
-
-    private RMPDApplication app = RMPDApplication.getInstance();
-    private AbstractMPDManager mpdManager;
-    public PlayerBarFragment() {
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -57,7 +49,6 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
         app.addMpdManagerChangeListener(this);
 
         mpdManager = app.getMpdManager();
-        mpdManager.addStatusChangeListener(this);
 
         // Don't kill the fragment on configuration change
         setRetainInstance(true);
@@ -68,58 +59,6 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
     public void onDestroyView() {
         super.onDestroyView();
         app.removeMpdManagerChangeListener(this);
-        mpdManager.removeStatusChangeListener(this);
-        mpdManager.disconnect();
-    }
-
-    @Override
-    public void mpdManagerChanged() {
-        Log.i(TAG, "MPDManagerChanged()");
-        mpdManager.disconnect();
-        mpdManager.removeStatusChangeListener(this);
-
-        mpdManager = app.getMpdManager();
-        mpdManager.addStatusChangeListener(this);
-    }
-
-    @Override
-    public void volumeChanged(MPDStatus mpdStatus, int oldVolume) {
-        //Log.d(TAG, "VolumeChanged: " + oldVolume);
-    }
-
-    @Override
-    public void playlistChanged(MPDStatus mpdStatus, int oldPlaylistVersion) {
-        //Log.d(TAG, "playlistChanged: " + oldPlaylistVersion);
-    }
-
-    @Override
-    public void trackChanged(MPDStatus mpdStatus, int oldTrack) {
-        //Log.d(TAG, "trackChanged: " + oldTrack);
-    }
-
-    @Override
-    public void stateChanged(MPDStatus mpdStatus, String oldState) {
-        //Log.d(TAG, "stateChanged: " + oldState);
-    }
-
-    @Override
-    public void repeatChanged(boolean repeating) {
-        //Log.d(TAG, "repeatChanged: " + repeating);
-    }
-
-    @Override
-    public void randomChanged(boolean random) {
-        //Log.d(TAG, "randomChanged: " + random);
-    }
-
-    @Override
-    public void connectionStateChanged(boolean connected, boolean connectionLost) {
-        //Log.d(TAG, "connectionStateChanged: " + (connected ? "connected": "connectionLost"));
-    }
-
-    @Override
-    public void libraryStateChanged(boolean updating) {
-        //Log.d(TAG, "libraryStateChanged - updateing: " + updating);
     }
 
     @Override

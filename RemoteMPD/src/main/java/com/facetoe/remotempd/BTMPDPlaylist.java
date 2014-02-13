@@ -2,7 +2,7 @@ package com.facetoe.remotempd;
 
 import android.util.Log;
 import com.facetoe.remotempd.exceptions.NoBluetoothServerConnectionException;
-import com.facetoe.remotempd.listeners.PlaylistUpdateListener;
+import com.facetoe.remotempd.listeners.PlaylistChangeListener;
 import org.a0z.mpd.*;
 
 import java.net.URL;
@@ -15,7 +15,7 @@ import java.util.List;
  * Created by facetoe on 9/02/14.
  */
 public class BTMPDPlaylist extends AbstractMPDPlaylist implements
-        PlaylistUpdateListener {
+        PlaylistChangeListener {
 
     private final String TAG = RMPDApplication.APP_PREFIX + "BTMPDPlaylist";
     private final RMPDApplication app = RMPDApplication.getInstance();
@@ -31,7 +31,8 @@ public class BTMPDPlaylist extends AbstractMPDPlaylist implements
 
     public BTMPDPlaylist(BluetoothConnection btConnection) {
         this.btConnection = btConnection;
-        lastPlaylistVersion = app.getPref(LAST_PLAYLIST_VERSION, -1);
+        //lastPlaylistVersion = app.getPref(LAST_PLAYLIST_VERSION, -1);
+        lastPlaylistVersion = -1;
     }
 
     /**
@@ -189,6 +190,11 @@ public class BTMPDPlaylist extends AbstractMPDPlaylist implements
 
         this.list.clear();
         this.list.addAll(newPlaylist);
+        if (updateListener != null) {
+            updateListener.playlistUpdated();
+        } else {
+            Log.i(TAG, "It was null in btmd");
+        }
     }
 
     /**

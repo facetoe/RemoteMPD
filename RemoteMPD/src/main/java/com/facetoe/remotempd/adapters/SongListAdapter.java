@@ -27,7 +27,7 @@ public class SongListAdapter extends ArrayAdapter<Music> {
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View rowView = inflater.inflate(R.layout.song_list, parent, false);
-        TextView title = (TextView) rowView.findViewById(R.id.label);
+        TextView title = (TextView) rowView.findViewById(R.id.name);
         title.setText(songList.get(position).getTitle());
         return rowView;
     }

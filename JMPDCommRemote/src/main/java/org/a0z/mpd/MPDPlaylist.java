@@ -193,7 +193,12 @@ public class MPDPlaylist extends AbstractMPDPlaylist {
 
 			lastPlaylistVersion = status.getPlaylistVersion();
 			firstRefreash = false;
-		} else {
+            if (updateListener != null) {
+                updateListener.playlistUpdated();
+            } else {
+                Log.i("RMPD-mmmm", "It was null fuck");
+            }
+        } else {
 			this.lastPlaylistVersion = this.refresh(lastPlaylistVersion);
 		}
 		return this.lastPlaylistVersion;
@@ -232,6 +237,11 @@ public class MPDPlaylist extends AbstractMPDPlaylist {
 		this.list.clear();
 		this.list.addAll(newPlaylist);
 
+        if (updateListener != null) {
+            updateListener.playlistUpdated();
+        } else {
+            Log.i("RMPD-mmmm", "It was null fuck");
+        }
 		return status.getPlaylistVersion();
 	}
 

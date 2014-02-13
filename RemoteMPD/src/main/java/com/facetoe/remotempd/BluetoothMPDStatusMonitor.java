@@ -1,7 +1,7 @@
 package com.facetoe.remotempd;
 
 import android.util.Log;
-import com.facetoe.remotempd.listeners.PlaylistUpdateListener;
+import com.facetoe.remotempd.listeners.PlaylistChangeListener;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.a0z.mpd.MPDStatus;
@@ -22,14 +22,14 @@ public class BluetoothMPDStatusMonitor extends AbstractStatusChangeListener {
     private static final String TAG = RMPDApplication.APP_PREFIX + "BluetoothMPDStatusMonitor";
     private final LinkedList<StatusChangeListener> statusChangedListeners = new LinkedList<StatusChangeListener>();
     private final LinkedList<TrackPositionListener> trackPositionChangedListeners = new LinkedList<TrackPositionListener>();
-    private PlaylistUpdateListener plUpdateListener;
+    private PlaylistChangeListener plUpdateListener;
     private final Gson gson;
 
     public BluetoothMPDStatusMonitor() {
         gson = new Gson();
     }
 
-    public void setPlaylistUpdateListener(PlaylistUpdateListener listener) {
+    public void setPlaylistUpdateListener(PlaylistChangeListener listener) {
         plUpdateListener = listener;
     }
 

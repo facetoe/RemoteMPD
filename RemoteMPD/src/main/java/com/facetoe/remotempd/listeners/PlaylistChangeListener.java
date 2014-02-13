@@ -13,6 +13,6 @@ import java.util.List;
  * Called when a playlist is updated from the BluetoothServer.
  * Only returns the songs that have changed.
  */
-public interface PlaylistUpdateListener {
+public interface PlaylistChangeListener {
     void updatePlaylist(List<Music> changes);
 }
