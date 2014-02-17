@@ -31,5 +31,6 @@
     <string name="noWifiSettingsDialogMessage">Wifi is selected but no settings are configured.</string>
     <string name="connectionProgressDialogTitle">Connecting to MPD</string>
     <string name="connectionProgressDialogMessage">Connecting to MPD server...</string>
+    <string name="title_activity_playlist">PlaylistActivity</string>
 
 </resources>
