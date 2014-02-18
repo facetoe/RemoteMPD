@@ -38,7 +38,7 @@ public class BluetoothConnection {
     private ConnectionListener connectionListener;
 
     private List<BTServerCommand> commandQueue = new ArrayList<BTServerCommand>();
-    ArrayBlockingQueue<MPDResponse> syncedCommandQueue;
+    LinkedBlockingQueue<MPDResponse> syncedCommandQueue;
 
     // For sending JSON across the wire
     private final Gson gson = new Gson();
@@ -48,7 +48,7 @@ public class BluetoothConnection {
      * Constructor. Prepares a new BluetoothConnection session.
      */
     public BluetoothConnection(BluetoothMPDStatusMonitor monitor,
-                               ArrayBlockingQueue<MPDResponse> syncedCommandQueue,
+                               LinkedBlockingQueue<MPDResponse> syncedCommandQueue,
                                ConnectionListener listener) {
 
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();

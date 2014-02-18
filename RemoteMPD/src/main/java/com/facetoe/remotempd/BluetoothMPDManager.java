@@ -16,10 +16,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 class BluetoothMPDManager extends AbstractMPDManager implements
         ConnectionListener {
@@ -30,8 +27,9 @@ class BluetoothMPDManager extends AbstractMPDManager implements
     private final BluetoothConnection btConnection;
     private final BluetoothMPDStatusMonitor btMonitor;
     private BTMPDPlaylist playlist;
-    ArrayBlockingQueue<MPDResponse> syncedCommandQueue = new ArrayBlockingQueue<MPDResponse>(10);
+    LinkedBlockingQueue<MPDResponse> syncedCommandQueue = new LinkedBlockingQueue<MPDResponse>();
     private Gson gson = new Gson();
+    private long TIMEOUT = 2;
 
     public BluetoothMPDManager() {
         btMonitor = new BluetoothMPDStatusMonitor();
@@ -117,12 +115,14 @@ class BluetoothMPDManager extends AbstractMPDManager implements
 
     private List<String> getResultFromFuture(Future<MPDResponse> responseFuture) {
         try {
-            MPDResponse response = responseFuture.get();
+            MPDResponse response = responseFuture.get(TIMEOUT,TimeUnit.SECONDS );
             return extractStringList(response);
         } catch (InterruptedException e) {
-            Log.e(TAG, "Fuck", e);
+            Log.e(TAG, "Interrupted in getResultFromFuture()", e);
         } catch (ExecutionException e) {
-            Log.e(TAG, "Fuck", e);
+            Log.e(TAG, "Exeption in getResultFromFuture()");
+        } catch (TimeoutException e) {
+            Log.e(TAG, "getResultFromFuture() timed out");
         }
         return Collections.emptyList();
     }

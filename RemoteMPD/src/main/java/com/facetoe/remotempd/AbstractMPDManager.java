@@ -209,7 +209,7 @@ public abstract class AbstractMPDManager extends MPD {
             if (!isConnected()) {
                 throw new MPDConnectionException("MPD Connection is not established");
             }
-            List<String> response = mpdStatusConnection.sendCommand(MPDCommand.MPD_CMD_STATUS);
+            List<String> response = sendCommand(MPDCommand.MPD_CMD_STATUS);
             mpdStatus.updateStatus(response);
         }
         return mpdStatus;

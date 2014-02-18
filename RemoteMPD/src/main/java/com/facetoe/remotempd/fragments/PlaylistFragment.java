@@ -14,6 +14,7 @@ import com.facetoe.remotempd.R;
 import com.facetoe.remotempd.RMPDApplication;
 import org.a0z.mpd.AbstractMPDPlaylist;
 import org.a0z.mpd.Music;
+import org.a0z.mpd.exception.MPDServerException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -47,6 +48,11 @@ class MusicAdapter extends ArrayAdapter<Music> {
         songLength.setText(song.getFormatedTime());
 
         return rowView;
+    }
+
+    @Override
+    public Music getItem(int position) {
+        return items.get(position);
     }
 
     @Override
@@ -99,7 +105,9 @@ class MusicAdapter extends ArrayAdapter<Music> {
  * RemoteMPD
  * Created by facetoe on 11/02/14.
  */
-public class PlaylistFragment extends AbstractRMPDFragment implements AbstractMPDPlaylist.PlaylistUpdateListener {
+public class PlaylistFragment extends AbstractRMPDFragment
+        implements AbstractMPDPlaylist.PlaylistUpdateListener,
+        AdapterView.OnItemClickListener {
     ListView listPlaylist;
     AbstractMPDPlaylist playlist;
     MusicAdapter musicAdapter;
@@ -142,6 +150,7 @@ public class PlaylistFragment extends AbstractRMPDFragment implements AbstractMP
         musicAdapter = new MusicAdapter(getActivity(), playlist.getMusicList());
         listPlaylist.setAdapter(musicAdapter);
         playlist.setPlaylistUpdateListener(this);
+        listPlaylist.setOnItemClickListener(this);
     }
 
     @Override
@@ -161,6 +170,17 @@ public class PlaylistFragment extends AbstractRMPDFragment implements AbstractMP
                     musicAdapter.notifyDataSetChanged();
                 }
             });
+        }
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Music song = musicAdapter.getItem(position);
+        Log.i(TAG, "Called");
+        try {
+            RMPDApplication.getInstance().getMpdManager().skipToId(song.getSongId());
+        } catch (MPDServerException e) {
+            Log.e(TAG, "Didn't work", e);
         }
     }
 
