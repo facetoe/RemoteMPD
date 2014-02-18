@@ -8,12 +8,17 @@ import com.facetoe.remotempd.exceptions.NoBluetoothServerConnectionException;
 import com.facetoe.remotempd.helpers.SettingsHelper;
 import com.facetoe.remotempd.listeners.ConnectionListener;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import org.a0z.mpd.Music;
 
 import java.io.*;
+import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.*;
 
 
 public class BluetoothConnection {
@@ -31,7 +36,9 @@ public class BluetoothConnection {
     private ConnectThread connectThread;
     private ConnectedThread connectedThread;
     private ConnectionListener connectionListener;
+
     private List<BTServerCommand> commandQueue = new ArrayList<BTServerCommand>();
+    ArrayBlockingQueue<MPDResponse> syncedCommandQueue;
 
     // For sending JSON across the wire
     private final Gson gson = new Gson();
@@ -40,8 +47,12 @@ public class BluetoothConnection {
     /**
      * Constructor. Prepares a new BluetoothConnection session.
      */
-    public BluetoothConnection(BluetoothMPDStatusMonitor monitor, ConnectionListener listener) {
+    public BluetoothConnection(BluetoothMPDStatusMonitor monitor,
+                               ArrayBlockingQueue<MPDResponse> syncedCommandQueue,
+                               ConnectionListener listener) {
+
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        this.syncedCommandQueue = syncedCommandQueue;
         this.monitor = monitor;
         this.connectionListener = listener;
     }
@@ -149,6 +160,27 @@ public class BluetoothConnection {
         } catch (IOException e) {
             throw new NoBluetoothServerConnectionException("Failed to send command to Bluetooth server");
         }
+    }
+
+    public Future<MPDResponse> syncedWriteRead(BTServerCommand command) {
+        try {
+            command.setSynchronous(true);
+            BTServerCallable callable = new BTServerCallable(command);
+            ExecutorService pool = Executors.newFixedThreadPool(2);
+            Future<MPDResponse> result = pool.submit(callable);
+            Log.i(TAG, "Before get");
+            //List<String> c = extractStringList(result.get());
+            Log.i(TAG, "After get");
+            return result;
+        } catch (Exception e) {
+            Log.e(TAG, "Error in syncedWriteRead", e);
+            return null;
+        }
+    }
+
+    private List<String> extractStringList(MPDResponse response) {
+        Type listType = new TypeToken<List<String>>() {}.getType();
+        return gson.fromJson(response.getObjectJSON(0), listType);
     }
 
     /**
@@ -322,9 +354,18 @@ public class BluetoothConnection {
         }
 
         private void handleMessage(String message) {
-            Log.v(TAG, "Message Received: " + message);
             MPDResponse response = gson.fromJson(message, MPDResponse.class);
-            monitor.handleMessage(response);
+            if(response.isSynchronous()) {
+                try {
+                    Log.i(TAG, "Putting command in queue");
+                    syncedCommandQueue.put(response);
+                } catch (InterruptedException e) {
+                    Log.e(TAG, "Interrupted while adding response to queue");
+                }
+            } else {
+                Log.i(TAG, "monitor.handleMessage");
+                monitor.handleMessage(response);
+            }
         }
 
         public void write(String data) throws IOException {
@@ -345,6 +386,20 @@ public class BluetoothConnection {
             } catch (IOException e) {
                 Log.e(TAG, "close() of connect socket failed", e);
             }
+        }
+    }
+
+    class BTServerCallable extends BTServerCommand implements Callable<MPDResponse> {
+        public BTServerCallable(BTServerCommand command) {
+            super(command.getCommand(), command.getArgs(), command.isSynchronous());
+        }
+
+        @Override
+        public MPDResponse call() throws Exception {
+            Log.i(TAG, "Sending: " + this.getCommand());
+            sendCommand(this);
+            MPDResponse response = syncedCommandQueue.take();
+            return response;
         }
     }
 }

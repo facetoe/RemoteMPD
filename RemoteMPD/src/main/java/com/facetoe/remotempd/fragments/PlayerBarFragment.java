@@ -73,6 +73,12 @@ public class PlayerBarFragment extends AbstractRMPDFragment implements View.OnCl
             case R.id.btnPrev:
                 mpdManager.prev();
                 break;
+            case R.id.btnShuffle:
+                Log.i(TAG, "Received albums: " + mpdManager.listAlbums());
+                break;
+            case R.id.btnRepeat:
+                Log.i(TAG, "Received artists: " + mpdManager.listArtists());
+                break;
             default:
                 Log.i(TAG, "Unknown: " + view.getId());
                 break;

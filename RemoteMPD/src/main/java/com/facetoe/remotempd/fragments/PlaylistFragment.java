@@ -16,6 +16,8 @@ import org.a0z.mpd.AbstractMPDPlaylist;
 import org.a0z.mpd.Music;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 class MusicAdapter extends ArrayAdapter<Music> {
@@ -29,7 +31,6 @@ class MusicAdapter extends ArrayAdapter<Music> {
         this.context = context;
         this.items = items;
         storedItems = new ArrayList<Music>(items);
-        Log.i(TAG, "Items: " + items.size() + " stored: " + storedItems.size());
     }
 
     @Override
@@ -58,25 +59,23 @@ class MusicAdapter extends ArrayAdapter<Music> {
         return new Filter() {
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
-                Log.i(TAG, "Performing filtering");
                 FilterResults results = new FilterResults();
-                // We implement here the filter logic
+
                 if (constraint == null || constraint.length() == 0) {
                     // No filter implemented we return all the list
                     results.values = storedItems;
                     results.count = storedItems.size();
                 }
                 else {
-                    // We perform filtering operation
-                    List<Music> musicList = new ArrayList<Music>();
+                    List<Music> musicMatches = new ArrayList<Music>();
 
                     for (Music music : storedItems) {
                         if (music.getTitle().toUpperCase().startsWith(constraint.toString().toUpperCase()))
-                            musicList.add(music);
+                            musicMatches.add(music);
                     }
 
-                    results.values = musicList;
-                    results.count = musicList.size();
+                    results.values = musicMatches;
+                    results.count = musicMatches.size();
                 }
                 return results;
             }
@@ -84,12 +83,12 @@ class MusicAdapter extends ArrayAdapter<Music> {
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
                 if (results.count == 0) {
-                    Log.i(TAG, "Invalidating dataset");
+                    items = Collections.emptyList();
                     notifyDataSetInvalidated();
                 } else {
                     items = (List<Music>) results.values;
                     notifyDataSetChanged();
-                    Log.i(TAG, "Updating with " + results.count + " results");
+                    Log.v(TAG, "Updating with " + results.count + " results");
                 }
             }
         };

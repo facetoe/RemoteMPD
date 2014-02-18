@@ -32,10 +32,13 @@ public class MPDResponse implements Serializable {
 
     // Events I've added for Bluetooth
     public static final int EVENT_GET_PLAYLIST_CHANGES = 20;
+    public static final int SYNC_READ_WRITE = 21;
 
     private int responseType;
     private int numObjects;
     private String[] objectJSON;
+
+    private boolean synchronous;
 
     public MPDResponse(int responseType, Object... obj) {
         this.responseType = responseType;
@@ -59,6 +62,14 @@ public class MPDResponse implements Serializable {
 
     public int getNumObjects() {
         return numObjects;
+    }
+
+    public boolean isSynchronous() {
+        return synchronous;
+    }
+
+    public void setSynchronous(boolean synchronous) {
+        this.synchronous = synchronous;
     }
 
     @Override

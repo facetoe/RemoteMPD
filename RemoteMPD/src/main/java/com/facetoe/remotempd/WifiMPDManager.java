@@ -3,13 +3,14 @@ package com.facetoe.remotempd;
 import android.util.Log;
 import com.facetoe.remotempd.helpers.MPDAsyncHelper;
 import com.facetoe.remotempd.listeners.ConnectionListener;
-import org.a0z.mpd.AbstractCommand;
-import org.a0z.mpd.AbstractMPDPlaylist;
-import org.a0z.mpd.MPD;
-import org.a0z.mpd.MPDCommand;
+import org.a0z.mpd.*;
 import org.a0z.mpd.event.StatusChangeListener;
 import org.a0z.mpd.event.TrackPositionListener;
 import org.a0z.mpd.exception.MPDServerException;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 
 /**
@@ -60,6 +61,65 @@ public class WifiMPDManager extends AbstractMPDManager implements ConnectionList
         } catch (MPDServerException e) {
             connectionFailed(e.getMessage());
         }
+    }
+
+    @Override
+    public void play() {
+        sendCommand(new MPDCommand(MPDCommand.MPD_CMD_PLAY));
+    }
+
+    @Override
+    public void playID(int id) {
+        sendCommand(new MPDCommand(MPDCommand.MPD_CMD_PLAY_ID, Integer.toString(id)));
+    }
+
+    @Override
+    public void stop() {
+        sendCommand(new MPDCommand(MPDCommand.MPD_CMD_STOP));
+    }
+
+    @Override
+    public void pause() {
+        sendCommand(new MPDCommand(MPDCommand.MPD_CMD_PAUSE));
+    }
+
+    @Override
+    public void next() {
+        sendCommand(new MPDCommand(MPDCommand.MPD_CMD_NEXT));
+    }
+
+    @Override
+    public void prev() {
+        sendCommand(new MPDCommand(MPDCommand.MPD_CMD_PREV));
+    }
+
+    @Override
+    public void setVolume(int newVolume) {
+        sendCommand(new MPDCommand(MPDCommand.MPD_CMD_VOLUME, Integer.toString(newVolume)));
+    }
+
+    @Override
+    public List<String> listAlbums() {
+        try {
+            return mpd.listAlbums();
+        } catch (MPDServerException e) {
+            handleError(e);
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<String> listArtists() {
+        try {
+            return mpd.listArtists();
+        } catch (MPDServerException e) {
+            handleError(e);
+        }
+        return Collections.emptyList();
+    }
+
+    private void handleError(MPDServerException e) {
+        connectionFailed(e.getMessage());
     }
 
     @Override

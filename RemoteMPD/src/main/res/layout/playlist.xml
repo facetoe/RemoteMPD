@@ -10,12 +10,14 @@
         android:layout_height="wrap_content"
         android:id="@+id/txtSearch"
         android:layout_gravity="center_horizontal"
-        android:inputType="textVisiblePassword"/>
+        android:inputType="textVisiblePassword"
+        />
 
     <ListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/listPlaylist"
         android:layout_gravity="center_horizontal"
-        android:choiceMode="singleChoice"/>
+        android:choiceMode="singleChoice"
+        />
 </LinearLayout>
