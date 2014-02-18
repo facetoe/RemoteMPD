@@ -14,6 +14,7 @@ import android.widget.ImageButton;
 import com.facetoe.remotempd.R;
 import com.facetoe.remotempd.RMPDApplication;
 import com.facetoe.remotempd.listeners.MPDManagerChangeListener;
+import org.a0z.mpd.exception.MPDServerException;
 
 /**
  * RemoteMPD
@@ -65,23 +66,47 @@ public class PlayerBarFragment extends AbstractRMPDFragment implements View.OnCl
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btnPlay:
-                mpdManager.play();
+                try {
+                    mpdManager.play();
+                } catch (MPDServerException e) {
+                    handleError(e);
+                }
                 break;
             case R.id.btnNext:
-                mpdManager.next();
+                try {
+                    mpdManager.next();
+                } catch (MPDServerException e) {
+                    e.printStackTrace();
+                }
                 break;
             case R.id.btnPrev:
-                mpdManager.prev();
+                try {
+                    mpdManager.previous();
+                } catch (MPDServerException e) {
+                    e.printStackTrace();
+                }
                 break;
             case R.id.btnShuffle:
-                Log.i(TAG, "Received albums: " + mpdManager.listAlbums());
+                try {
+                    Log.i(TAG, "Received albums: " + mpdManager.listAlbums());
+                } catch (MPDServerException e) {
+                    e.printStackTrace();
+                }
                 break;
             case R.id.btnRepeat:
-                Log.i(TAG, "Received artists: " + mpdManager.listArtists());
+                try {
+                    Log.i(TAG, "Received artists: " + mpdManager.listArtists());
+                } catch (MPDServerException e) {
+                    e.printStackTrace();
+                }
                 break;
             default:
                 Log.i(TAG, "Unknown: " + view.getId());
                 break;
         }
+    }
+
+    private void handleError(MPDServerException e) {
+        app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED, e.getMessage());
     }
 }

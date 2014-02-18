@@ -390,7 +390,7 @@ public class MPD {
      *
      * @return playlist.
      */
-    public MPDPlaylist getPlaylist() {
+    public AbstractMPDPlaylist getPlaylist() {
         return this.playlist;
     }
 
@@ -1562,8 +1562,6 @@ public class MPD {
                     try {
                         getPlaylist().add(stream);
                     } catch (MPDServerException e) {
-                        e.printStackTrace();
-                    } catch (MPDClientException e) {
                         e.printStackTrace();
                     }
                 }

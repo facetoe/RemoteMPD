@@ -10,7 +10,7 @@ public class MPDOutput {
 	private int id;
 	private boolean enabled;
 
-	MPDOutput(List<String> response) {
+	public MPDOutput(List<String> response) {
 		for (String line : response) {
 			if (line.startsWith("outputid:")) {
 				this.id = Integer.parseInt(line.substring("outputid: ".length()));

@@ -53,55 +53,9 @@ public class WifiMPDManager extends AbstractMPDManager implements ConnectionList
     }
 
     @Override
-    public void sendCommand(AbstractCommand command) {
+    List<String> sendCommand(String command) {
         try {
-            MPDCommand mpdCommand = new MPDCommand(command.getCommand(), command.getArgs());
-            mpd.getMpdConnection().sendCommand(mpdCommand);
-            Log.d(TAG, "Sent command: " + command);
-        } catch (MPDServerException e) {
-            connectionFailed(e.getMessage());
-        }
-    }
-
-    @Override
-    public void play() {
-        sendCommand(new MPDCommand(MPDCommand.MPD_CMD_PLAY));
-    }
-
-    @Override
-    public void playID(int id) {
-        sendCommand(new MPDCommand(MPDCommand.MPD_CMD_PLAY_ID, Integer.toString(id)));
-    }
-
-    @Override
-    public void stop() {
-        sendCommand(new MPDCommand(MPDCommand.MPD_CMD_STOP));
-    }
-
-    @Override
-    public void pause() {
-        sendCommand(new MPDCommand(MPDCommand.MPD_CMD_PAUSE));
-    }
-
-    @Override
-    public void next() {
-        sendCommand(new MPDCommand(MPDCommand.MPD_CMD_NEXT));
-    }
-
-    @Override
-    public void prev() {
-        sendCommand(new MPDCommand(MPDCommand.MPD_CMD_PREV));
-    }
-
-    @Override
-    public void setVolume(int newVolume) {
-        sendCommand(new MPDCommand(MPDCommand.MPD_CMD_VOLUME, Integer.toString(newVolume)));
-    }
-
-    @Override
-    public List<String> listAlbums() {
-        try {
-            return mpd.listAlbums();
+            return mpd.getMpdConnection().sendCommand(command);
         } catch (MPDServerException e) {
             handleError(e);
         }
@@ -109,13 +63,28 @@ public class WifiMPDManager extends AbstractMPDManager implements ConnectionList
     }
 
     @Override
-    public List<String> listArtists() {
+    List<String> sendCommand(AbstractCommand command) {
         try {
-            return mpd.listArtists();
+            return mpd.getMpdConnection().sendCommand(new MPDCommand(command.getCommand(), command.getArgs()));
         } catch (MPDServerException e) {
             handleError(e);
         }
         return Collections.emptyList();
+    }
+
+    @Override
+    List<String> sendCommand(String command, String... args) {
+        try {
+            return mpd.getMpdConnection().sendCommand(command, args);
+        } catch (MPDServerException e) {
+            handleError(e);
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
+    public AbstractMPDPlaylist getPlaylist() {
+        return mpd.getPlaylist();
     }
 
     private void handleError(MPDServerException e) {
@@ -123,8 +92,8 @@ public class WifiMPDManager extends AbstractMPDManager implements ConnectionList
     }
 
     @Override
-    public AbstractMPDPlaylist getPlaylist() {
-        return mpd.getPlaylist();
+    List<String[]> sendCommandQueueSeparated() {
+        return null;
     }
 
     @Override

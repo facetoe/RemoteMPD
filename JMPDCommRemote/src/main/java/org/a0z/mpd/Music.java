@@ -80,7 +80,7 @@ public class Music extends Item implements FilesystemTreeEntry {
      *
      * @param response server response, which gets parsed into the instance.
      */
-    Music(List<String> response) {
+    public Music(List<String> response) {
         for (String line : response) {
             if (line.startsWith("file:")) {
                 this.fullpath = line.substring("file: ".length());

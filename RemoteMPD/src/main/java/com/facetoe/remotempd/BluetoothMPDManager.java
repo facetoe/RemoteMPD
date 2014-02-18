@@ -7,10 +7,13 @@ import com.google.gson.reflect.TypeToken;
 import org.a0z.mpd.AbstractCommand;
 import org.a0z.mpd.AbstractMPDPlaylist;
 import org.a0z.mpd.FilesystemTreeEntry;
+import org.a0z.mpd.MPDPlaylist;
 import org.a0z.mpd.event.StatusChangeListener;
 import org.a0z.mpd.event.TrackPositionListener;
 
 import java.lang.reflect.Type;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -69,53 +72,46 @@ class BluetoothMPDManager extends AbstractMPDManager implements
     }
 
     @Override
-    public void play() {
-        sendCommand(new BTServerCommand(BTServerCommand.MPD_CMD_PLAY));
+    List<String[]> sendCommandQueueSeparated() {
+        throw new IllegalStateException("Not implemented yet!");
+    }
+
+    static List<String[]> separatedQueueResults(List<String> lines) {
+        List<String[]> result = new ArrayList<String[]>();
+        ArrayList<String> lineCache = new ArrayList<String>();
+
+        for (String line : lines) {
+            if (line.equals(BTServerCommand.MPD_CMD_BULK_SEP)) { // new part
+                if (lineCache.size() != 0) {
+                    result.add((String[]) lineCache.toArray(new String[0]));
+                    lineCache.clear();
+                }
+            } else
+                lineCache.add(line);
+        }
+        if (lineCache.size() != 0) {
+            result.add((String[]) lineCache.toArray(new String[0]));
+        }
+        return result;
+    }
+
+    public List<String> sendCommand(AbstractCommand command) {
+        return sendCommand(command.getCommand(), command.getArgs());
     }
 
     @Override
-    public void playID(int id) {
-        sendCommand(new BTServerCommand(BTServerCommand.MPD_CMD_PLAY_ID, Integer.toString(id)));
-    }
-
-    @Override
-    public void stop() {
-        sendCommand(new BTServerCommand(BTServerCommand.MPD_CMD_STOP));
-    }
-
-    @Override
-    public void pause() {
-        sendCommand(new BTServerCommand(BTServerCommand.MPD_CMD_PAUSE));
-    }
-
-    @Override
-    public void next() {
-        sendCommand(new BTServerCommand(BTServerCommand.MPD_CMD_NEXT));
-    }
-
-    @Override
-    public void prev() {
-        sendCommand(new BTServerCommand(BTServerCommand.MPD_CMD_PREV));
-    }
-
-    @Override
-    public void setVolume(int newVolume) {
-        sendCommand(new BTServerCommand(BTServerCommand.MPD_CMD_VOLUME, Integer.toString(newVolume)));
-    }
-
-    @Override
-    public List<String> listAlbums() {
-        BTServerCommand command = new BTServerCommand(BTServerCommand.MPD_CMD_LIST_TAG, BTServerCommand.MPD_TAG_ALBUM);
-        command.setSynchronous(true);
-        final Future<MPDResponse> responseFuture = btConnection.syncedWriteRead(command);
+    List<String> sendCommand(String command) {
+        BTServerCommand serverCommand = new BTServerCommand(command);
+        serverCommand.setSynchronous(true);
+        final Future<MPDResponse> responseFuture = btConnection.syncedWriteRead(serverCommand);
         return getResultFromFuture(responseFuture);
     }
 
     @Override
-    public List<String> listArtists() {
-        BTServerCommand command = new BTServerCommand(BTServerCommand.MPD_CMD_LIST_TAG, BTServerCommand.MPD_TAG_ARTIST);
-        command.setSynchronous(true);
-        final Future<MPDResponse> responseFuture = btConnection.syncedWriteRead(command);
+    List<String> sendCommand(String command, String... args) {
+        BTServerCommand serverCommand = new BTServerCommand(command, args);
+        serverCommand.setSynchronous(true);
+        final Future<MPDResponse> responseFuture = btConnection.syncedWriteRead(serverCommand);
         return getResultFromFuture(responseFuture);
     }
 
@@ -134,18 +130,6 @@ class BluetoothMPDManager extends AbstractMPDManager implements
     private List<String> extractStringList(MPDResponse response) {
         Type listType = new TypeToken<List<String>>() {}.getType();
         return gson.fromJson(response.getObjectJSON(0), listType);
-    }
-
-    @Override
-    public void sendCommand(AbstractCommand command) {
-        try {
-            // Need to convert it here to make life easier on the other end.
-            BTServerCommand serverCommand = new BTServerCommand(command.getCommand(), command.getArgs());
-            btConnection.sendCommand(serverCommand);
-            Log.i(TAG, "Sent command: " + command);
-        } catch (Exception e) {
-            connectionFailed(e.getMessage());
-        }
     }
 
     @Override

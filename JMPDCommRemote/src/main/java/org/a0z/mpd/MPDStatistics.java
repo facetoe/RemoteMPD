@@ -21,7 +21,7 @@ public class MPDStatistics {
 	private long playtime = -1;
 	private long dbPlaytime = -1;
 
-	MPDStatistics(List<String> response) {
+	public MPDStatistics(List<String> response) {
 		for (String line : response) {
 			if (line.startsWith("artists:")) {
 				this.artists = Long.parseLong(line.substring("artists: ".length()));

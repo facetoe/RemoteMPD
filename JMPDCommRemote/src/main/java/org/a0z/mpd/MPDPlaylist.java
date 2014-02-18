@@ -79,7 +79,7 @@ public class MPDPlaylist extends AbstractMPDPlaylist {
 	 * @param url streams's URL
 	 * @throws MPDServerException
 	 */
-	public void add(URL url) throws MPDServerException, MPDClientException {
+	public void add(URL url) throws MPDServerException {
 		this.mpd.getMpdConnection().sendCommand(MPD_CMD_PLAYLIST_ADD, url.toString());
 		this.refresh();
 	}
