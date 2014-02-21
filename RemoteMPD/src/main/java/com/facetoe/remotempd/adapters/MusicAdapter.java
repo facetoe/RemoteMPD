@@ -23,11 +23,12 @@ import java.util.List;
 public class MusicAdapter extends ArrayAdapter<Music> {
     private final Context context;
     private List<Music> items;
-    private final List<Music> storedItems;
+    private List<Music> storedItems;
     private static final String TAG = RMPDApplication.APP_PREFIX + "MusicAdapter";
 
     public MusicAdapter(Context context, List<Music> items) {
         super(context, R.layout.song_list, items);
+        Log.i(TAG, "MusicAdapter created with " + items.size() + " songs.");
         this.context = context;
         this.items = items;
         storedItems = new ArrayList<Music>(items);
@@ -47,6 +48,12 @@ public class MusicAdapter extends ArrayAdapter<Music> {
         songLength.setText(song.getFormatedTime());
 
         return rowView;
+    }
+
+    public void updatePlaylist(List<Music> newItems) {
+        storedItems.clear();
+        storedItems.addAll(newItems);
+        notifyDataSetChanged();
     }
 
     @Override
@@ -79,6 +86,8 @@ public class MusicAdapter extends ArrayAdapter<Music> {
                             musicMatches.add(music);
                     }
 
+                    Log.i(TAG, "Found " + musicMatches.size() + " matches for " + constraint);
+
                     results.values = musicMatches;
                     results.count = musicMatches.size();
                 }
@@ -88,12 +97,13 @@ public class MusicAdapter extends ArrayAdapter<Music> {
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
                 if (results.count == 0) {
+                    Log.i(TAG, "No results");
                     items = Collections.emptyList();
-                    notifyDataSetInvalidated();
+                    notifyDataSetChanged();
                 } else {
+                    Log.i(TAG, "Got " + results.count + " results");
                     items = (List<Music>) results.values;
                     notifyDataSetChanged();
-                    Log.v(TAG, "Updating with " + results.count + " results");
                 }
             }
         };

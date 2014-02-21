@@ -202,6 +202,10 @@ public class RMPDApplication extends Application implements
         return asyncHelper.oMPD;
     }
 
+    public MPDAsyncHelper getAsyncHelper() {
+        return asyncHelper;
+    }
+
     private void checkState() {
         if (currentActivity instanceof SettingsActivity) {
             return;
@@ -313,7 +317,6 @@ public class RMPDApplication extends Application implements
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         Log.i(TAG, "Shared preferences changed: " + key);
         if (key.equals(getString(R.string.remoteMpdConnectionTypeKey))) { //TODO change this to a constant
-
             asyncHelper.stopMonitor();
             asyncHelper.disconnect();
         }

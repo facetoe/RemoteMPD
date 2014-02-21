@@ -5,8 +5,6 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 import com.google.gson.Gson;
-import org.a0z.mpd.event.StatusChangeListener;
-import org.a0z.mpd.event.TrackPositionListener;
 import org.a0z.mpd.exception.NoBluetoothServerConnectionException;
 
 import java.io.*;
@@ -50,6 +48,25 @@ public class BluetoothConnection {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     }
 
+    public void sendCommand(BTServerCommand command) throws NoBluetoothServerConnectionException {
+        if (CURRENT_STATE != STATE_CONNECTED) {
+            throw new NoBluetoothServerConnectionException("No connection to Bluetooth Server");
+        }
+        try {
+            String commandJSON = gson.toJson(command);
+            write(commandJSON);
+        } catch (IOException e) {
+            throw new NoBluetoothServerConnectionException("Failed to send command to Bluetooth server");
+        }
+    }
+
+    public Future<MPDResponse> syncedWriteRead(BTServerCommand command) {
+        Log.d(TAG, "Sending synced command: " + command);
+        command.setSynchronous(true);
+        BTServerCallable callable = new BTServerCallable(command);
+        return pool.submit(callable);
+    }
+
     public void addConnectionListener(ConnectionListener listener) {
         connectionListeners.add(listener);
     }
@@ -60,7 +77,7 @@ public class BluetoothConnection {
         }
     }
 
-    private void notifyConnectionSucceded(String message) {
+    private void notifyConnectionSucceeded(String message) {
         for (ConnectionListener connectionListener : connectionListeners) {
             connectionListener.connectionSucceeded(message);
         }
@@ -71,13 +88,12 @@ public class BluetoothConnection {
      */
     public synchronized void connect() {
         if (bluetoothAdapter == null) {
-            notifyConnectionFailed("Bluetooth is not supported");
+            bluetoothConnectionFailed("Bluetooth is not supported");
             return;
         }
 
         Log.i(TAG, "connecting to: " + bluetoothDevice);
 
-        // Cancel connection if we are attempting to connect
         if (CURRENT_STATE == STATE_CONNECTING) {
             Log.w(TAG, "Connection was already in progress, cancelling");
             if (connectThread != null) {
@@ -116,25 +132,6 @@ public class BluetoothConnection {
 
     public boolean isConnected() {
         return connectedThread != null && connectedThread.isAlive();
-    }
-
-    public void sendCommand(BTServerCommand command) throws NoBluetoothServerConnectionException {
-        if (CURRENT_STATE != STATE_CONNECTED) {
-            throw new NoBluetoothServerConnectionException("No connection to Bluetooth Server");
-        }
-        try {
-            String commandJSON = gson.toJson(command);
-            write(commandJSON);
-        } catch (IOException e) {
-            throw new NoBluetoothServerConnectionException("Failed to send command to Bluetooth server");
-        }
-    }
-
-    public Future<MPDResponse> syncedWriteRead(BTServerCommand command) {
-        Log.d(TAG, "Sending synced command: " + command);
-        command.setSynchronous(true);
-        BTServerCallable callable = new BTServerCallable(command);
-        return pool.submit(callable);
     }
 
     /**
@@ -189,7 +186,7 @@ public class BluetoothConnection {
         connectedThread.start();
 
         setState(STATE_CONNECTED);
-        notifyConnectionSucceded("");
+        notifyConnectionSucceeded("");
     }
 
     /**
@@ -309,6 +306,8 @@ public class BluetoothConnection {
                 addToSyncedResultQueue(response);
             } else if(response.getResponseType() == MPDResponse.EVENT_UPDATE_RAW_CHANGES) {
                 addToMPDChangeQueue(response);
+            } else {
+                Log.w(TAG, "Received strange command: " + response.getResponseType());
             }
         }
 
