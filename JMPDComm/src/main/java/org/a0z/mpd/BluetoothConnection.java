@@ -313,7 +313,7 @@ public class BluetoothConnection {
 
         private void addToMPDChangeQueue(MPDResponse response) {
             try {
-                Log.i(TAG, "Adding changes to queue");
+                Log.d(TAG, "Adding changes to queue");
                 mpdChangeQueue.put(response);
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -322,7 +322,7 @@ public class BluetoothConnection {
 
         private void addToSyncedResultQueue(MPDResponse response) {
             try {
-                Log.i(TAG, "Putting command in queue");
+                Log.d(TAG, "Putting result in queue: " + response);
                 syncedResultQueue.put(response);
             } catch (InterruptedException e) {
                 Log.e(TAG, "Interrupted while adding response to queue");

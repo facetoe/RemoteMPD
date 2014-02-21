@@ -12,6 +12,13 @@
         android:layout_weight="50"
         tools:layout="@layout/playlist"/>
 
+    <!--<fragment class="com.facetoe.remotempd.fragments.LibraryFragment"-->
+    <!--android:id="@+id/libraryFragment"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="0dp"-->
+    <!--android:layout_weight="50"-->
+    <!--tools:layout="@layout/library"/>-->
+
     <fragment class="com.facetoe.remotempd.fragments.PlayerBarFragment"
               android:id="@+id/playerBarFragment"
               android:layout_width="match_parent"

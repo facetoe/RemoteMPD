@@ -2,6 +2,7 @@ package org.a0z.mpd;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.util.Log;
 import org.a0z.mpd.exception.MPDClientException;
 import org.a0z.mpd.exception.MPDConnectionException;
 import org.a0z.mpd.exception.MPDException;
@@ -752,11 +753,20 @@ public class MPD {
         }
 
         List<String[]> responses = mpdConnection.sendCommandQueueSeparated();
-
+        String albumArtistStr = "AlbumArtist: ";
+        String artistStr = "Artist: ";
         for (String[] r : responses) {
             ArrayList<String> albumresult = new ArrayList<String>();
             for (String s : r) {
-                String name = s.substring((albumArtist ? "AlbumArtist: " : "Artist: ").length());
+                String name = "";
+                if(s.contains(albumArtistStr)) {
+                    name = s.substring(albumArtistStr.length());
+                } else if(s.contains(artistStr)) {
+                    name = s.substring(artistStr.length());
+                } else {
+                    Log.e("RMPD-", "Strange artist name in listArtists(): " + s);
+                }
+
                 if (name.length() > 0)
                     albumresult.add(name);
             }

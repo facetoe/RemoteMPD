@@ -55,6 +55,7 @@ public class RMPDApplication extends Application implements
         asyncHelper.addConnectionListener(this);
         asyncHelper.addStatusChangeListener(this);
         asyncHelper.addTrackPositionListener(this);
+        MPD.setApplicationContext(getApplicationContext());
         PreferenceManager.getDefaultSharedPreferences(this)
                 .registerOnSharedPreferenceChangeListener(this);
     }

@@ -92,7 +92,11 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener 
                 }
                 break;
             case R.id.btnRepeat:
-                Log.i(TAG, "Received artists: " + mpd.getPlaylist().getMusicList());
+                try {
+                    Log.i(TAG, "Received Dir: " + mpd.getDir());
+                } catch (MPDServerException e) {
+                    handleError(e);
+                }
                 break;
             default:
                 Log.i(TAG, "Unknown: " + view.getId());

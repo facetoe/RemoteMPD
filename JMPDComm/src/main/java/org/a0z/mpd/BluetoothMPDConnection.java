@@ -4,8 +4,6 @@ import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import org.a0z.mpd.event.StatusChangeListener;
-import org.a0z.mpd.event.TrackPositionListener;
 import org.a0z.mpd.exception.NoBluetoothServerConnectionException;
 
 import java.lang.reflect.Type;
@@ -92,9 +90,13 @@ public class BluetoothMPDConnection extends AbstractMPDConnection {
             commandstr = BTServerCommand.MPD_CMD_START_BULK + "\n";
         }
 
-        for (AbstractCommand command : commandQueue) {
+        // Build the command using a temporary array as it is possible for a ConcurrentModificationException
+        // to be thrown if the commandQueue is modified while it is being iterated over.
+        ArrayList<AbstractCommand> tmpList = new ArrayList<AbstractCommand>(commandQueue);
+        for (AbstractCommand command : tmpList) {
             commandstr += command.toString();
         }
+
         commandstr += BTServerCommand.MPD_CMD_END_BULK + "\n";
         commandQueue = new ArrayList<AbstractCommand>();
         return sendCommand(new BTServerCommand(commandstr));
@@ -141,9 +143,5 @@ public class BluetoothMPDConnection extends AbstractMPDConnection {
         Type listType = new TypeToken<List<String>>() {
         }.getType();
         return gson.fromJson(response.getObjectJSON(0), listType);
-    }
-
-    public void addConnectionListener(ConnectionListener listener) {
-        btConnection.addConnectionListener(listener);
     }
 }

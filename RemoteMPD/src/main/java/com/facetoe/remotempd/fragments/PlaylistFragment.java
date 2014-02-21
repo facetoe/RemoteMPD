@@ -41,7 +41,7 @@ public class PlaylistFragment extends Fragment implements AdapterView.OnItemClic
         listPlaylist.setOnItemClickListener(this);
         app.getAsyncHelper().addStatusChangeListener(this);
 
-        musicAdapter = new MusicAdapter(getActivity(), playlist.getMusicList());
+        musicAdapter = new MusicAdapter(getActivity(), R.layout.song_list, playlist.getMusicList());
         listPlaylist.setAdapter(musicAdapter);
 
         EditText txtSearch = (EditText)rootView.findViewById(R.id.txtSearch);
@@ -83,7 +83,7 @@ public class PlaylistFragment extends Fragment implements AdapterView.OnItemClic
                 @Override
                 public void run() {
                     Log.d(TAG, "Updated playlist with " + playlist.size() + " songs");
-                    musicAdapter.updatePlaylist(app.getMpd().getPlaylist().getMusicList());
+                    musicAdapter.resetEntries(playlist.getMusicList());
                 }
             });
         }

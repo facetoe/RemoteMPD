@@ -20,7 +20,7 @@ abstract public class AbstractMPDConnection {
     protected static final String MPD_CMD_END_BULK = "command_list_end";
 
     protected int[] mpdVersion;
-    protected List<AbstractCommand> commandQueue;
+    protected List<AbstractCommand> commandQueue = new ArrayList<AbstractCommand>();
 
     abstract int[] connect() throws MPDServerException;
 
