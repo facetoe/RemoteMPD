@@ -1,14 +1,16 @@
 package com.facetoe.remotempd.helpers;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import com.facetoe.remotempd.RMPDApplication;
-import com.facetoe.remotempd.listeners.ConnectionListener;
 import com.facetoe.remotempd.tools.Tools;
 import com.facetoe.remotempd.tools.WeakLinkedList;
+import org.a0z.mpd.ConnectionListener;
 import org.a0z.mpd.MPD;
 import org.a0z.mpd.MPDStatus;
 import org.a0z.mpd.MPDStatusMonitor;
@@ -54,11 +56,6 @@ public class MPDAsyncHelper extends Handler {
     private MPDStatusMonitor oMonitor;
     public MPD oMPD;
     private static int iJobID = 0;
-
-    //TODO you did this!
-    public Handler getHandler() {
-        return oMPDAsyncWorker;
-    }
 
     // Interface for callback when Asynchronous operations are finished
     public interface AsyncExecListener {
@@ -246,11 +243,19 @@ public class MPDAsyncHelper extends Handler {
             switch (msg.what) {
                 case EVENT_CONNECT:
                     try {
-                        oMPD.connect(SettingsHelper.getHost(),
-                                SettingsHelper.getPort(),
-                                SettingsHelper.getPassword());
+                        if(SettingsHelper.isBluetooth()) {
+                            String lastDevice = SettingsHelper.getLastDevice();
+                            BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+                            BluetoothDevice device = adapter.getRemoteDevice(lastDevice);
+                            oMPD.connect(device);
 
-                        MPDAsyncHelper.this.obtainMessage(EVENT_CONNECTSUCCEEDED).sendToTarget();
+                        } else {
+                            oMPD.connect(SettingsHelper.getHost(),
+                                    SettingsHelper.getPort(),
+                                    SettingsHelper.getPassword());
+                        }
+
+                        //MPDAsyncHelper.this.obtainMessage(EVENT_CONNECTSUCCEEDED).sendToTarget();
 
                     } catch (MPDServerException e) {
                         MPDAsyncHelper.this.obtainMessage(EVENT_CONNECTFAILED, Tools.toObjectArray(e.getMessage())).sendToTarget();

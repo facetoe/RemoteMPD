@@ -34,6 +34,7 @@ public class TestActivity extends ActionBarActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        app.disconnect();
     }
 
     @Override

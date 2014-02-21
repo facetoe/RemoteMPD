@@ -8,10 +8,16 @@ import android.content.SharedPreferences;
 import android.net.wifi.WifiManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import com.facetoe.remotempd.helpers.MPDAsyncHelper;
 import com.facetoe.remotempd.helpers.RMPDAlertDialogFragmentFactory;
 import com.facetoe.remotempd.helpers.SettingsHelper;
 import com.facetoe.remotempd.helpers.WifiConnectionAsyncTask;
 import com.facetoe.remotempd.listeners.MPDManagerChangeListener;
+import org.a0z.mpd.ConnectionListener;
+import org.a0z.mpd.MPD;
+import org.a0z.mpd.MPDStatus;
+import org.a0z.mpd.event.StatusChangeListener;
+import org.a0z.mpd.event.TrackPositionListener;
 
 import java.util.ArrayList;
 
@@ -20,7 +26,7 @@ import java.util.ArrayList;
  */
 
 public class RMPDApplication extends Application implements
-        SharedPreferences.OnSharedPreferenceChangeListener {
+        SharedPreferences.OnSharedPreferenceChangeListener, ConnectionListener, StatusChangeListener, TrackPositionListener {
 
     private static RMPDApplication instance;
     public final static String APP_PREFIX = "RMPD-";
@@ -28,9 +34,8 @@ public class RMPDApplication extends Application implements
     public static final int REQUEST_ENABLE_BT = 2;
 
     private Activity currentActivity;
-    private AbstractMPDManager mpdManager;
+    private MPDAsyncHelper asyncHelper;
     private final ArrayList<MPDManagerChangeListener> mpdManagerChangeListeners = new ArrayList<MPDManagerChangeListener>();
-    private boolean connectionsLocked = false;
 
     public enum Event {
         LOCK_CONNECTIONS,
@@ -46,8 +51,58 @@ public class RMPDApplication extends Application implements
     public void onCreate() {
         super.onCreate();
         instance = this;
+        asyncHelper = new MPDAsyncHelper();
+        asyncHelper.addConnectionListener(this);
+        asyncHelper.addStatusChangeListener(this);
+        asyncHelper.addTrackPositionListener(this);
         PreferenceManager.getDefaultSharedPreferences(this)
                 .registerOnSharedPreferenceChangeListener(this);
+    }
+
+
+    @Override
+    public void volumeChanged(MPDStatus mpdStatus, int oldVolume) {
+
+    }
+
+    @Override
+    public void playlistChanged(MPDStatus mpdStatus, int oldPlaylistVersion) {
+        Log.i(TAG, "Playlist changed");
+    }
+
+    @Override
+    public void trackChanged(MPDStatus mpdStatus, int oldTrack) {
+        Log.i(TAG, "Track changed");
+    }
+
+    @Override
+    public void stateChanged(MPDStatus mpdStatus, String oldState) {
+
+    }
+
+    @Override
+    public void repeatChanged(boolean repeating) {
+
+    }
+
+    @Override
+    public void randomChanged(boolean random) {
+
+    }
+
+    @Override
+    public void connectionStateChanged(boolean connected, boolean connectionLost) {
+        Log.i(TAG, "Connection state changed");
+    }
+
+    @Override
+    public void libraryStateChanged(boolean updating) {
+
+    }
+
+    @Override
+    public void trackPositionChanged(MPDStatus status) {
+        Log.i(TAG, "Track position changed");
     }
 
     public static RMPDApplication getInstance() {
@@ -74,25 +129,20 @@ public class RMPDApplication extends Application implements
     public void notifyEvent(Event event) {
         switch (event) {
             case LOCK_CONNECTIONS:
-                connectionsLocked = true;
                 break;
             case RELEASE_CONNECTION_LOCK:
-                connectionsLocked = false;
                 break;
             case CONNECT:
-                connectMPDManager();
-                connectionsLocked = true;
+                connect();
                 break;
             case CONNECTING:
                 showConnectingProgressDialog();
                 break;
             case CONNECTION_SUCCEEDED:
                 dismissDialog();
-                connectionsLocked = false;
                 break;
             case REFUSED_BT_ENABLE:
                 showRefusedBluetoothEnableDialog();
-                connectionsLocked = false;
                 break;
             default:
                 Log.w(TAG, "Unknown event: " + event);
@@ -104,7 +154,6 @@ public class RMPDApplication extends Application implements
         switch (event) {
             case CONNECTION_FAILED:
                 maybeShowConnectionFailedDialog(message);
-                connectionsLocked = false;
                 break;
             default:
                 Log.w(TAG, "Unknown event: " + event);
@@ -123,23 +172,34 @@ public class RMPDApplication extends Application implements
         prefs.edit().putInt(key, value).commit();
     }
 
-    private void connectMPDManager() {
-        getMpdManager(); // Ensure we have the right manager
-        checkState();
-        if (!mpdManager.isConnected() && !connectionsLocked) {
-            mpdManager.connect();
+    private void connect() {
+        Log.i(TAG, "Connecting...");
+        if(!asyncHelper.isMonitorAlive()) {
+            asyncHelper.startMonitor();
         }
+        asyncHelper.connect();
+        showConnectingProgressDialog();
     }
 
-    public AbstractMPDManager getMpdManager() {
-        if (SettingsHelper.isBluetooth()) {
-            if (mpdManager == null || mpdManager instanceof WifiMPDManager)
-                mpdManager = new BluetoothMPDManager();
-        } else {
-            if (mpdManager == null || mpdManager instanceof BluetoothMPDManager)
-                mpdManager = new WifiMPDManager();
-        }
-        return mpdManager;
+    public void disconnect() {
+        asyncHelper.stopMonitor();
+        asyncHelper.disconnect();
+    }
+
+    @Override
+    public void connectionFailed(String message) {
+        Log.i(TAG, "Connection failed: " + message);
+        maybeShowConnectionFailedDialog(message);
+    }
+
+    @Override
+    public void connectionSucceeded(String message) {
+        Log.i(TAG, "Connection succeeded: " + message);
+        dismissDialog();
+    }
+
+    public MPD getMpd() {
+        return asyncHelper.oMPD;
     }
 
     private void checkState() {
@@ -199,9 +259,8 @@ public class RMPDApplication extends Application implements
     }
 
     private void checkConnection() {
-        if (mpdManager != null && !mpdManager.isConnected() && !connectionsLocked) {
-            mpdManager.connect();
-            connectionsLocked = true;
+        if (!asyncHelper.oMPD.isConnected()) {
+            connect();
         }
     }
 
@@ -213,7 +272,7 @@ public class RMPDApplication extends Application implements
     private void maybeShowConnectionFailedDialog(String message) {
         if (currentActivity == null
                 || currentActivity instanceof SettingsActivity
-                || mpdManager.isConnected()) {
+                || asyncHelper.oMPD.isConnected()) {
             return;
         }
         DialogFragment dialog = RMPDAlertDialogFragmentFactory.getConnectionFailedDialog(message);
@@ -250,25 +309,13 @@ public class RMPDApplication extends Application implements
         ft.addToBackStack(null);
     }
 
-    public void addMpdManagerChangeListener(MPDManagerChangeListener listener) {
-        mpdManagerChangeListeners.add(listener);
-    }
-
-    public void removeMpdManagerChangeListener(MPDManagerChangeListener listener) {
-        mpdManagerChangeListeners.remove(listener);
-    }
-
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         Log.i(TAG, "Shared preferences changed: " + key);
         if (key.equals(getString(R.string.remoteMpdConnectionTypeKey))) { //TODO change this to a constant
-            fireMPDManagerChanged();
-        }
-    }
 
-    private void fireMPDManagerChanged() {
-        for (MPDManagerChangeListener listener : mpdManagerChangeListeners) {
-            listener.mpdManagerChanged();
+            asyncHelper.stopMonitor();
+            asyncHelper.disconnect();
         }
     }
 }

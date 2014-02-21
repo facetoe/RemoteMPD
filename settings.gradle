@@ -1,1 +1,1 @@
-include ':RemoteMPD', ':JMPDCommRemote'
+include ':RemoteMPD', ':JMPDComm', ':JMPDComm'

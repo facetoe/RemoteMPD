@@ -5,6 +5,7 @@ package com.facetoe.remotempd.fragments;
  * Created by facetoe on 6/02/14.
  */
 
+import android.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,6 +15,7 @@ import android.widget.ImageButton;
 import com.facetoe.remotempd.R;
 import com.facetoe.remotempd.RMPDApplication;
 import com.facetoe.remotempd.listeners.MPDManagerChangeListener;
+import org.a0z.mpd.MPD;
 import org.a0z.mpd.exception.MPDServerException;
 
 /**
@@ -21,10 +23,11 @@ import org.a0z.mpd.exception.MPDServerException;
  *
  * PlayerBarFragment handles controlling the MPD player.
  */
-public class PlayerBarFragment extends AbstractRMPDFragment implements View.OnClickListener,
-        MPDManagerChangeListener {
+public class PlayerBarFragment extends Fragment implements View.OnClickListener {
 
     private static final String TAG = RMPDApplication.APP_PREFIX + "PlayerBarFragment";
+    private final RMPDApplication app = RMPDApplication.getInstance();
+    private final MPD mpd = app.getMpd();
     private ImageButton btnPlay;
     private ImageButton btnNext;
     private ImageButton btnPrev;
@@ -47,10 +50,6 @@ public class PlayerBarFragment extends AbstractRMPDFragment implements View.OnCl
         btnRepeat.setOnClickListener(this);
         btnShuffle.setOnClickListener(this);
 
-        app.addMpdManagerChangeListener(this);
-
-        mpdManager = app.getMpdManager();
-
         // Don't kill the fragment on configuration change
         setRetainInstance(true);
         return rootView;
@@ -59,7 +58,6 @@ public class PlayerBarFragment extends AbstractRMPDFragment implements View.OnCl
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        app.removeMpdManagerChangeListener(this);
     }
 
     @Override
@@ -67,38 +65,34 @@ public class PlayerBarFragment extends AbstractRMPDFragment implements View.OnCl
         switch (view.getId()) {
             case R.id.btnPlay:
                 try {
-                    mpdManager.play();
+                    mpd.play();
                 } catch (MPDServerException e) {
                     handleError(e);
                 }
                 break;
             case R.id.btnNext:
                 try {
-                    mpdManager.next();
+                    mpd.next();
                 } catch (MPDServerException e) {
                     handleError(e);
                 }
                 break;
             case R.id.btnPrev:
                 try {
-                    mpdManager.previous();
+                    mpd.previous();
                 } catch (MPDServerException e) {
                     handleError(e);
                 }
                 break;
             case R.id.btnShuffle:
                 try {
-                    Log.i(TAG, "Received albums: " + mpdManager.getStatistics());
+                    Log.i(TAG, "Received albums: " + mpd.getStatistics());
                 } catch (MPDServerException e) {
                     handleError(e);
                 }
                 break;
             case R.id.btnRepeat:
-                try {
-                    Log.i(TAG, "Received artists: " + mpdManager.getVolume());
-                } catch (MPDServerException e) {
-                    handleError(e);
-                }
+                Log.i(TAG, "Received artists: " + mpd.getPlaylist().getMusicList());
                 break;
             default:
                 Log.i(TAG, "Unknown: " + view.getId());
