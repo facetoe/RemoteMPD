@@ -8,7 +8,7 @@
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/txtLibrarySearch"
+        android:id="@+id/txtSearch"
         android:layout_gravity="center_horizontal"
         android:inputType="textVisiblePassword"
         />
@@ -16,7 +16,7 @@
     <ListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/listLibrary"
+        android:id="@+id/listItems"
         android:layout_gravity="center_horizontal"
         android:choiceMode="singleChoice"
         />

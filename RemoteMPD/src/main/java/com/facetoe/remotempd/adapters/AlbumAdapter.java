@@ -6,18 +6,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import com.facetoe.remotempd.R;
-import org.a0z.mpd.Artist;
+import org.a0z.mpd.Album;
 import org.a0z.mpd.Item;
 
 import java.util.List;
 
 /**
  * RemoteMPD
- * Created by facetoe on 21/02/14.
+ * Created by facetoe on 22/02/14.
  */
-public class ArtistAdapter extends AbstractMPDArrayAdapter<Artist> {
+public class AlbumAdapter extends AbstractMPDArrayAdapter<Album> {
 
-    public ArtistAdapter(Context context, int itemLayoutID, List<Artist> items) {
+    public AlbumAdapter(Context context, int itemLayoutID, List<Album> items) {
         super(context, itemLayoutID, items);
     }
 
@@ -25,10 +25,9 @@ public class ArtistAdapter extends AbstractMPDArrayAdapter<Artist> {
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = LayoutInflater.from(context);
         View rowView = inflater.inflate(itemLayoutID, parent, false);
-        TextView txtView = (TextView) rowView.findViewById(R.id.txtView);
-
-        Artist artist = items.get(position);
-        txtView.setText(artist.getName());
+        TextView txtAlbum = (TextView) rowView.findViewById(R.id.txtAlbum);
+        Album album = (Album)items.get(position);
+        txtAlbum.setText(album.getName());
         return rowView;
     }
 }

@@ -26,7 +26,7 @@ public class BluetoothMPDConnection extends AbstractMPDConnection {
     BluetoothConnection btConnection;
     Gson gson = new Gson();
 
-    private long TIMEOUT = 10;
+    private static final long TIMEOUT = 10;
 
     public BluetoothMPDConnection(BluetoothDevice device) throws NoBluetoothServerConnectionException {
         this.device = device;
@@ -37,7 +37,7 @@ public class BluetoothMPDConnection extends AbstractMPDConnection {
     @Override
     int[] connect() throws NoBluetoothServerConnectionException {
         btConnection.connect();
-        return new int[0]; // TODO fix this somehow
+        return new int[0]; // TODO return the version somehow.
     }
 
     @Override
@@ -117,6 +117,8 @@ public class BluetoothMPDConnection extends AbstractMPDConnection {
 
     private List<String> getResultFromFuture(Future<MPDResponse> responseFuture) {
         try {
+            // This call blocks until we get a response from the bluetooth server and
+            // it is added to the queue, or it times out.
             MPDResponse response = responseFuture.get(TIMEOUT, TimeUnit.SECONDS);
             return extractStringList(response);
         } catch (InterruptedException e) {
@@ -131,7 +133,9 @@ public class BluetoothMPDConnection extends AbstractMPDConnection {
 
     public List<String> waitForChanges() {
         try {
-            MPDResponse response = btConnection.mpdChangeQueue.take();
+            // This call blocks until the bluetooth server sends an update
+            // and it is added to the queue.
+            MPDResponse response = btConnection.mpdIdleUpdateQueue.take();
             return extractStringList(response);
         } catch (InterruptedException e) {
             Log.e(TAG, "Interrupted", e);

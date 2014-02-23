@@ -1,14 +1,15 @@
 package com.facetoe.remotempd;
 
 import android.app.Activity;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import com.facetoe.remotempd.fragments.ArtistListFragment;
 
-public class TestActivity extends ActionBarActivity {
+public class TestActivity extends Activity {
     private static final String TAG = RMPDApplication.APP_PREFIX + "TestActivity";
     private final RMPDApplication app = RMPDApplication.getInstance();
 
@@ -16,6 +17,27 @@ public class TestActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
+        if (findViewById(R.id.filterableListContainer) != null) {
+
+            // However, if we're being restored from a previous state,
+            // then we don't need to do anything and should return or else
+            // we could end up with overlapping fragments.
+            if (savedInstanceState != null) {
+                return;
+            }
+
+            // Create a new Fragment to be placed in the activity layout
+            ArtistListFragment listFragment = new ArtistListFragment();
+
+            // Add the fragment to the 'fragment_container' FrameLayout
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            ft.add(R.id.filterableListContainer, listFragment);
+            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            ft.commit();
+        } else {
+            Log.e(TAG, "Couldn't find filterableListFragment");
+        }
+
     }
 
     @Override

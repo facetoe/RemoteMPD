@@ -19,6 +19,8 @@ import org.a0z.mpd.Music;
 import org.a0z.mpd.event.StatusChangeListener;
 import org.a0z.mpd.exception.MPDServerException;
 
+import java.util.Collections;
+
 
 /**
  * RemoteMPD

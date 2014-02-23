@@ -96,14 +96,6 @@ public class MPD {
         this.rootDirectory = Directory.makeRootDirectory(this);
     }
 
-    public BluetoothMPDConnection getBluetoothMPDConnection() {
-        if (mpdConnection instanceof BluetoothMPDConnection) {
-            return (BluetoothMPDConnection) mpdConnection;
-        } else {
-            throw new IllegalStateException("Not using bluetooth");
-        }
-    }
-
     /**
      * Constructs a new MPD server controller.
      *
@@ -129,6 +121,11 @@ public class MPD {
         connect(server, port, password);
     }
 
+    /**
+     * Constructs a new MPD server controller.
+     * @param device The Bluetooth device to connect to.
+     * @throws MPDException
+     */
     public MPD(BluetoothDevice device) throws MPDException {
         this();
         connect(device);
@@ -154,11 +151,14 @@ public class MPD {
      * @throws MPDServerException if an error occur while contacting server
      */
     public List<String> waitForChanges() throws MPDServerException {
+        List<String> data;
         if (mpdConnection instanceof BluetoothMPDConnection) {
-            return ((BluetoothMPDConnection) mpdConnection).waitForChanges();
+            data = ((BluetoothMPDConnection) mpdConnection).waitForChanges();
+            return data;
+
         } else {
             while (mpdIdleConnection != null && mpdIdleConnection.isConnected()) {
-                List<String> data = mpdIdleConnection
+                data = mpdIdleConnection
                         .sendAsyncCommand(MPDCommand.MPD_CMD_IDLE);
                 if (data.isEmpty()) {
                     continue;
@@ -202,6 +202,11 @@ public class MPD {
         getMpdConnection().sendCommand(MPDCommand.MPD_CMD_CLEARERROR);
     }
 
+    /**
+     * Connects to a MPD server via Bluetooth.
+     * @param device The Bluetooth device to connect to.
+     * @throws MPDServerException
+     */
     public void connect(BluetoothDevice device) throws MPDServerException {
         mpdConnection = new BluetoothMPDConnection(device);
         mpdConnection.connect();
@@ -227,6 +232,10 @@ public class MPD {
      * @param port   server port
      */
     public final void connect(InetAddress server, int port, String password) throws MPDServerException {
+        //TODO Fix the problem with properly closing sockets in MPDConnection MultiSocket
+        // This has been reverted to a mono connection from a multi connection until I can
+        // figure out how to close all the sockets properly. When changing from Bluetooth to Wifi
+        // some sockets are left open, and after a while MPD stops accepting new connections.
         this.mpdConnection = new MPDConnectionMonoSocket(server, port, password, 1000);
         this.mpdIdleConnection = new MPDConnectionMonoSocket(server, port, password, 0);
         this.mpdStatusConnection = new MPDConnectionMonoSocket(server, port, password, 10000);

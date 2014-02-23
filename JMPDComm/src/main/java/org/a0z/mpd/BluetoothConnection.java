@@ -26,12 +26,19 @@ public class BluetoothConnection {
     private static int CURRENT_STATE = STATE_NONE;
 
     private final BluetoothAdapter bluetoothAdapter;
-    private ConnectThread connectThread;
-    private ConnectedThread connectedThread;
     private ArrayList<ConnectionListener> connectionListeners = new ArrayList<ConnectionListener>();
 
+    // Thread used to locate and connect to the bluetooth device
+    private ConnectThread connectThread;
+
+    // Thread used to manage the connection once connected.
+    private ConnectedThread connectedThread;
+
+    // Command responses from the bluetooth server are placed in this queue
     LinkedBlockingQueue<MPDResponse> syncedResultQueue = new LinkedBlockingQueue<MPDResponse>();
-    LinkedBlockingQueue<MPDResponse> mpdChangeQueue = new LinkedBlockingQueue<MPDResponse>();
+
+    // MPD idle connection updates are placed in this queue
+    LinkedBlockingQueue<MPDResponse> mpdIdleUpdateQueue = new LinkedBlockingQueue<MPDResponse>();
 
     ExecutorService pool = Executors.newFixedThreadPool(10);
 
@@ -81,6 +88,11 @@ public class BluetoothConnection {
         for (ConnectionListener connectionListener : connectionListeners) {
             connectionListener.connectionSucceeded(message);
         }
+    }
+
+    private void bluetoothConnectionFailed(String message) {
+        setState(STATE_NONE);
+        notifyConnectionFailed(message);
     }
 
     /**
@@ -142,18 +154,13 @@ public class BluetoothConnection {
     private void write(String data) throws IOException {
         Log.d("Writing: ", data);
         // Create temporary object
-        ConnectedThread r;
+        ConnectedThread syncedThread;
         // Synchronize a copy of the ConnectedThread
         synchronized (this) {
-            r = connectedThread;
+            syncedThread = connectedThread;
         }
         // Perform the write unsynchronized
-        r.write(data);
-    }
-
-    private void bluetoothConnectionFailed(String message) {
-        setState(STATE_NONE);
-        notifyConnectionFailed(message);
+        syncedThread.write(data);
     }
 
     private synchronized void setState(int newState) {
@@ -285,7 +292,6 @@ public class BluetoothConnection {
             Log.d(TAG, "ConnectedThread running");
             String input;
 
-            // Keep listening to the InputStream while connected with the Server
             while (!isCanceled) {
                 try {
                     // Messages from the server are terminated with a newline.
@@ -305,24 +311,24 @@ public class BluetoothConnection {
             if (response.isSynchronous()) {
                 addToSyncedResultQueue(response);
             } else if(response.getResponseType() == MPDResponse.EVENT_UPDATE_RAW_CHANGES) {
-                addToMPDChangeQueue(response);
+                addToMpdIdleUpdateQueue(response);
             } else {
                 Log.w(TAG, "Received strange command: " + response.getResponseType());
             }
         }
 
-        private void addToMPDChangeQueue(MPDResponse response) {
+        private void addToMpdIdleUpdateQueue(MPDResponse response) {
             try {
-                Log.d(TAG, "Adding changes to queue");
-                mpdChangeQueue.put(response);
+                Log.d(TAG, "Adding MPD idle update to queue");
+                mpdIdleUpdateQueue.put(response);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.e(TAG, "Interrupted while adding MPD idle update to queue");
             }
         }
 
         private void addToSyncedResultQueue(MPDResponse response) {
             try {
-                Log.d(TAG, "Putting result in queue: " + response);
+                Log.d(TAG, "Putting synced result in queue: " + response);
                 syncedResultQueue.put(response);
             } catch (InterruptedException e) {
                 Log.e(TAG, "Interrupted while adding response to queue");

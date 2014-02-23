@@ -8,6 +8,7 @@ import java.util.List;
 /**
  * RemoteMPD
  * Created by facetoe on 9/02/14.
+ *
  */
 public class BTServerCommand extends AbstractCommand {
 

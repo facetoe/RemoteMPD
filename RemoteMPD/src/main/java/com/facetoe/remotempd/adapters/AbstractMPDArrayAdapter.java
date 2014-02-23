@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
 import com.facetoe.remotempd.RMPDApplication;
+import org.a0z.mpd.Item;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,14 +19,14 @@ import java.util.List;
  *
  * Base class for MPDArray adapters. Provides filtering.
  */
-public class AbstractMPDArrayAdapter<T> extends ArrayAdapter<T> {
+public class AbstractMPDArrayAdapter<T extends Item> extends ArrayAdapter<T> {
     protected Context context;
     protected List<T> items;
     protected List<T> storedItems;
     protected int itemLayoutID;
     protected String TAG = RMPDApplication.APP_PREFIX + "AbstractMPDArrayAdapter";
 
-    AbstractMPDArrayAdapter(Context context, int itemLayoutID, List<T> items) {
+    public AbstractMPDArrayAdapter(Context context, int itemLayoutID, List<T> items) {
         super(context, itemLayoutID, items);
         this.context = context;
         this.itemLayoutID = itemLayoutID;
@@ -66,32 +67,32 @@ public class AbstractMPDArrayAdapter<T> extends ArrayAdapter<T> {
                     results.values = storedItems;
                     results.count = storedItems.size();
                 } else {
-                    List<T> entries = new ArrayList<T>();
-
-                    for (T entry : storedItems) {
-                        if (entry.toString().toUpperCase().startsWith(constraint.toString().toUpperCase()))
-                            entries.add(entry);
-                    }
-
-                    Log.i(TAG, "Found " + entries.size() + " matches for " + constraint);
-
-                    results.values = entries;
-                    results.count = entries.size();
+                    List<T> matches = filterMatches(constraint);
+                    results.values = matches;
+                    results.count = matches.size();
                 }
                 return results;
+            }
+
+            private List<T> filterMatches(CharSequence constraint) {
+                List<T> matches = new ArrayList<T>();
+                for (T item : storedItems) {
+                    if (item.toString().toUpperCase().startsWith(constraint.toString().toUpperCase()))
+                        matches.add(item);
+                }
+                return matches;
             }
 
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
                 if (results.count == 0) {
-                    Log.i(TAG, "No results");
+                    Log.d(TAG, "No results");
                     items = Collections.emptyList();
-                    notifyDataSetChanged();
                 } else {
-                    Log.i(TAG, "Got " + results.count + " results");
+                    Log.d(TAG, "Got " + results.count + " results");
                     items = (List<T>) results.values;
-                    notifyDataSetChanged();
                 }
+                notifyDataSetChanged();
             }
         };
     }
