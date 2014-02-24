@@ -20,7 +20,7 @@ import com.facetoe.remotempd.helpers.SettingsHelper;
 public class SettingsFragment extends PreferenceFragment {
 
     private static final String TAG = RMPDApplication.APP_PREFIX + "SettingsFragment";
-    public static final int REQUEST_SCAN_DEVICE = 1;
+    private static final int REQUEST_SCAN_DEVICE = 1;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

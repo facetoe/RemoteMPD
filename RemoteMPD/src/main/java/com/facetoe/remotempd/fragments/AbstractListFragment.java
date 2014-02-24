@@ -1,5 +1,6 @@
 package com.facetoe.remotempd.fragments;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -26,19 +27,18 @@ import java.util.List;
 abstract class AbstractListFragment extends Fragment implements AdapterView.OnItemClickListener,
         SearchView.OnQueryTextListener {
     private static final String TAG = RMPDApplication.APP_PREFIX + "AbstractListFragment";
-    protected final RMPDApplication app = RMPDApplication.getInstance();
-    protected final MPD mpd = app.getMpd();
-    protected AbstractMPDArrayAdapter adapter;
-    protected ListView listItems;
-    protected List entries = new ArrayList<Item>();
-    protected SearchView searchView;
+    final RMPDApplication app = RMPDApplication.getInstance();
+    final MPD mpd = app.getMpd();
+    AbstractMPDArrayAdapter adapter;
+    final List entries = new ArrayList<Item>();
+    final SearchView searchView;
 
 
-    protected static final int ADD_ITEM = 1;
-    protected static final int ADD_AND_REPLACE = 2;
-    protected static final int ADD_REPLACE_AND_PLAY = 3;
-    protected static final int ADD_AND_PLAY = 4;
-    protected LinearLayout spinnerLayout;
+    private static final int ADD_ITEM = 1;
+    private static final int ADD_AND_REPLACE = 2;
+    private static final int ADD_REPLACE_AND_PLAY = 3;
+    private static final int ADD_AND_PLAY = 4;
+    LinearLayout spinnerLayout;
 
     abstract protected AbstractMPDArrayAdapter getAdapter();
 
@@ -47,6 +47,7 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.filterable_list, container, false);
+        assert rootView != null;
         spinnerLayout = (LinearLayout) rootView.findViewById(R.id.filterableListSpinnerLayout);
 
         Activity parentActivity = getActivity();
@@ -56,7 +57,7 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
             Log.w(TAG, "parentActivity was null");
         }
 
-        listItems = (ListView) rootView.findViewById(R.id.listItems);
+        ListView listItems = (ListView) rootView.findViewById(R.id.listItems);
         TextView emptyMessage = (TextView) rootView.findViewById(R.id.txtEmptyFilterableList);
         listItems.setEmptyView(emptyMessage);
         listItems.setOnItemClickListener(this);
@@ -67,8 +68,8 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
 
         setRetainInstance(true);
 
-        // Clear the filter if we are returning to this fragment
-        // otherwise if the user filters, then clicks on an item, then clicks back
+        // Clear the filter if we are returning to this fragment.
+        // Otherwise if the user filters, then clicks on an item, then clicks back
         // the list will still be showing the filtered results.
         if (savedInstanceState != null) {
             adapter.getFilter().filter("");
@@ -77,7 +78,7 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
         return rootView;
     }
 
-    public AbstractListFragment(SearchView searchView) {
+    AbstractListFragment(SearchView searchView) {
         this.searchView = searchView;
     }
 
@@ -131,27 +132,27 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
         Item selectedItem = adapter.getItem(info.position);
         switch (item.getItemId()) {
             case ADD_ITEM:
-                Log.d(TAG, "Add clicked: " + selectedItem);
+                Log.d(TAG, "Add: " + selectedItem);
                 addItem(selectedItem, false, false);
                 break;
 
             case ADD_AND_REPLACE:
-                Log.d(TAG, "Add and replace clicked: " + selectedItem);
+                Log.d(TAG, "Add and replace: " + selectedItem);
                 addItem(selectedItem, true, false);
                 break;
 
             case ADD_REPLACE_AND_PLAY:
-                Log.d(TAG, "Add, replace and play clicked: " + selectedItem);
+                Log.d(TAG, "Add, replace and play: " + selectedItem);
                 addItem(selectedItem, true, true);
                 break;
 
             case ADD_AND_PLAY:
-                Log.d(TAG, "Add and play clicked: " + selectedItem);
+                Log.d(TAG, "Add and play: " + selectedItem);
                 addItem(selectedItem, false, true);
                 break;
 
             default:
-                Log.i(TAG, "Unknown: " + item.getItemId());
+                Log.w(TAG, "Unknown: " + item.getItemId());
                 break;
         }
         return true;
@@ -170,14 +171,12 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
     }
 
     private void add(final Artist artist, final boolean replace, final boolean play) {
-        final Toast toast = Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT);
-        toast.setGravity(Gravity.CENTER, 0, 0);
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     mpd.add(artist, replace, play);
-                    toast.setText("Added " + artist.getName());
+                    Toast toast = makeToast("Added " + artist.getName());
                     toast.show();
                 } catch (MPDServerException e) {
                     app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED);
@@ -187,14 +186,12 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
     }
 
     private void add(final Album album, final boolean replace, final boolean play) {
-        final Toast toast = Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT);
-        toast.setGravity(Gravity.CENTER, 0, 0);
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     mpd.add(album, replace, play);
-                    toast.setText("Added " + album.getName());
+                    Toast toast = makeToast("Added " + album.getName());
                     toast.show();
                 } catch (MPDServerException e) {
                     app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED);
@@ -204,14 +201,12 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
     }
 
     private void add(final Music song, final boolean replace, final boolean play) {
-        final Toast toast = Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT);
-        toast.setGravity(Gravity.CENTER, 0, 0);
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     mpd.add(song, replace, play);
-                    toast.setText("Added " + song.getName());
+                    Toast toast = makeToast("Added " + song.getName());
                     toast.show();
                 } catch (MPDServerException e) {
                     app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED);
@@ -220,19 +215,23 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
         }).start();
     }
 
+    Toast makeToast(String toastText) {
+        @SuppressWarnings("ConstantConditions") @SuppressLint("ShowToast")
+        final Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        return toast;
+    }
+
     @Override
     public boolean onQueryTextChange(String newText) {
-//        if (!newText.isEmpty()) {
-//            Log.i(TAG, "Search changed: " + newText);
-//        }
-        Log.i(TAG, "textChanged: " + newText);
+        Log.v(TAG, "TextChanged: " + newText);
         adapter.getFilter().filter(newText);
         return true;
     }
 
     @Override
     public boolean onQueryTextSubmit(String query) {
-        Log.i(TAG, "Search submitted: " + query);
+        Log.v(TAG, "Search submitted: " + query);
         hideSoftKeyboard();
         hideSearchView();
         return true;
@@ -261,21 +260,24 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
         }
     }
 
-    protected void updateEntries(final List<? extends Item> newItems) {
+    void updateEntries(final List<? extends Item> newItems) {
+        Log.d(TAG, "Updating " + newItems.size() + " entries");
         Activity parentActivity = getActivity();
         if (parentActivity != null) {
             parentActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     entries.clear();
+                    //noinspection unchecked
                     entries.addAll(newItems);
+                    //noinspection unchecked
                     adapter.resetEntries(newItems);
                 }
             });
         }
     }
 
-    protected void replaceWithFragment(Fragment fragment) {
+    void replaceWithFragment(Fragment fragment) {
         // Hide these when swapping fragments as otherwise they
         // will hang around when the user clicks an item in the ListView
         // while still in the process of searching

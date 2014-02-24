@@ -1,31 +1,24 @@
 package com.facetoe.remotempd.fragments;
 
 import android.os.AsyncTask;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.AdapterView;
+import android.widget.SearchView;
+import android.widget.Toast;
 import com.facetoe.remotempd.R;
 import com.facetoe.remotempd.RMPDApplication;
 import com.facetoe.remotempd.adapters.AbstractMPDArrayAdapter;
-import com.facetoe.remotempd.adapters.FilterTextWatcher;
 import com.facetoe.remotempd.adapters.SongListAdapter;
 import org.a0z.mpd.Album;
 import org.a0z.mpd.Music;
 import org.a0z.mpd.exception.MPDServerException;
-
-import java.util.List;
 
 /**
  * RemoteMPD
  * Created by facetoe on 23/02/14.
  */
 public class SongListFragment extends AbstractListFragment {
-    private static final String TAG = RMPDApplication.APP_PREFIX + "SongListFragment";
-    private Album album;
+    private final Album album;
 
     SongListFragment(SearchView searchView, Album album) {
         super(searchView);
@@ -35,13 +28,14 @@ public class SongListFragment extends AbstractListFragment {
     @Override
     public void onStart() {
         super.onStart();
-        if(entries.size() == 0) {
+        if (entries.size() == 0) {
             new LoadAlbumSongsTask().execute();
         }
     }
 
     @Override
     protected AbstractMPDArrayAdapter getAdapter() {
+        //noinspection unchecked
         return new SongListAdapter(getActivity(), R.layout.song_list, entries);
     }
 
@@ -52,14 +46,13 @@ public class SongListFragment extends AbstractListFragment {
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        final Music song = (Music)adapter.getItem(position);
-        final Toast toast = Toast.makeText(getActivity(), song.getTitle() + " added to playlist", Toast.LENGTH_SHORT);
-        toast.setGravity(Gravity.CENTER, 0, 0);
+        final Music song = (Music) adapter.getItem(position);
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     mpd.add(song);
+                    Toast toast = makeToast(song.getTitle() + " added to playlist");
                     toast.show();
                 } catch (MPDServerException e) {
                     app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED);
@@ -68,7 +61,7 @@ public class SongListFragment extends AbstractListFragment {
         }).start();
     }
 
-    class LoadAlbumSongsTask extends AsyncTask<Void, Void, Void> {
+    private class LoadAlbumSongsTask extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected void onPreExecute() {

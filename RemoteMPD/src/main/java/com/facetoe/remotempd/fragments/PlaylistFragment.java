@@ -19,25 +19,23 @@ import org.a0z.mpd.Music;
 import org.a0z.mpd.event.StatusChangeListener;
 import org.a0z.mpd.exception.MPDServerException;
 
-import java.util.Collections;
-
 
 /**
  * RemoteMPD
  * Created by facetoe on 11/02/14.
  */
 public class PlaylistFragment extends Fragment implements AdapterView.OnItemClickListener, StatusChangeListener {
-    RMPDApplication app = RMPDApplication.getInstance();
-    MPDPlaylist playlist = app.getMpd().getPlaylist();
-    ListView listPlaylist;
-    MusicAdapter musicAdapter;
+    private final RMPDApplication app = RMPDApplication.getInstance();
+    private final MPDPlaylist playlist = app.getMpd().getPlaylist();
+    private MusicAdapter musicAdapter;
 
-    private String TAG = RMPDApplication.APP_PREFIX + "PlaylistFragment";
+    private final String TAG = RMPDApplication.APP_PREFIX + "PlaylistFragment";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.playlist, container, false);
-        listPlaylist = (ListView) rootView.findViewById(R.id.listPlaylist);
+        assert rootView != null;
+        ListView listPlaylist = (ListView) rootView.findViewById(R.id.listPlaylist);
         listPlaylist.setFastScrollEnabled(true);
         listPlaylist.setFastScrollAlwaysVisible(true);
         listPlaylist.setOnItemClickListener(this);
@@ -65,11 +63,6 @@ public class PlaylistFragment extends Fragment implements AdapterView.OnItemClic
         });
 
         return rootView;
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
     }
 
     @Override

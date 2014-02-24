@@ -1,10 +1,5 @@
 package com.facetoe.remotempd.fragments;
 
-/**
- * RemoteMPD
- * Created by facetoe on 6/02/14.
- */
-
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
@@ -48,7 +43,7 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
         UNKNOWN
     }
 
-    PLAYER_STATE playerState = PLAYER_STATE.UNKNOWN;
+    private PLAYER_STATE playerState = PLAYER_STATE.UNKNOWN;
     private MPDStatus mpdStatus;
 
 
@@ -60,6 +55,7 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.player_bar, container, false);
+        assert rootView != null;
         btnPlay = (ImageButton) rootView.findViewById(R.id.btnPlay);
         btnNext = (ImageButton) rootView.findViewById(R.id.btnNext);
         btnPrev = (ImageButton) rootView.findViewById(R.id.btnPrev);
@@ -79,11 +75,6 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
         // Don't kill the fragment on configuration change
         setRetainInstance(true);
         return rootView;
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
     }
 
     @Override
@@ -213,7 +204,7 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
             public void run() {
                 try {
                     if (playerState == PLAYER_STATE.PLAYING) {
-                        mpd.stop();
+                        mpd.pause();
                     } else if (playerState == PLAYER_STATE.STOPPED || playerState == PLAYER_STATE.PAUSED) {
                         mpd.play();
                     }

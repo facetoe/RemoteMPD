@@ -14,8 +14,6 @@ import org.a0z.mpd.Artist;
 import org.a0z.mpd.ConnectionListener;
 import org.a0z.mpd.exception.MPDServerException;
 
-import java.util.List;
-
 
 /**
  * RemoteMPD
@@ -24,8 +22,8 @@ import java.util.List;
 
 
 public class ArtistListFragment extends AbstractListFragment implements ConnectionListener {
-    MPDAsyncHelper asyncHelper = RMPDApplication.getInstance().getAsyncHelper();
-    private String TAG = RMPDApplication.APP_PREFIX + "ArtistListFragment";
+    private final MPDAsyncHelper asyncHelper = RMPDApplication.getInstance().getAsyncHelper();
+    private final String TAG = RMPDApplication.APP_PREFIX + "ArtistListFragment";
 
     public ArtistListFragment(SearchView searchView) {
         super(searchView);
@@ -38,6 +36,7 @@ public class ArtistListFragment extends AbstractListFragment implements Connecti
 
     @Override
     protected AbstractMPDArrayAdapter getAdapter() {
+        //noinspection unchecked
         return new ArtistAdapter(getActivity(), R.layout.list_item, entries);
     }
 
@@ -82,6 +81,7 @@ public class ArtistListFragment extends AbstractListFragment implements Connecti
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         final Artist artist = (Artist) adapter.getItem(position);
+        Log.d(TAG, "Artist clicked: " + artist.getName());
         ArtistAlbumsListFragment albumFragment = new ArtistAlbumsListFragment(searchView, artist);
         replaceWithFragment(albumFragment);
     }

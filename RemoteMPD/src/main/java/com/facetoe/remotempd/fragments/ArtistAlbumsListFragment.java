@@ -1,24 +1,17 @@
 package com.facetoe.remotempd.fragments;
 
-import android.app.Activity;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.AdapterView;
+import android.widget.SearchView;
 import com.facetoe.remotempd.R;
 import com.facetoe.remotempd.RMPDApplication;
 import com.facetoe.remotempd.adapters.AbstractMPDArrayAdapter;
 import com.facetoe.remotempd.adapters.AlbumAdapter;
-import com.facetoe.remotempd.adapters.FilterTextWatcher;
 import org.a0z.mpd.Album;
 import org.a0z.mpd.Artist;
-import org.a0z.mpd.Music;
 import org.a0z.mpd.exception.MPDServerException;
-
-import java.util.List;
 
 /**
  * RemoteMPD
@@ -26,7 +19,7 @@ import java.util.List;
  */
 public class ArtistAlbumsListFragment extends AbstractListFragment {
     private static final String TAG = RMPDApplication.APP_PREFIX + "ArtistAlbumsListFragment";
-    Artist artist;
+    private final Artist artist;
 
     ArtistAlbumsListFragment(SearchView searchView, Artist artist) {
         super(searchView);
@@ -36,13 +29,14 @@ public class ArtistAlbumsListFragment extends AbstractListFragment {
     @Override
     public void onStart() {
         super.onStart();
-        if(entries.size() == 0) {
+        if (entries.size() == 0) {
             new LoadAlbumsTask().execute();
         }
     }
 
     @Override
     protected AbstractMPDArrayAdapter getAdapter() {
+        //noinspection unchecked
         return new AlbumAdapter(getActivity(), R.layout.list_item, entries);
     }
 
@@ -54,12 +48,12 @@ public class ArtistAlbumsListFragment extends AbstractListFragment {
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Album album = (Album) adapter.getItem(position);
-        Log.i(TAG, "Clicked album: " + album.getName());
+        Log.d(TAG, "Clicked album: " + album.getName());
         SongListFragment songListFragment = new SongListFragment(searchView, album);
         replaceWithFragment(songListFragment);
     }
 
-    class LoadAlbumsTask extends AsyncTask<Void, Void, Void> {
+    private class LoadAlbumsTask extends AsyncTask<Void, Void, Void> {
         @Override
         protected void onPreExecute() {
             spinnerLayout.setVisibility(View.VISIBLE);
@@ -73,8 +67,7 @@ public class ArtistAlbumsListFragment extends AbstractListFragment {
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                Log.i(TAG, "Getting albums for " + artist.getName());
-                Log.i(TAG, "Found " + entries + " albums for artist");
+                Log.d(TAG, "Getting albums for " + artist.getName());
                 updateEntries(mpd.getAlbums(artist, true));
             } catch (MPDServerException e) {
                 app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED);
