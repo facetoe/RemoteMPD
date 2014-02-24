@@ -3,6 +3,7 @@ package com.facetoe.remotempd.fragments;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,16 +45,23 @@ public class SongListFragment extends AbstractListFragment {
 
         adapter = new SongListAdapter(getActivity(), R.layout.song_list, entries);
 
+        getActivity().setTitle(album.getName());
+
         listItems = (ListView) rootView.findViewById(R.id.listItems);
+        TextView emptyMessage = (TextView)rootView.findViewById(R.id.txtEmptyFilterableList);
+        listItems.setEmptyView(emptyMessage);
+
         listItems.setAdapter(adapter);
         listItems.setOnItemClickListener(this);
+        registerForContextMenu(listItems);
         return rootView;
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         final Music song = (Music)adapter.getItem(position);
-        final Toast toast = Toast.makeText(getActivity(), "Added " + song.getTitle() + " to playlist", Toast.LENGTH_SHORT);
+        final Toast toast = Toast.makeText(getActivity(), song.getTitle() + " added to playlist", Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER, 0, 0);
         new Thread(new Runnable() {
             @Override
             public void run() {

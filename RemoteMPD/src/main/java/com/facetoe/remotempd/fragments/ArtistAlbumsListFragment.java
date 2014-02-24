@@ -43,10 +43,15 @@ public class ArtistAlbumsListFragment extends AbstractListFragment {
         View rootView = inflater.inflate(R.layout.filterable_list, container, false);
         spinnerLayout = (LinearLayout)rootView.findViewById(R.id.filterableListSpinnerLayout);
 
-        adapter = new AlbumAdapter(getActivity(), R.layout.album_item, entries);
+        getActivity().setTitle(artist.getName());
+
+        adapter = new AlbumAdapter(getActivity(), R.layout.list_item, entries);
         listItems = (ListView) rootView.findViewById(R.id.listItems);
+        TextView emptyMessage = (TextView)rootView.findViewById(R.id.txtEmptyFilterableList);
+        listItems.setEmptyView(emptyMessage);
         listItems.setAdapter(adapter);
         listItems.setOnItemClickListener(this);
+        registerForContextMenu(listItems);
 
         return rootView;
     }

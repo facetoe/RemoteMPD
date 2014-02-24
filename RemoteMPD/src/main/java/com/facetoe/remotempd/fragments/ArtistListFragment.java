@@ -1,24 +1,17 @@
 package com.facetoe.remotempd.fragments;
 
-import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentTransaction;
-import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.widget.*;
 import com.facetoe.remotempd.R;
 import com.facetoe.remotempd.RMPDApplication;
-import com.facetoe.remotempd.adapters.*;
+import com.facetoe.remotempd.adapters.ArtistAdapter;
 import com.facetoe.remotempd.helpers.MPDAsyncHelper;
 import org.a0z.mpd.*;
 import org.a0z.mpd.exception.MPDServerException;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -40,16 +33,20 @@ public class ArtistListFragment extends AbstractListFragment implements Connecti
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.filterable_list, container, false);
-
         adapter = new ArtistAdapter(getActivity(), R.layout.list_item, entries);
-        spinnerLayout = (LinearLayout)rootView.findViewById(R.id.filterableListSpinnerLayout);
+        spinnerLayout = (LinearLayout) rootView.findViewById(R.id.filterableListSpinnerLayout);
+
+        getActivity().setTitle(getString(R.string.artistFragmentTitle));
 
         listItems = (ListView) rootView.findViewById(R.id.listItems);
+        TextView emptyMessage = (TextView) rootView.findViewById(R.id.txtEmptyFilterableList);
+        listItems.setEmptyView(emptyMessage);
         listItems.setOnItemClickListener(this);
         listItems.setAdapter(adapter);
 
-        setRetainInstance(true);
+        registerForContextMenu(listItems);
 
+        setRetainInstance(true);
         return rootView;
     }
 
@@ -57,7 +54,7 @@ public class ArtistListFragment extends AbstractListFragment implements Connecti
     public void onStart() {
         super.onStart();
         asyncHelper.addConnectionListener(this);
-        if(asyncHelper.oMPD.isConnected()) {
+        if (asyncHelper.oMPD.isConnected()) {
             new LoadArtistTask().execute();
         }
     }
@@ -75,13 +72,15 @@ public class ArtistListFragment extends AbstractListFragment implements Connecti
 
     @Override
     public void connectionSucceeded(String message) {
-        new LoadArtistTask().execute();
+        if (entries.size() == 0) {
+            new LoadArtistTask().execute();
+        }
     }
 
     private void addArtists() {
         Log.i(TAG, "addArtists()");
         try {
-            if(entries.size() == 0) {
+            if (entries.size() == 0) {
                 List<Artist> artists = mpd.getArtists();
                 Log.i(TAG, "Adding " + artists.size() + " artists.");
                 entries.addAll(artists);

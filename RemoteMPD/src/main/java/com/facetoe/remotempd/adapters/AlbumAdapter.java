@@ -1,6 +1,7 @@
 package com.facetoe.remotempd.adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,9 +26,13 @@ public class AlbumAdapter extends AbstractMPDArrayAdapter<Album> {
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = LayoutInflater.from(context);
         View rowView = inflater.inflate(itemLayoutID, parent, false);
-        TextView txtAlbum = (TextView) rowView.findViewById(R.id.txtAlbum);
-        Album album = (Album)items.get(position);
-        txtAlbum.setText(album.getName());
+        TextView txtAlbum = (TextView) rowView.findViewById(R.id.txtView);
+        Album album = getItem(position);
+        if (album != null) {
+            txtAlbum.setText(album.getName());
+        } else {
+            Log.e(TAG, "Invalid position: " + position + ". Expected < " + items.size());
+        }
         return rowView;
     }
 }
