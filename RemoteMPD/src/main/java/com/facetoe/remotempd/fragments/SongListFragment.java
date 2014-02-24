@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.*;
 import com.facetoe.remotempd.R;
 import com.facetoe.remotempd.RMPDApplication;
+import com.facetoe.remotempd.adapters.AbstractMPDArrayAdapter;
 import com.facetoe.remotempd.adapters.FilterTextWatcher;
 import com.facetoe.remotempd.adapters.SongListAdapter;
 import org.a0z.mpd.Album;
@@ -25,7 +26,6 @@ import java.util.List;
 public class SongListFragment extends AbstractListFragment {
     private static final String TAG = RMPDApplication.APP_PREFIX + "SongListFragment";
     private Album album;
-    private LinearLayout spinnerLayout;
 
     SongListFragment(SearchView searchView, Album album) {
         super(searchView);
@@ -39,22 +39,13 @@ public class SongListFragment extends AbstractListFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.filterable_list, container, false);
-        spinnerLayout = (LinearLayout)rootView.findViewById(R.id.filterableListSpinnerLayout);
+    protected AbstractMPDArrayAdapter getAdapter() {
+        return new SongListAdapter(getActivity(), R.layout.song_list, entries);
+    }
 
-        adapter = new SongListAdapter(getActivity(), R.layout.song_list, entries);
-
-        getActivity().setTitle(album.getName());
-
-        listItems = (ListView) rootView.findViewById(R.id.listItems);
-        TextView emptyMessage = (TextView)rootView.findViewById(R.id.txtEmptyFilterableList);
-        listItems.setEmptyView(emptyMessage);
-
-        listItems.setAdapter(adapter);
-        listItems.setOnItemClickListener(this);
-        registerForContextMenu(listItems);
-        return rootView;
+    @Override
+    protected String getTitle() {
+        return album.getName();
     }
 
     @Override

@@ -1,15 +1,17 @@
 package com.facetoe.remotempd.fragments;
 
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.util.Log;
-import android.view.*;
-import android.widget.*;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.SearchView;
 import com.facetoe.remotempd.R;
 import com.facetoe.remotempd.RMPDApplication;
+import com.facetoe.remotempd.adapters.AbstractMPDArrayAdapter;
 import com.facetoe.remotempd.adapters.ArtistAdapter;
 import com.facetoe.remotempd.helpers.MPDAsyncHelper;
-import org.a0z.mpd.*;
+import org.a0z.mpd.Artist;
+import org.a0z.mpd.ConnectionListener;
 import org.a0z.mpd.exception.MPDServerException;
 
 import java.util.List;
@@ -24,30 +26,19 @@ import java.util.List;
 public class ArtistListFragment extends AbstractListFragment implements ConnectionListener {
     MPDAsyncHelper asyncHelper = RMPDApplication.getInstance().getAsyncHelper();
     private String TAG = RMPDApplication.APP_PREFIX + "ArtistListFragment";
-    private LinearLayout spinnerLayout;
 
     public ArtistListFragment(SearchView searchView) {
         super(searchView);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.filterable_list, container, false);
-        adapter = new ArtistAdapter(getActivity(), R.layout.list_item, entries);
-        spinnerLayout = (LinearLayout) rootView.findViewById(R.id.filterableListSpinnerLayout);
+    protected String getTitle() {
+        return getString(R.string.artistFragmentTitle);
+    }
 
-        getActivity().setTitle(getString(R.string.artistFragmentTitle));
-
-        listItems = (ListView) rootView.findViewById(R.id.listItems);
-        TextView emptyMessage = (TextView) rootView.findViewById(R.id.txtEmptyFilterableList);
-        listItems.setEmptyView(emptyMessage);
-        listItems.setOnItemClickListener(this);
-        listItems.setAdapter(adapter);
-
-        registerForContextMenu(listItems);
-
-        setRetainInstance(true);
-        return rootView;
+    @Override
+    protected AbstractMPDArrayAdapter getAdapter() {
+        return new ArtistAdapter(getActivity(), R.layout.list_item, entries);
     }
 
     @Override
@@ -93,7 +84,7 @@ public class ArtistListFragment extends AbstractListFragment implements Connecti
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        final Artist artist = (Artist) entries.get(position);
+        final Artist artist = (Artist) adapter.getItem(position);
         ArtistAlbumsListFragment albumFragment = new ArtistAlbumsListFragment(searchView, artist);
         replaceWithFragment(albumFragment);
     }

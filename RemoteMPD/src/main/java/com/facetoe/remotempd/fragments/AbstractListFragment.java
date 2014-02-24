@@ -7,15 +7,9 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.ContextMenu;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
+import android.view.*;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
-import android.widget.ListView;
-import android.widget.SearchView;
-import android.widget.Toast;
+import android.widget.*;
 import com.facetoe.remotempd.R;
 import com.facetoe.remotempd.RMPDApplication;
 import com.facetoe.remotempd.adapters.AbstractMPDArrayAdapter;
@@ -38,11 +32,48 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
     protected List entries = new ArrayList<Item>();
     protected SearchView searchView;
 
+
     protected static final int ADD_ITEM = 1;
     protected static final int ADD_AND_REPLACE = 2;
     protected static final int ADD_REPLACE_AND_PLAY = 3;
     protected static final int ADD_AND_PLAY = 4;
+    protected LinearLayout spinnerLayout;
 
+    abstract protected AbstractMPDArrayAdapter getAdapter();
+    abstract protected String getTitle();
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.filterable_list, container, false);
+        spinnerLayout = (LinearLayout) rootView.findViewById(R.id.filterableListSpinnerLayout);
+
+        Activity parentActivity = getActivity();
+        if (parentActivity != null) {
+            parentActivity.setTitle(getTitle());
+        } else {
+            Log.w(TAG, "parentActivity was null");
+        }
+
+        listItems = (ListView) rootView.findViewById(R.id.listItems);
+        TextView emptyMessage = (TextView) rootView.findViewById(R.id.txtEmptyFilterableList);
+        listItems.setEmptyView(emptyMessage);
+        listItems.setOnItemClickListener(this);
+        registerForContextMenu(listItems);
+
+        adapter = getAdapter();
+        listItems.setAdapter(adapter);
+
+        setRetainInstance(true);
+
+        // Clear the filter if we are returning to this fragment
+        // otherwise if the user filters, then clicks on an item, then clicks back
+        // the list will still be showing the filtered results. 
+        if(savedInstanceState != null) {
+            adapter.getFilter().filter("");
+        }
+
+        return rootView;
+    }
 
     public AbstractListFragment(SearchView searchView) {
         this.searchView = searchView;
