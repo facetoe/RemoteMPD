@@ -44,7 +44,6 @@ public class WifiConnectionAsyncTask extends AsyncTask<Void, String, Boolean> {
     protected void onPreExecute() {
         super.onPreExecute();
         Log.i(TAG, "onPreExecute");
-        app.notifyEvent(RMPDApplication.Event.LOCK_CONNECTIONS);
         dialog = new ProgressDialog(activity);
         dialog.setTitle("Connecting to Wifi");
         dialog.setMessage("Please wait, connecting to Wifi network");
@@ -58,7 +57,6 @@ public class WifiConnectionAsyncTask extends AsyncTask<Void, String, Boolean> {
         Log.i(TAG, "onPostExecute");
         dialog.dismiss();
         timer.cancel();
-        app.notifyEvent(RMPDApplication.Event.RELEASE_CONNECTION_LOCK);
         app.notifyEvent(RMPDApplication.Event.CONNECT);
     }
 

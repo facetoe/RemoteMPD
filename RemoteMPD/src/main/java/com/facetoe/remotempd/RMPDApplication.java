@@ -26,7 +26,7 @@ import java.util.ArrayList;
  */
 
 public class RMPDApplication extends Application implements
-        SharedPreferences.OnSharedPreferenceChangeListener, ConnectionListener, StatusChangeListener, TrackPositionListener {
+        SharedPreferences.OnSharedPreferenceChangeListener, ConnectionListener {
 
     private static RMPDApplication instance;
     public final static String APP_PREFIX = "RMPD-";
@@ -35,11 +35,8 @@ public class RMPDApplication extends Application implements
 
     private Activity currentActivity;
     private MPDAsyncHelper asyncHelper;
-    private final ArrayList<MPDManagerChangeListener> mpdManagerChangeListeners = new ArrayList<MPDManagerChangeListener>();
 
     public enum Event {
-        LOCK_CONNECTIONS,
-        RELEASE_CONNECTION_LOCK,
         CONNECT,
         CONNECTING,
         CONNECTION_FAILED,
@@ -47,63 +44,22 @@ public class RMPDApplication extends Application implements
         REFUSED_BT_ENABLE
     }
 
+    private enum ConnectionState {
+        CONNECTING,
+        CONNECTED,
+        DISCONNECTED
+    }
+    ConnectionState connectionState = ConnectionState.DISCONNECTED;
+
     @Override
     public void onCreate() {
         super.onCreate();
         instance = this;
         asyncHelper = new MPDAsyncHelper();
         asyncHelper.addConnectionListener(this);
-        asyncHelper.addStatusChangeListener(this);
-        asyncHelper.addTrackPositionListener(this);
         MPD.setApplicationContext(getApplicationContext());
         PreferenceManager.getDefaultSharedPreferences(this)
                 .registerOnSharedPreferenceChangeListener(this);
-    }
-
-
-    @Override
-    public void volumeChanged(MPDStatus mpdStatus, int oldVolume) {
-
-    }
-
-    @Override
-    public void playlistChanged(MPDStatus mpdStatus, int oldPlaylistVersion) {
-        Log.i(TAG, "Playlist changed");
-    }
-
-    @Override
-    public void trackChanged(MPDStatus mpdStatus, int oldTrack) {
-        Log.i(TAG, "Track changed");
-    }
-
-    @Override
-    public void stateChanged(MPDStatus mpdStatus, String oldState) {
-
-    }
-
-    @Override
-    public void repeatChanged(boolean repeating) {
-
-    }
-
-    @Override
-    public void randomChanged(boolean random) {
-
-    }
-
-    @Override
-    public void connectionStateChanged(boolean connected, boolean connectionLost) {
-        Log.i(TAG, "Connection state changed");
-    }
-
-    @Override
-    public void libraryStateChanged(boolean updating) {
-
-    }
-
-    @Override
-    public void trackPositionChanged(MPDStatus status) {
-        Log.i(TAG, "Track position changed");
     }
 
     public static RMPDApplication getInstance() {
@@ -129,10 +85,6 @@ public class RMPDApplication extends Application implements
 
     public void notifyEvent(Event event) {
         switch (event) {
-            case LOCK_CONNECTIONS:
-                break;
-            case RELEASE_CONNECTION_LOCK:
-                break;
             case CONNECT:
                 connect();
                 break;
@@ -141,6 +93,9 @@ public class RMPDApplication extends Application implements
                 break;
             case CONNECTION_SUCCEEDED:
                 dismissDialog();
+                break;
+            case CONNECTION_FAILED:
+                maybeShowConnectionFailedDialog("Failed to contact MPD server");
                 break;
             case REFUSED_BT_ENABLE:
                 showRefusedBluetoothEnableDialog();
@@ -174,10 +129,15 @@ public class RMPDApplication extends Application implements
     }
 
     private void connect() {
+        if(connectionState == ConnectionState.CONNECTING) {
+            Log.w(TAG, "Connect called when connection already in progress.");
+            return;
+        }
         Log.i(TAG, "Connecting...");
         if(!asyncHelper.isMonitorAlive()) {
             asyncHelper.startMonitor();
         }
+        setConnectionState(ConnectionState.CONNECTING);
         asyncHelper.connect();
         showConnectingProgressDialog();
     }
@@ -190,12 +150,14 @@ public class RMPDApplication extends Application implements
     @Override
     public void connectionFailed(String message) {
         Log.i(TAG, "Connection failed: " + message);
+        setConnectionState(ConnectionState.DISCONNECTED);
         maybeShowConnectionFailedDialog(message);
     }
 
     @Override
     public void connectionSucceeded(String message) {
         Log.i(TAG, "Connection succeeded: " + message);
+        setConnectionState(ConnectionState.CONNECTED);
         dismissDialog();
     }
 
@@ -264,7 +226,7 @@ public class RMPDApplication extends Application implements
     }
 
     private void checkConnection() {
-        if (!asyncHelper.oMPD.isConnected()) {
+        if (!asyncHelper.oMPD.isConnected() && connectionState != ConnectionState.CONNECTING) {
             connect();
         }
     }
@@ -321,5 +283,10 @@ public class RMPDApplication extends Application implements
             asyncHelper.stopMonitor();
             asyncHelper.disconnect();
         }
+    }
+
+    private void setConnectionState(ConnectionState newState) {
+        Log.d(TAG, "Connection state changed from " + connectionState + " to " + newState);
+        connectionState = newState;
     }
 }

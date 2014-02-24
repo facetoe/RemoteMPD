@@ -248,7 +248,6 @@ public class MPDAsyncHelper extends Handler {
                             BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
                             BluetoothDevice device = adapter.getRemoteDevice(lastDevice);
                             oMPD.connect(device);
-
                         } else {
                             oMPD.connect(SettingsHelper.getHost(),
                                     SettingsHelper.getPort(),

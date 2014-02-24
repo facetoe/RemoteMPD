@@ -26,7 +26,8 @@ import java.util.List;
 abstract class AbstractListFragment extends Fragment implements AdapterView.OnItemClickListener,
         SearchView.OnQueryTextListener {
     private static final String TAG = RMPDApplication.APP_PREFIX + "AbstractListFragment";
-    protected final MPD mpd = RMPDApplication.getInstance().getMpd();
+    protected final RMPDApplication app = RMPDApplication.getInstance();
+    protected final MPD mpd = app.getMpd();
     protected AbstractMPDArrayAdapter adapter;
     protected ListView listItems;
     protected List entries = new ArrayList<Item>();
@@ -40,6 +41,7 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
     protected LinearLayout spinnerLayout;
 
     abstract protected AbstractMPDArrayAdapter getAdapter();
+
     abstract protected String getTitle();
 
     @Override
@@ -67,8 +69,8 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
 
         // Clear the filter if we are returning to this fragment
         // otherwise if the user filters, then clicks on an item, then clicks back
-        // the list will still be showing the filtered results. 
-        if(savedInstanceState != null) {
+        // the list will still be showing the filtered results.
+        if (savedInstanceState != null) {
             adapter.getFilter().filter("");
         }
 
@@ -177,7 +179,7 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
                     toast.setText("Added " + artist.getName());
                     toast.show();
                 } catch (MPDServerException e) {
-                    e.printStackTrace();
+                    app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED);
                 }
             }
         }).start();
@@ -193,7 +195,7 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
                     toast.setText("Added " + album.getName());
                     toast.show();
                 } catch (MPDServerException e) {
-                    e.printStackTrace();
+                    app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED);
                 }
             }
         }).start();
@@ -209,7 +211,7 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
                     toast.setText("Added " + song.getName());
                     toast.show();
                 } catch (MPDServerException e) {
-                    e.printStackTrace();
+                    app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED);
                 }
             }
         }).start();
@@ -217,18 +219,17 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        if (!newText.isEmpty()) {
-            Log.i(TAG, "Search changed: " + newText);
-            adapter.getFilter().filter(newText);
-        }
+//        if (!newText.isEmpty()) {
+//            Log.i(TAG, "Search changed: " + newText);
+//        }
+        Log.i(TAG, "textChanged: " + newText);
+        adapter.getFilter().filter(newText);
         return true;
     }
 
     @Override
     public boolean onQueryTextSubmit(String query) {
         Log.i(TAG, "Search submitted: " + query);
-        adapter.getFilter().filter(query);
-
         hideSoftKeyboard();
         hideSearchView();
         return true;
@@ -263,6 +264,8 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
             parentActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    entries.clear();
+                    entries.addAll(newItems);
                     adapter.resetEntries(newItems);
                 }
             });

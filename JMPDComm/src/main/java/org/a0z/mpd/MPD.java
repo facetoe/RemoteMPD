@@ -209,7 +209,6 @@ public class MPD {
      */
     public void connect(BluetoothDevice device) throws MPDServerException {
         mpdConnection = new BluetoothMPDConnection(device);
-        mpdConnection.connect();
     }
 
     /**

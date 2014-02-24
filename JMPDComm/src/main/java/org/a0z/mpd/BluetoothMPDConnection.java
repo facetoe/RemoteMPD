@@ -7,9 +7,7 @@ import com.google.gson.reflect.TypeToken;
 import org.a0z.mpd.exception.NoBluetoothServerConnectionException;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;

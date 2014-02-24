@@ -12,6 +12,6 @@
         android:text="Medium Text"
         android:id="@+id/txtView"
         android:layout_gravity="left"
-        android:layout_margin="15dp"
-        android:textSize="20dp"/>
+        android:layout_margin="13dp"
+        android:textSize="17dp"/>
 </LinearLayout>

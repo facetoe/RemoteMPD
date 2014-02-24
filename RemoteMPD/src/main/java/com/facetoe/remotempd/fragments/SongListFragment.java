@@ -60,7 +60,7 @@ public class SongListFragment extends AbstractListFragment {
                     mpd.add(song);
                     toast.show();
                 } catch (MPDServerException e) {
-                    Log.e(TAG, "Error: " + e.getMessage());
+                    app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED);
                 }
             }
         }).start();
@@ -81,10 +81,9 @@ public class SongListFragment extends AbstractListFragment {
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                entries.addAll(mpd.getSongs(album.getArtist(), album));
-                updateEntries(entries);
+                updateEntries(mpd.getSongs(album.getArtist(), album));
             } catch (MPDServerException e) {
-                e.printStackTrace();
+                app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED);
             }
             return null;
         }

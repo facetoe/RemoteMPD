@@ -32,6 +32,8 @@
         android:id="@+id/txtEmptyFilterableList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="No results."/>
+        android:gravity="center"
+        android:text="No results."
+        android:textSize="15sp"/>
 
 </LinearLayout>

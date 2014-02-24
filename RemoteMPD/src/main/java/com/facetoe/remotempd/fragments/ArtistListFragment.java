@@ -72,13 +72,10 @@ public class ArtistListFragment extends AbstractListFragment implements Connecti
         Log.i(TAG, "addArtists()");
         try {
             if (entries.size() == 0) {
-                List<Artist> artists = mpd.getArtists();
-                Log.i(TAG, "Adding " + artists.size() + " artists.");
-                entries.addAll(artists);
-                updateEntries(entries);
+                updateEntries(mpd.getArtists());
             }
         } catch (MPDServerException e) {
-            Log.e(TAG, "Error updating entries: " + e.getMessage());
+            app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED);
         }
     }
 

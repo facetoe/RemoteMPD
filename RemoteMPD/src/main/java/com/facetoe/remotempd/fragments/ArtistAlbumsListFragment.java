@@ -1,5 +1,6 @@
 package com.facetoe.remotempd.fragments;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -71,12 +72,10 @@ public class ArtistAlbumsListFragment extends AbstractListFragment {
         protected Void doInBackground(Void... params) {
             try {
                 Log.i(TAG, "Getting albums for " + artist.getName());
-                entries.clear();
-                entries.addAll(mpd.getAlbums(artist, true));
                 Log.i(TAG, "Found " + entries + " albums for artist");
-                updateEntries(entries);
+                updateEntries(mpd.getAlbums(artist, true));
             } catch (MPDServerException e) {
-                Log.e(TAG, "Error loading albums", e);
+                app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED);
             }
             return null;
         }

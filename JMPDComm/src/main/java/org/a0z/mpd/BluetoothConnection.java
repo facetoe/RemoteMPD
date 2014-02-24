@@ -30,13 +30,13 @@ public class BluetoothConnection {
 
     // Thread used to locate and connect to the bluetooth device
     private ConnectThread connectThread;
-
-    // Thread used to manage the connection once connected.
+    
+    // Thread used to manage the connection once connected. 
     private ConnectedThread connectedThread;
 
     // Command responses from the bluetooth server are placed in this queue
     LinkedBlockingQueue<MPDResponse> syncedResultQueue = new LinkedBlockingQueue<MPDResponse>();
-
+    
     // MPD idle connection updates are placed in this queue
     LinkedBlockingQueue<MPDResponse> mpdIdleUpdateQueue = new LinkedBlockingQueue<MPDResponse>();
 
@@ -319,16 +319,16 @@ public class BluetoothConnection {
 
         private void addToMpdIdleUpdateQueue(MPDResponse response) {
             try {
-                Log.d(TAG, "Adding MPD idle update to queue");
+                Log.d(TAG, "Adding changes to queue");
                 mpdIdleUpdateQueue.put(response);
             } catch (InterruptedException e) {
-                Log.e(TAG, "Interrupted while adding MPD idle update to queue");
+                e.printStackTrace();
             }
         }
 
         private void addToSyncedResultQueue(MPDResponse response) {
             try {
-                Log.d(TAG, "Putting synced result in queue: " + response);
+                Log.d(TAG, "Putting result in queue: " + response);
                 syncedResultQueue.put(response);
             } catch (InterruptedException e) {
                 Log.e(TAG, "Interrupted while adding response to queue");
