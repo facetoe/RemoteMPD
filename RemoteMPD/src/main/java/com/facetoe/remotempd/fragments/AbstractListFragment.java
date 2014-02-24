@@ -29,10 +29,10 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
     private static final String TAG = RMPDApplication.APP_PREFIX + "AbstractListFragment";
     final RMPDApplication app = RMPDApplication.getInstance();
     final MPD mpd = app.getMpd();
+
     AbstractMPDArrayAdapter adapter;
     final List entries = new ArrayList<Item>();
     final SearchView searchView;
-
 
     private static final int ADD_ITEM = 1;
     private static final int ADD_AND_REPLACE = 2;
@@ -50,16 +50,11 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
         assert rootView != null;
         spinnerLayout = (LinearLayout) rootView.findViewById(R.id.filterableListSpinnerLayout);
 
-        Activity parentActivity = getActivity();
-        if (parentActivity != null) {
-            parentActivity.setTitle(getTitle());
-        } else {
-            Log.w(TAG, "parentActivity was null");
-        }
+        setTitle();
 
         ListView listItems = (ListView) rootView.findViewById(R.id.listItems);
-        TextView emptyMessage = (TextView) rootView.findViewById(R.id.txtEmptyFilterableList);
-        listItems.setEmptyView(emptyMessage);
+        TextView emptyListMessage = (TextView) rootView.findViewById(R.id.txtEmptyFilterableList);
+        listItems.setEmptyView(emptyListMessage);
         listItems.setOnItemClickListener(this);
         registerForContextMenu(listItems);
 
@@ -76,6 +71,15 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
         }
 
         return rootView;
+    }
+
+    private void setTitle() {
+        Activity parentActivity = getActivity();
+        if (parentActivity != null) {
+            parentActivity.setTitle(getTitle());
+        } else {
+            Log.w(TAG, "parentActivity was null");
+        }
     }
 
     AbstractListFragment(SearchView searchView) {
@@ -171,12 +175,15 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
     }
 
     private void add(final Artist artist, final boolean replace, final boolean play) {
+        final Toast toast = Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     mpd.add(artist, replace, play);
-                    Toast toast = makeToast("Added " + artist.getName());
+                    toast.setText("Added " + artist.getName());
                     toast.show();
                 } catch (MPDServerException e) {
                     app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED);
@@ -186,12 +193,15 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
     }
 
     private void add(final Album album, final boolean replace, final boolean play) {
+        final Toast toast = Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     mpd.add(album, replace, play);
-                    Toast toast = makeToast("Added " + album.getName());
+                    toast.setText("Added " + album.getName());
                     toast.show();
                 } catch (MPDServerException e) {
                     app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED);
@@ -201,25 +211,21 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
     }
 
     private void add(final Music song, final boolean replace, final boolean play) {
+        final Toast toast = Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     mpd.add(song, replace, play);
-                    Toast toast = makeToast("Added " + song.getName());
+                    toast.setText("Added " + song.getName());
                     toast.show();
                 } catch (MPDServerException e) {
                     app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED);
                 }
             }
         }).start();
-    }
-
-    Toast makeToast(String toastText) {
-        @SuppressWarnings("ConstantConditions") @SuppressLint("ShowToast")
-        final Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
-        toast.setGravity(Gravity.CENTER, 0, 0);
-        return toast;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.facetoe.remotempd.fragments;
 
 import android.os.AsyncTask;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.SearchView;
@@ -47,12 +48,15 @@ public class SongListFragment extends AbstractListFragment {
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         final Music song = (Music) adapter.getItem(position);
+        final Toast toast = Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     mpd.add(song);
-                    Toast toast = makeToast(song.getTitle() + " added to playlist");
+                    toast.setText(song.getTitle() + " added to playlist");
                     toast.show();
                 } catch (MPDServerException e) {
                     app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED);
