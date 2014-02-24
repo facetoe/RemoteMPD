@@ -1,12 +1,11 @@
 package com.facetoe.remotempd;
 
+import android.app.Activity;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import com.facetoe.remotempd.fragments.PlaylistFragment;
 
-public class PlaylistActivity extends ActionBarActivity {
+public class PlaylistActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

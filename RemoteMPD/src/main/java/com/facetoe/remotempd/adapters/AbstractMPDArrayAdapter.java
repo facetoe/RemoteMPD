@@ -41,7 +41,12 @@ public class AbstractMPDArrayAdapter<T extends Item> extends ArrayAdapter<T> {
 
     @Override
     public T getItem(int position) {
-        return items.get(position);
+        if(items.size() == 0 || position >= items.size()) {
+            Log.e(TAG, "Invalid position. Expected <= " + items.size() + " got " + position);
+            return null;
+        } else {
+            return items.get(position);
+        }
     }
 
     @Override

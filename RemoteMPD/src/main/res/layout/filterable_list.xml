@@ -5,14 +5,20 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/txtSearch"
-        android:layout_gravity="center_horizontal"
-        android:inputType="textVisiblePassword"
-        />
+    <LinearLayout
+        android:id="@+id/filterableListSpinnerLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
 
+        <ProgressBar
+            android:id="@+id/filterableListSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+    </LinearLayout>
     <ListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

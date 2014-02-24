@@ -2,42 +2,36 @@ package com.facetoe.remotempd;
 
 import android.app.Activity;
 import android.app.FragmentTransaction;
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.SearchView;
 import com.facetoe.remotempd.fragments.ArtistListFragment;
 
 public class TestActivity extends Activity {
     private static final String TAG = RMPDApplication.APP_PREFIX + "TestActivity";
     private final RMPDApplication app = RMPDApplication.getInstance();
+    private boolean shouldShowFragment = true;
+    SearchView searchView;
+    MenuItem menuItem;
+    ArtistListFragment listFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
-        if (findViewById(R.id.filterableListContainer) != null) {
 
-            // However, if we're being restored from a previous state,
-            // then we don't need to do anything and should return or else
-            // we could end up with overlapping fragments.
-            if (savedInstanceState != null) {
-                return;
-            }
-
-            // Create a new Fragment to be placed in the activity layout
-            ArtistListFragment listFragment = new ArtistListFragment();
-
-            // Add the fragment to the 'fragment_container' FrameLayout
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
-            ft.add(R.id.filterableListContainer, listFragment);
-            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            ft.commit();
-        } else {
-            Log.e(TAG, "Couldn't find filterableListFragment");
+        // If savedInstance state isn't null then showing the fragment will
+        // result in overlapping fragments.
+        if(savedInstanceState != null) {
+            shouldShowFragment = false;
         }
-
     }
 
     @Override
@@ -58,11 +52,41 @@ public class TestActivity extends Activity {
         super.onDestroy();
     }
 
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.test, menu);
+        // Get the SearchView and set the searchable configuration
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        menuItem = menu.findItem(R.id.menu_search);
+        searchView = (SearchView)menuItem.getActionView();
+        searchView.setSearchableInfo(
+                searchManager.getSearchableInfo(getComponentName()));
+
+        // The reason for adding the fragment here is I need to be able to
+        // pass the search view in to perform filtering on search.
+        if(shouldShowFragment) {
+            showListFragment(searchView);
+        }
         return true;
+    }
+
+    private void showListFragment(SearchView searchView) {
+        if (findViewById(R.id.filterableListContainer) != null) {
+
+            // Create a new Fragment to be placed in the activity layout
+            listFragment = new ArtistListFragment(searchView);
+
+            // Add the fragment to the 'fragment_container' FrameLayout
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            ft.add(R.id.filterableListContainer, listFragment);
+            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            ft.commit();
+        } else {
+            Log.e(TAG, "Couldn't find filterableListFragment");
+        }
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.facetoe.remotempd.adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,9 +27,10 @@ public class ArtistAdapter extends AbstractMPDArrayAdapter<Artist> {
         LayoutInflater inflater = LayoutInflater.from(context);
         View rowView = inflater.inflate(itemLayoutID, parent, false);
         TextView txtView = (TextView) rowView.findViewById(R.id.txtView);
-
-        Artist artist = items.get(position);
-        txtView.setText(artist.getName());
+        Artist artist = getItem(position);
+        if (artist != null) {
+            txtView.setText(artist.getName());
+        }
         return rowView;
     }
 }
