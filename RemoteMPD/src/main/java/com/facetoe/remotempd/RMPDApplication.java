@@ -44,13 +44,6 @@ public class RMPDApplication extends Application implements
         REFUSED_BT_ENABLE
     }
 
-    private enum ConnectionState {
-        CONNECTING,
-        CONNECTED,
-        DISCONNECTED
-    }
-    ConnectionState connectionState = ConnectionState.DISCONNECTED;
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -129,15 +122,10 @@ public class RMPDApplication extends Application implements
     }
 
     private void connect() {
-        if(connectionState == ConnectionState.CONNECTING) {
-            Log.w(TAG, "Connect called when connection already in progress.");
-            return;
-        }
         Log.i(TAG, "Connecting...");
         if(!asyncHelper.isMonitorAlive()) {
             asyncHelper.startMonitor();
         }
-        setConnectionState(ConnectionState.CONNECTING);
         asyncHelper.connect();
         showConnectingProgressDialog();
     }
@@ -150,14 +138,12 @@ public class RMPDApplication extends Application implements
     @Override
     public void connectionFailed(String message) {
         Log.i(TAG, "Connection failed: " + message);
-        setConnectionState(ConnectionState.DISCONNECTED);
         maybeShowConnectionFailedDialog(message);
     }
 
     @Override
     public void connectionSucceeded(String message) {
         Log.i(TAG, "Connection succeeded: " + message);
-        setConnectionState(ConnectionState.CONNECTED);
         dismissDialog();
     }
 
@@ -226,7 +212,7 @@ public class RMPDApplication extends Application implements
     }
 
     private void checkConnection() {
-        if (!asyncHelper.oMPD.isConnected() && connectionState != ConnectionState.CONNECTING) {
+        if (!asyncHelper.oMPD.isConnected()) {
             connect();
         }
     }
@@ -283,10 +269,5 @@ public class RMPDApplication extends Application implements
             asyncHelper.stopMonitor();
             asyncHelper.disconnect();
         }
-    }
-
-    private void setConnectionState(ConnectionState newState) {
-        Log.d(TAG, "Connection state changed from " + connectionState + " to " + newState);
-        connectionState = newState;
     }
 }

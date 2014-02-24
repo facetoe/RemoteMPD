@@ -247,6 +247,7 @@ public class MPDAsyncHelper extends Handler {
                             String lastDevice = SettingsHelper.getLastDevice();
                             BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
                             BluetoothDevice device = adapter.getRemoteDevice(lastDevice);
+
                             oMPD.connect(device);
                         } else {
                             oMPD.connect(SettingsHelper.getHost(),
@@ -254,7 +255,7 @@ public class MPDAsyncHelper extends Handler {
                                     SettingsHelper.getPassword());
                         }
 
-                        //MPDAsyncHelper.this.obtainMessage(EVENT_CONNECTSUCCEEDED).sendToTarget();
+                        MPDAsyncHelper.this.obtainMessage(EVENT_CONNECTSUCCEEDED).sendToTarget();
 
                     } catch (MPDServerException e) {
                         MPDAsyncHelper.this.obtainMessage(EVENT_CONNECTFAILED, Tools.toObjectArray(e.getMessage())).sendToTarget();

@@ -9,7 +9,6 @@ import org.a0z.mpd.exception.NoBluetoothServerConnectionException;
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.*;
 
@@ -26,20 +25,17 @@ public class BluetoothConnection {
     private static int CURRENT_STATE = STATE_NONE;
 
     private final BluetoothAdapter bluetoothAdapter;
-    private ArrayList<ConnectionListener> connectionListeners = new ArrayList<ConnectionListener>();
 
-    // Thread used to locate and connect to the bluetooth device
-    private ConnectThread connectThread;
-    
-    // Thread used to manage the connection once connected. 
-    private ConnectedThread connectedThread;
+    // Thread used to communicate with the bluetooth server
+    private BluetoothCommThread bluetoothCommThread;
 
     // Command responses from the bluetooth server are placed in this queue
     LinkedBlockingQueue<MPDResponse> syncedResultQueue = new LinkedBlockingQueue<MPDResponse>();
-    
+
     // MPD idle connection updates are placed in this queue
     LinkedBlockingQueue<MPDResponse> mpdIdleUpdateQueue = new LinkedBlockingQueue<MPDResponse>();
 
+    // Thread pool for executing BTServerCallable's
     ExecutorService pool = Executors.newFixedThreadPool(10);
 
 
@@ -48,25 +44,84 @@ public class BluetoothConnection {
     private final BluetoothDevice bluetoothDevice;
 
     /**
-     * Constructor. Prepares a new BluetoothConnection session.
+     * Initialize and connect to the bluetooth server.
+     * @param device The device to connect to
+     * @throws NoBluetoothServerConnectionException On failure to connect.
      */
-    public BluetoothConnection(BluetoothDevice device) {
+    public BluetoothConnection(BluetoothDevice device) throws NoBluetoothServerConnectionException {
         bluetoothDevice = device;
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        connect();
     }
 
+    /**
+     * Attempt to connect to the device and launch the BluetoothCommThread for managing the connection.
+     */
+    public synchronized void connect() throws NoBluetoothServerConnectionException {
+        if (bluetoothAdapter == null) {
+            throw new NoBluetoothServerConnectionException("Bluetooth is not supported");
+        }
+
+        if (CURRENT_STATE == STATE_CONNECTING) {
+            Log.w(TAG, "Connection was already in progress, not proceeding with connection");
+            return;
+        }
+        Log.i(TAG, "connecting to: " + bluetoothDevice);
+
+        BluetoothSocket socket = getAndConnectBluetoothSocket();
+
+        // Start the thread to communicate with bluetooth server
+        bluetoothCommThread = new BluetoothCommThread(socket);
+        bluetoothCommThread.start();
+    }
+
+
+    /**
+     * Attempt to connect to the remote device and open the socket.
+     *
+     * @return The connected BluetoothSocket
+     * @throws NoBluetoothServerConnectionException If we can't find the device (most likely) or other error.
+     */
+    private BluetoothSocket getAndConnectBluetoothSocket() throws NoBluetoothServerConnectionException {
+        BluetoothSocket socket;
+        setState(STATE_CONNECTING);
+        try {
+            socket = bluetoothDevice.createRfcommSocketToServiceRecord(MY_UUID);
+
+            // Cancel discovery as it slows down connection
+            bluetoothAdapter.cancelDiscovery();
+
+            // Attempt to connect.
+            socket.connect();
+        } catch (IOException e) {
+            Log.e(TAG, "Bluetooth connection failed: " + e.getMessage());
+            throw new NoBluetoothServerConnectionException("Failed to connect to bluetooth server");
+        }
+        return socket;
+    }
+
+    /**
+     * Send a command to the Bluetooth server.
+     * @param command The command to send.
+     * @throws NoBluetoothServerConnectionException On failure to send command.
+     */
     public void sendCommand(BTServerCommand command) throws NoBluetoothServerConnectionException {
         if (CURRENT_STATE != STATE_CONNECTED) {
             throw new NoBluetoothServerConnectionException("No connection to Bluetooth Server");
         }
         try {
             String commandJSON = gson.toJson(command);
-            write(commandJSON);
+            bluetoothCommThread.write(commandJSON);
         } catch (IOException e) {
             throw new NoBluetoothServerConnectionException("Failed to send command to Bluetooth server");
         }
     }
 
+    /**
+     * Sends a command and returns a Future<MPDResponse> object for use in the calling thread.
+     * @param command The command to send.
+     * @return A Future<MPDResponse> object.
+     */
     public Future<MPDResponse> syncedWriteRead(BTServerCommand command) {
         Log.d(TAG, "Sending synced command: " + command);
         command.setSynchronous(true);
@@ -74,288 +129,10 @@ public class BluetoothConnection {
         return pool.submit(callable);
     }
 
-    public void addConnectionListener(ConnectionListener listener) {
-        connectionListeners.add(listener);
-    }
-
-    private void notifyConnectionFailed(String message) {
-        for (ConnectionListener connectionListener : connectionListeners) {
-            connectionListener.connectionFailed(message);
-        }
-    }
-
-    private void notifyConnectionSucceeded(String message) {
-        for (ConnectionListener connectionListener : connectionListeners) {
-            connectionListener.connectionSucceeded(message);
-        }
-    }
-
-    private void bluetoothConnectionFailed(String message) {
-        setState(STATE_NONE);
-        notifyConnectionFailed(message);
-    }
-
     /**
-     * Start the ConnectThread to initiate a connection to a remote device.
+     * This class submits a command and waits for the response to be added to the syncedResultQueue.
+     * Once the response is returned the call() method will return, allowing the receiver to access it.
      */
-    public synchronized void connect() {
-        if (bluetoothAdapter == null) {
-            bluetoothConnectionFailed("Bluetooth is not supported");
-            return;
-        }
-
-        Log.i(TAG, "connecting to: " + bluetoothDevice);
-
-        if (CURRENT_STATE == STATE_CONNECTING) {
-            Log.w(TAG, "Connection was already in progress, cancelling");
-            if (connectThread != null) {
-                connectThread.cancel();
-                connectThread = null;
-            }
-        }
-
-        // Cancel any thread currently running a connection
-        if (connectedThread != null) {
-            connectedThread.cancel();
-            connectedThread = null;
-        }
-
-        // Start the thread to connect with the given device
-        connectThread = new ConnectThread(bluetoothDevice);
-        connectThread.start();
-        setState(STATE_CONNECTING);
-    }
-
-    /**
-     * Stop all threads
-     */
-    public synchronized void disconnect() {
-        Log.d(TAG, "disconnect()");
-        if (connectThread != null) {
-            connectThread.cancel();
-            connectThread = null;
-        }
-        if (connectedThread != null) {
-            connectedThread.cancel();
-            connectedThread = null;
-        }
-        setState(STATE_NONE);
-    }
-
-    public boolean isConnected() {
-        return connectedThread != null && connectedThread.isAlive();
-    }
-
-    /**
-     * Write to the ConnectedThread in an unsynchronized manner
-     *
-     * @param data The data to write
-     */
-    private void write(String data) throws IOException {
-        Log.d("Writing: ", data);
-        // Create temporary object
-        ConnectedThread syncedThread;
-        // Synchronize a copy of the ConnectedThread
-        synchronized (this) {
-            syncedThread = connectedThread;
-        }
-        // Perform the write unsynchronized
-        syncedThread.write(data);
-    }
-
-    private synchronized void setState(int newState) {
-        Log.d(TAG, "setState() " + CURRENT_STATE + " -> " + newState);
-        CURRENT_STATE = newState;
-    }
-
-    /**
-     * Start the ConnectedThread to begin managing a Bluetooth connection
-     *
-     * @param socket The BluetoothSocket on which the connection was made
-     */
-    synchronized void spawnConnectedThread(BluetoothSocket socket) {
-        Log.d(TAG, "spawnConnectedThread()");
-
-        // Cancel the thread that completed the connection
-        if (connectThread != null) {
-            connectThread.cancel();
-            connectThread = null;
-        }
-
-        // Cancel any thread currently running a connection
-        if (connectedThread != null) {
-            connectedThread.cancel();
-            connectedThread = null;
-        }
-
-        // Start the thread to manage the connection and perform transmissions
-        connectedThread = new ConnectedThread(socket);
-        connectedThread.start();
-
-        setState(STATE_CONNECTED);
-        notifyConnectionSucceeded("");
-    }
-
-    /**
-     * This thread runs while attempting to make an outgoing connection
-     * with a device. It runs straight through; the connection either
-     * succeeds or fails.
-     */
-    private class ConnectThread extends Thread {
-        private final BluetoothSocket mmSocket;
-
-        public ConnectThread(BluetoothDevice device) {
-            BluetoothSocket tmp = null;
-
-            // Get a BluetoothSocket for a connection with the
-            // given BluetoothDevice
-            try {
-                tmp = device.createRfcommSocketToServiceRecord(MY_UUID);
-            } catch (IOException e) {
-                Log.e(TAG, "create() failed", e);
-            }
-            mmSocket = tmp;
-        }
-
-        public void run() {
-            Log.i(TAG, "run()");
-            setName("ConnectThread");
-
-            // Always cancel discovery because it will slow down a connection
-            bluetoothAdapter.cancelDiscovery();
-
-            // Make a connection to the BluetoothSocket
-            try {
-                // This is a blocking call and will only return on a
-                // successful connection or an exception
-                mmSocket.connect();
-            } catch (IOException e) {
-                bluetoothConnectionFailed(e.getMessage());
-                Log.e(TAG, "Bluetooth Connection failed");
-
-                // Close the socket
-                try {
-                    mmSocket.close();
-                } catch (IOException e2) {
-                    Log.e(TAG, "unable to close() socket during connection failure", e2);
-                }
-                return;
-            }
-
-            // Reset the ConnectThread because we're done
-            synchronized (BluetoothConnection.this) {
-                connectThread = null;
-            }
-
-            // Start the ConnectedThread thread
-            spawnConnectedThread(mmSocket);
-        }
-
-        public void cancel() {
-            try {
-                mmSocket.close();
-            } catch (IOException e) {
-                Log.e(TAG, "close() of connect socket failed", e);
-            }
-        }
-    }
-
-    /**
-     * This thread runs during a connection with a remote device.
-     * It handles all incoming and outgoing transmissions.
-     */
-    private class ConnectedThread extends Thread {
-        private final BluetoothSocket bluetoothSocket;
-        private final BufferedReader inputReader;
-        private final BufferedWriter outputWriter;
-        private boolean isCanceled = false;
-
-        public ConnectedThread(BluetoothSocket socket) {
-            Log.d(TAG, "ConnectedThread()");
-            bluetoothSocket = socket;
-            InputStream tmpIn = null;
-            OutputStream tmpOut = null;
-
-            // Get the BluetoothSocket input and output streams
-            try {
-                tmpIn = bluetoothSocket.getInputStream();
-                tmpOut = bluetoothSocket.getOutputStream();
-            } catch (IOException e) {
-                Log.e(TAG, "temp sockets not created", e);
-            }
-
-            inputReader = new BufferedReader(new InputStreamReader(tmpIn, Charset.forName("UTF-8")));
-            outputWriter = new BufferedWriter(new OutputStreamWriter(tmpOut, Charset.forName("UTF-8")));
-        }
-
-        public void run() {
-            Log.d(TAG, "ConnectedThread running");
-            String input;
-
-            while (!isCanceled) {
-                try {
-                    // Messages from the server are terminated with a newline.
-                    input = inputReader.readLine();
-                    handleMessage(input);
-
-                } catch (IOException e) {
-                    Log.e(TAG, "disconnected");
-                    bluetoothConnectionFailed(e.getMessage());
-                    break;
-                }
-            }
-        }
-
-        private void handleMessage(String message) {
-            MPDResponse response = gson.fromJson(message, MPDResponse.class);
-            if (response.isSynchronous()) {
-                addToSyncedResultQueue(response);
-            } else if(response.getResponseType() == MPDResponse.EVENT_UPDATE_RAW_CHANGES) {
-                addToMpdIdleUpdateQueue(response);
-            } else {
-                Log.w(TAG, "Received strange command: " + response.getResponseType());
-            }
-        }
-
-        private void addToMpdIdleUpdateQueue(MPDResponse response) {
-            try {
-                Log.d(TAG, "Adding changes to queue");
-                mpdIdleUpdateQueue.put(response);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-        private void addToSyncedResultQueue(MPDResponse response) {
-            try {
-                Log.d(TAG, "Putting result in queue: " + response);
-                syncedResultQueue.put(response);
-            } catch (InterruptedException e) {
-                Log.e(TAG, "Interrupted while adding response to queue");
-            }
-        }
-
-        public void write(String data) throws IOException {
-            outputWriter.write(data + "\n");
-            outputWriter.flush();
-        }
-
-        public void cancel() {
-            isCanceled = true;
-            innerDisconnect();
-        }
-
-        private void innerDisconnect() {
-            try {
-                bluetoothSocket.close();
-                inputReader.close();
-                outputWriter.close();
-            } catch (IOException e) {
-                Log.e(TAG, "close() of connect socket failed", e);
-            }
-        }
-    }
-
     class BTServerCallable extends BTServerCommand implements Callable<MPDResponse> {
         public BTServerCallable(BTServerCommand command) {
             super(command.getCommand(), command.getArgs(), command.isSynchronous());
@@ -367,4 +144,144 @@ public class BluetoothConnection {
             return syncedResultQueue.take();
         }
     }
+
+    /**
+     * Kill the connection to the Bluetooth Server.
+     */
+    public synchronized void disconnect() {
+        Log.d(TAG, "disconnect()");
+        if (bluetoothCommThread != null) {
+            bluetoothCommThread.disconnect();
+            bluetoothCommThread = null;
+        }
+        setState(STATE_NONE);
+    }
+
+    public boolean isConnected() {
+        return bluetoothCommThread != null && bluetoothCommThread.isAlive() && CURRENT_STATE == STATE_CONNECTED;
+    }
+
+    private synchronized void setState(int newState) {
+        Log.d(TAG, "setState() " + CURRENT_STATE + " -> " + newState);
+        CURRENT_STATE = newState;
+    }
+
+    /**
+     * This thread handles all communication with the Bluetooth server.
+     */
+    private class BluetoothCommThread extends Thread {
+        private final BluetoothSocket mmSocket;
+        private BufferedReader inputReader;
+        private BufferedWriter outputWriter;
+
+        private boolean isCanceled = false;
+
+        public BluetoothCommThread(BluetoothSocket socket) {
+            this.mmSocket = socket;
+        }
+
+        public void run() {
+            setName("BluetoothCommThread");
+
+            initStreams();
+            setState(STATE_CONNECTED);
+            String input;
+            while (!isCanceled) {
+                try {
+                    Log.v(TAG, "Waiting for response from server");
+                    // Messages from the server are terminated with a newline.
+                    input = inputReader.readLine();
+                    handleMessage(input);
+
+                } catch (IOException e) {
+                    Log.e(TAG, "disconnected");
+                    setState(STATE_NONE);
+
+                    // Close the socket
+                    try {
+                        mmSocket.close();
+                    } catch (IOException e2) {
+                        Log.e(TAG, "unable to close() socket during connection failure", e2);
+                    }
+                    break;
+                }
+            }
+        }
+
+        // Get the BluetoothSocket input and output streams and initialize Buffered Reader/Writer
+        private void initStreams() {
+            InputStream tmpIn = null;
+            OutputStream tmpOut = null;
+
+            try {
+                tmpIn = mmSocket.getInputStream();
+                tmpOut = mmSocket.getOutputStream();
+            } catch (IOException e) {
+                Log.e(TAG, "temp sockets not created", e);
+            }
+
+            inputReader = new BufferedReader(new InputStreamReader(tmpIn, Charset.forName("UTF-8")));
+            outputWriter = new BufferedWriter(new OutputStreamWriter(tmpOut, Charset.forName("UTF-8")));
+        }
+
+        /**
+         * Handle the messages received from the bluetooth server and add them to
+         * the appropriate queue.
+         * @param message
+         */
+        private void handleMessage(String message) {
+            MPDResponse response = gson.fromJson(message, MPDResponse.class);
+            if (response.isSynchronous()) {
+                addToSyncedResultQueue(response);
+            } else if (response.getResponseType() == MPDResponse.EVENT_UPDATE_RAW_CHANGES) {
+                addToMpdIdleUpdateQueue(response);
+            } else {
+                Log.w(TAG, "Received strange command: " + response.getResponseType());
+            }
+        }
+
+        private void addToMpdIdleUpdateQueue(MPDResponse response) {
+            try {
+                Log.v(TAG, "Adding MpdIdleUpdate to the mpdIdleUpdateQueue");
+                mpdIdleUpdateQueue.put(response);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        private void addToSyncedResultQueue(MPDResponse response) {
+            try {
+                Log.d(TAG, "Adding synced response to the syncedResultQueue: " + response);
+                syncedResultQueue.put(response);
+            } catch (InterruptedException e) {
+                Log.e(TAG, "Interrupted while adding response to queue");
+            }
+        }
+
+        /**
+         * Send the data to the server. Note, the server expects messages to be terminated with a newline.
+         * @param data The data to write.
+         * @throws IOException On error.
+         */
+        public void write(String data) throws IOException {
+            outputWriter.write(data + "\n");
+            outputWriter.flush();
+        }
+
+
+        /**
+         * Cleanup and disconnect from the bluetooth server.
+         */
+        public void disconnect() {
+            isCanceled = true;
+            try {
+                mmSocket.close();
+                inputReader.close();
+                outputWriter.close();
+            } catch (IOException e) {
+                Log.e(TAG, "close() of connect socket failed", e);
+            }
+        }
+    }
 }
+

@@ -5,6 +5,7 @@ package com.facetoe.remotempd.fragments;
  * Created by facetoe on 6/02/14.
  */
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
@@ -143,11 +144,19 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
     }
 
     private void updateNowPlayingText(MPDStatus status) {
-        Music currentSong = getCurrentSong(status);
+        final Music currentSong = getCurrentSong(status);
         if (currentSong != null) {
-            txtSong.setText(currentSong.getTitle());
-            txtAlbum.setText(currentSong.getAlbum());
-            txtArtist.setText(currentSong.getArtist());
+            Activity parentActivity = getActivity();
+            if (parentActivity != null) {
+                parentActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        txtSong.setText(currentSong.getTitle());
+                        txtAlbum.setText(currentSong.getAlbum());
+                        txtArtist.setText(currentSong.getArtist());
+                    }
+                });
+            }
         }
     }
 
