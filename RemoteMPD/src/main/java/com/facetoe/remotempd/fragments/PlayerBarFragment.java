@@ -151,18 +151,10 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
                 handleBtnPlay();
                 break;
             case R.id.btnNext:
-                try {
-                    mpd.next();
-                } catch (MPDServerException e) {
-                    handleError(e);
-                }
+                handleBtnNext();
                 break;
             case R.id.btnPrev:
-                try {
-                    mpd.previous();
-                } catch (MPDServerException e) {
-                    handleError(e);
-                }
+                handleBtnPrevious();
                 break;
             case R.id.btnRandom:
                 handleBtnRandom();
@@ -174,6 +166,32 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
                 Log.i(TAG, "Unknown: " + view.getId());
                 break;
         }
+    }
+
+    private void handleBtnPrevious() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mpd.previous();
+                } catch (MPDServerException e) {
+                    handleError(e);
+                }
+            }
+        }).start();
+    }
+
+    private void handleBtnNext() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mpd.next();
+                } catch (MPDServerException e) {
+                    handleError(e);
+                }
+            }
+        }).start();
     }
 
     private void handleBtnRepeat() {
@@ -270,22 +288,24 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
 
     @Override
     public void repeatChanged(boolean repeating) {
-        Log.i(TAG, "Repeat Changed");
+        Log.i(TAG, "Repeat Changed: " + repeating);
+        btnRepeat.setPressed(repeating);
     }
 
     @Override
     public void randomChanged(boolean random) {
-        Log.i(TAG, "Random changed");
+        Log.i(TAG, "Random changed: " + random);
+        btnRandom.setPressed(random);
     }
 
     @Override
     public void connectionStateChanged(boolean connected, boolean connectionLost) {
-        Log.i(TAG, "Connection state changed");
+        Log.i(TAG, "Connection state changed: " + connected);
     }
 
     @Override
     public void libraryStateChanged(boolean updating) {
-        Log.i(TAG, "Library state changed");
+        Log.i(TAG, "Library state changed: " + updating);
     }
 
     private void handleError(MPDServerException e) {

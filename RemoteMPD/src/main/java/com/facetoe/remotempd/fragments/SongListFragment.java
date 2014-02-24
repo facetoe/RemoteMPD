@@ -35,7 +35,9 @@ public class SongListFragment extends AbstractListFragment {
     @Override
     public void onStart() {
         super.onStart();
-        new LoadAlbumSongsTask().execute();
+        if(entries.size() == 0) {
+            new LoadAlbumSongsTask().execute();
+        }
     }
 
     @Override

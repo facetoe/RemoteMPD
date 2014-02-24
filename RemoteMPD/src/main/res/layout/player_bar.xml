@@ -49,7 +49,7 @@
             android:layout_weight="1"
             android:id="@+id/btnRandom"
             android:src="@drawable/ic_media_random"
-            android:background="#0000"/>
+            android:background="?android:attr/actionBarItemBackground"/>
 
         <ImageButton
             android:layout_width="wrap_content"
@@ -57,7 +57,7 @@
             android:layout_weight="1"
             android:id="@+id/btnPrev"
             android:src="@drawable/ic_media_prev"
-            android:background="#0000"/>
+            android:background="?android:attr/actionBarItemBackground"/>
 
         <ImageButton
             android:layout_width="wrap_content"
@@ -65,7 +65,7 @@
             android:layout_weight="1"
             android:id="@+id/btnPlay"
             android:src="@drawable/ic_media_play"
-            android:background="#0000"/>
+            android:background="?android:attr/actionBarItemBackground"/>
 
         <ImageButton
             android:layout_width="wrap_content"
@@ -73,7 +73,7 @@
             android:layout_weight="1"
             android:id="@+id/btnNext"
             android:src="@drawable/ic_media_next"
-            android:background="#0000"/>
+            android:background="?android:attr/actionBarItemBackground"/>
 
         <ImageButton
             android:layout_width="wrap_content"
@@ -81,7 +81,7 @@
             android:layout_weight="1"
             android:id="@+id/btnRepeat"
             android:src="@drawable/ic_media_repeat"
-            android:background="#0000"/>
+            android:background="?android:attr/actionBarItemBackground"/>
 
     </LinearLayout>
 

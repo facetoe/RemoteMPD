@@ -171,6 +171,7 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
 
     private void add(final Artist artist, final boolean replace, final boolean play) {
         final Toast toast = Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER, 0, 0);
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -187,6 +188,7 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
 
     private void add(final Album album, final boolean replace, final boolean play) {
         final Toast toast = Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER, 0, 0);
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -203,6 +205,7 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
 
     private void add(final Music song, final boolean replace, final boolean play) {
         final Toast toast = Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER, 0, 0);
         new Thread(new Runnable() {
             @Override
             public void run() {
