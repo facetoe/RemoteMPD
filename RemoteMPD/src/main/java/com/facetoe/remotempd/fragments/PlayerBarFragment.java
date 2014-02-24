@@ -48,9 +48,7 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
     }
 
     PLAYER_STATE playerState = PLAYER_STATE.UNKNOWN;
-
-    private boolean isRepeat = false;
-    private boolean isRandom = false;
+    private MPDStatus mpdStatus;
 
 
     private TextView txtSong;
@@ -97,28 +95,70 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
     public void onStart() {
         super.onStart();
         asyncHelper.addStatusChangeListener(this);
-        checkButtonPlayImage();
+        if(mpd.isConnected()) {
+            initializePlayerBar();
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        checkButtonPlayImage();
-    }
-
-    private void checkButtonPlayImage() {
-        if (mpd.isConnected()) {
-            try {
-                String currentState = mpd.getStatus().getState();
-                setState(currentState);
-                setButtonPlayImage();
-            } catch (MPDServerException e) {
-                handleError(e);
-            }
+        if(mpd.isConnected()) {
+            initializePlayerBar();
         }
     }
 
+    private void initializePlayerBar() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mpdStatus = mpd.getStatus();
+                    String state = mpdStatus.getState();
+                    setState(state);
+                    setButtonPlayImage();
+                    updateNowPlayingText(mpdStatus);
+                    updateRepeatRandomButtons(mpdStatus);
+
+                } catch (MPDServerException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    private void updateRepeatRandomButtons(MPDStatus status) {
+        btnRepeat.setPressed(status.isRepeat());
+        btnRandom.setPressed(status.isRandom());
+    }
+
+    private void setButtonPlayImage() {
+        if (playerState == PLAYER_STATE.PLAYING) {
+            btnPlay.setImageResource(R.drawable.ic_media_pause);
+        } else if (playerState == PLAYER_STATE.PAUSED || playerState == PLAYER_STATE.STOPPED) {
+            btnPlay.setImageResource(R.drawable.ic_media_play);
+        } else {
+            Log.w(TAG, "Unknown state: " + playerState);
+        }
+    }
+
+    private void updateNowPlayingText(MPDStatus status) {
+        Music currentSong = getCurrentSong(status);
+        if (currentSong != null) {
+            txtSong.setText(currentSong.getTitle());
+            txtAlbum.setText(currentSong.getAlbum());
+            txtArtist.setText(currentSong.getArtist());
+        }
+    }
+
+    private Music getCurrentSong(MPDStatus status) {
+        return mpd.getPlaylist().getByIndex(status.getSongPos());
+    }
+
     private void setState(String newState) {
+        if(newState.equals(playerState.toString())) {
+            return;
+        }
         String logMessage = "State changed from " + playerState + " to ";
         if (newState.equals(MPDStatus.MPD_STATE_PLAYING)) {
             playerState = PLAYER_STATE.PLAYING;
@@ -132,16 +172,6 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
             Log.w(TAG, "Invalid state passed to setState()");
         }
         Log.d(TAG, logMessage + playerState);
-    }
-
-    private void setButtonPlayImage() {
-        if (playerState == PLAYER_STATE.PLAYING) {
-            btnPlay.setImageResource(R.drawable.ic_media_pause);
-        } else if (playerState == PLAYER_STATE.PAUSED || playerState == PLAYER_STATE.STOPPED) {
-            btnPlay.setImageResource(R.drawable.ic_media_play);
-        } else {
-            Log.w(TAG, "Unknown state: " + playerState);
-        }
     }
 
     @Override
@@ -168,14 +198,18 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
         }
     }
 
-    private void handleBtnPrevious() {
+    private void handleBtnPlay() {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    mpd.previous();
+                    if (playerState == PLAYER_STATE.PLAYING) {
+                        mpd.stop();
+                    } else if (playerState == PLAYER_STATE.STOPPED || playerState == PLAYER_STATE.PAUSED) {
+                        mpd.play();
+                    }
                 } catch (MPDServerException e) {
-                    handleError(e);
+                    app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED, e.getMessage());
                 }
             }
         }).start();
@@ -194,18 +228,12 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
         }).start();
     }
 
-    private void handleBtnRepeat() {
+    private void handleBtnPrevious() {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    if(isRepeat) {
-                        isRepeat = false;
-                        mpd.setRepeat(isRepeat);
-                    } else {
-                        isRepeat = true;
-                        mpd.setRepeat(isRepeat);
-                    }
+                    mpd.previous();
                 } catch (MPDServerException e) {
                     handleError(e);
                 }
@@ -218,13 +246,7 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
             @Override
             public void run() {
                 try {
-                    if(isRandom) {
-                        isRandom = false;
-                        mpd.setRandom(isRandom);
-                    } else {
-                        isRandom = true;
-                        mpd.setRandom(isRandom);
-                    }
+                    mpd.setRandom(!mpdStatus.isRandom());
                 } catch (MPDServerException e) {
                     handleError(e);
                 }
@@ -232,18 +254,14 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
         }).start();
     }
 
-    private void handleBtnPlay() {
+    private void handleBtnRepeat() {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    if (playerState == PLAYER_STATE.PLAYING) {
-                        mpd.stop();
-                    } else if (playerState == PLAYER_STATE.STOPPED || playerState == PLAYER_STATE.PAUSED) {
-                        mpd.play();
-                    }
+                    mpd.setRepeat(!mpdStatus.isRepeat());
                 } catch (MPDServerException e) {
-                    app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED, e.getMessage());
+                    handleError(e);
                 }
             }
         }).start();
@@ -251,50 +269,41 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
 
     @Override
     public void volumeChanged(MPDStatus mpdStatus, int oldVolume) {
-        Log.i(TAG, "Volume Changed");
+        this.mpdStatus = mpdStatus;
+        Log.d(TAG, "Volume Changed");
     }
 
     @Override
     public void playlistChanged(MPDStatus mpdStatus, int oldPlaylistVersion) {
-        Log.i(TAG, "Playlist changed");
-        Music currentSong = getCurrentSong(mpdStatus);
-        updatePlayerBarText(currentSong);
+        this.mpdStatus = mpdStatus;
+        Log.d(TAG, "Playlist changed");
+        updateNowPlayingText(mpdStatus);
     }
 
     @Override
     public void trackChanged(MPDStatus mpdStatus, int oldTrack) {
+        this.mpdStatus = mpdStatus;
         Music currentSong = getCurrentSong(mpdStatus);
-        Log.i(TAG, "Track changed to: " + currentSong);
-        updatePlayerBarText(currentSong);
-    }
-
-    private Music getCurrentSong(MPDStatus status) {
-        return mpd.getPlaylist().getByIndex(status.getSongPos());
-    }
-
-    private void updatePlayerBarText(Music currentSong) {
-        if (currentSong != null) {
-            txtSong.setText(currentSong.getTitle());
-            txtAlbum.setText(currentSong.getAlbum());
-            txtArtist.setText(currentSong.getArtist());
-        }
+        Log.d(TAG, "Track changed to: " + currentSong);
+        updateNowPlayingText(mpdStatus);
     }
 
     @Override
     public void stateChanged(MPDStatus mpdStatus, String oldState) {
+        this.mpdStatus = mpdStatus;
         setState(mpdStatus.getState());
         setButtonPlayImage();
     }
 
     @Override
     public void repeatChanged(boolean repeating) {
-        Log.i(TAG, "Repeat Changed: " + repeating);
+        Log.d(TAG, "Repeat Changed: " + repeating);
         btnRepeat.setPressed(repeating);
     }
 
     @Override
     public void randomChanged(boolean random) {
-        Log.i(TAG, "Random changed: " + random);
+        Log.d(TAG, "Random changed: " + random);
         btnRandom.setPressed(random);
     }
 
@@ -305,7 +314,7 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
 
     @Override
     public void libraryStateChanged(boolean updating) {
-        Log.i(TAG, "Library state changed: " + updating);
+        Log.d(TAG, "Library state changed: " + updating);
     }
 
     private void handleError(MPDServerException e) {
