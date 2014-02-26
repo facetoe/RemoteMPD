@@ -24,10 +24,6 @@ public class PlaylistFragment extends AbstractListFragment implements StatusChan
     private final MPDPlaylist playlist = app.getMpd().getPlaylist();
     private final String TAG = RMPDApplication.APP_PREFIX + "PlaylistFragment";
 
-    public PlaylistFragment(SearchView searchView) {
-        super(searchView);
-    }
-
     @Override
     public void onStart() {
         super.onStart();

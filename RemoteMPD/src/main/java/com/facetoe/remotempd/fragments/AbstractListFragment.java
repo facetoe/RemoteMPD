@@ -12,6 +12,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import com.facetoe.remotempd.R;
 import com.facetoe.remotempd.RMPDApplication;
+import com.facetoe.remotempd.TestActivity;
 import com.facetoe.remotempd.adapters.AbstractMPDArrayAdapter;
 import com.facetoe.remotempd.adapters.ItemAdapter;
 import org.a0z.mpd.*;
@@ -26,14 +27,15 @@ import java.util.List;
  */
 public abstract class AbstractListFragment extends Fragment
         implements AdapterView.OnItemClickListener,
-        SearchView.OnQueryTextListener {
+        SearchView.OnQueryTextListener,
+        TestActivity.OnSearchableFragmentVisible {
+
     private static final String TAG = RMPDApplication.APP_PREFIX + "AbstractListFragment";
     final RMPDApplication app = RMPDApplication.getInstance();
     final MPD mpd = app.getMpd();
 
     final List<Item> entries = new ArrayList<Item>();
     ItemAdapter adapter;
-    final SearchView searchView;
 
     private static final int ADD_ITEM = 1;
     private static final int ADD_AND_REPLACE = 2;
@@ -41,6 +43,7 @@ public abstract class AbstractListFragment extends Fragment
     private static final int ADD_AND_PLAY = 4;
     LinearLayout spinnerLayout;
     ListView listItems;
+    SearchView searchView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -80,10 +83,6 @@ public abstract class AbstractListFragment extends Fragment
         }
     }
 
-    AbstractListFragment(SearchView searchView) {
-        this.searchView = searchView;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,9 +90,15 @@ public abstract class AbstractListFragment extends Fragment
     }
 
     @Override
+    public void handleSearchEvents(SearchView searchView) {
+        Log.i(TAG, "Setting query listener in PlaylistFragment");
+        this.searchView = searchView;
+        searchView.setOnQueryTextListener(this);
+    }
+
+    @Override
     public void onStart() {
         super.onStart();
-        searchView.setOnQueryTextListener(this);
     }
 
     @Override
@@ -102,6 +107,11 @@ public abstract class AbstractListFragment extends Fragment
             ListView lv = (ListView) v;
             AdapterView.AdapterContextMenuInfo acmi = (AdapterView.AdapterContextMenuInfo) menuInfo;
             Item item = (Item) lv.getItemAtPosition(acmi.position);
+
+            // No context menu for songs yet
+            if(item instanceof Music) {
+                return;
+            }
 
             menu.add(Menu.NONE, ADD_ITEM, Menu.NONE, "Add " + getItemName(item));
             menu.add(Menu.NONE, ADD_AND_REPLACE, Menu.NONE, "Add and replace " + getItemName(item));
@@ -241,9 +251,14 @@ public abstract class AbstractListFragment extends Fragment
         return true;
     }
 
+    protected void hideKeyboardAndCollapseSearchView() {
+        hideSearchView();
+        hideSoftKeyboard();
+    }
+
     private void hideSearchView() {
         Activity parentActivity = getActivity();
-        if (parentActivity != null) {
+        if (parentActivity != null && searchView != null) {
             parentActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {

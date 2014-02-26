@@ -16,14 +16,18 @@ import java.util.Stack;
  * RemoteMPD
  * Created by facetoe on 26/02/14.
  */
-public class TestFragment extends AbstractListFragment implements ConnectionListener {
-
-    private static final String TAG = RMPDApplication.APP_PREFIX + "TestFragment";
+public class BrowserFragment extends AbstractListFragment implements ConnectionListener {
+    private static final String TAG = RMPDApplication.APP_PREFIX + "BrowserFragment";
     Stack<List<? extends Item>> backStack = new Stack<List<? extends Item>>();
     List<? extends Item> previousItems;
 
-    public TestFragment(SearchView searchView) {
-        super(searchView);
+    @Override
+    public void onStart() {
+        super.onStart();
+        app.getAsyncHelper().addConnectionListener(this);
+        if (mpd.isConnected()) {
+            new PopulateListTask().execute(); // This will populate with artists.
+        }
     }
 
     public boolean canGoBack() {
@@ -38,6 +42,9 @@ public class TestFragment extends AbstractListFragment implements ConnectionList
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        // Hide the keyboard and SearchView if the user was conducting a search.
+        hideKeyboardAndCollapseSearchView();
+
         final Item clickedItem = adapter.getItem(position);
         if (clickedItem instanceof Artist || clickedItem instanceof Album) {
             new PopulateListTask().execute(clickedItem);
@@ -48,18 +55,9 @@ public class TestFragment extends AbstractListFragment implements ConnectionList
         }
     }
 
-    private void addSong(Item clickedItem) {
+    private void addSong(final Item clickedItem) {
         Music song = (Music)clickedItem;
         add(song, false, false);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        app.getAsyncHelper().addConnectionListener(this);
-        if (mpd.isConnected()) {
-            new PopulateListTask().execute();
-        }
     }
 
     @Override

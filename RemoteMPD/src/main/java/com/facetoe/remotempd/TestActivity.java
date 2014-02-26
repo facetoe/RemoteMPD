@@ -15,41 +15,49 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.SearchView;
-import com.facetoe.remotempd.fragments.AbstractListFragment;
 import com.facetoe.remotempd.fragments.PlaylistFragment;
-import com.facetoe.remotempd.fragments.TestFragment;
-import org.a0z.mpd.Item;
+import com.facetoe.remotempd.fragments.BrowserFragment;
 
 public class TestActivity extends FragmentActivity {
     private static final String TAG = RMPDApplication.APP_PREFIX + "TestActivity";
     private final RMPDApplication app = RMPDApplication.getInstance();
     SearchView searchView;
-    MenuItem menuItem;
 
     ViewPager viewPager;
     ListPagerAdapter pagerAdapter;
 
+    // Call handleSearchEvents when we want the currently visible fragment
+    // to handle search queries.
+    public interface OnSearchableFragmentVisible {
+        void handleSearchEvents(SearchView searchView);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
         viewPager = (ViewPager) findViewById(R.id.viewPager);
-    }
 
-    @Override
-    public void onBackPressed() {
-        if (viewPager.getCurrentItem() == 0) {
-            if (pagerAdapter.canGoBack()) {
-                pagerAdapter.goBack();
-            } else {
-                super.onBackPressed();
+        pagerAdapter = new ListPagerAdapter(getSupportFragmentManager());
+        viewPager.setAdapter(pagerAdapter);
+        viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int i, float v, int i2) {
+
             }
-        } else {
-            viewPager.setCurrentItem(viewPager.getCurrentItem() - 1);
-        }
-    }
 
+            @Override
+            public void onPageSelected(int i) {
+                pagerAdapter.setFragmentSearchView(i);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int i) {
+
+            }
+        });
+
+    }
 
     @Override
     protected void onStart() {
@@ -64,9 +72,18 @@ public class TestActivity extends FragmentActivity {
         app.unregisterCurrentActivity();
     }
 
+
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    public void onBackPressed() {
+        if (viewPager.getCurrentItem() == 0) {
+            if (pagerAdapter.browserFragmentCanGoBack()) {
+                pagerAdapter.browserFragmentBack();
+            } else {
+                super.onBackPressed();
+            }
+        } else {
+            viewPager.setCurrentItem(viewPager.getCurrentItem() - 1);
+        }
     }
 
     @Override
@@ -75,14 +92,13 @@ public class TestActivity extends FragmentActivity {
         getMenuInflater().inflate(R.menu.test, menu);
         // Get the SearchView and set the searchable configuration
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        menuItem = menu.findItem(R.id.menu_search);
+        MenuItem menuItem = menu.findItem(R.id.menu_search);
         searchView = (SearchView) menuItem.getActionView();
         searchView.setSearchableInfo(
                 searchManager.getSearchableInfo(getComponentName()));
 
-        // This is created here as I need to pass the SearchView to the fragments in the pager.
-        pagerAdapter = new ListPagerAdapter(searchView, getSupportFragmentManager());
-        viewPager.setAdapter(pagerAdapter);
+        // Set the BrowserFragment to initially accept search events from the SearchView.
+        pagerAdapter.setFragmentSearchView(0);
         return true;
     }
 
@@ -116,47 +132,49 @@ public class TestActivity extends FragmentActivity {
         }
     }
 
-    public class ListPagerAdapter extends FragmentPagerAdapter {
-        private static final String TAG = RMPDApplication.APP_PREFIX + "ListPagerAdapter";
-        SearchView searchView;
-        TestFragment firstFragment;
+    private class ListPagerAdapter extends FragmentPagerAdapter {
+        private static final int NUM_FRAGMENTS = 2;
+        BrowserFragment browserFragment;
         PlaylistFragment playlistFragment;
 
-
-        public ListPagerAdapter(SearchView searchView, FragmentManager fm) {
+        public ListPagerAdapter(FragmentManager fm) {
             super(fm);
-            this.searchView = searchView;
         }
 
-        public boolean canGoBack() {
-            return firstFragment.canGoBack();
+        public void setFragmentSearchView(int i) {
+            if(i == 0) {
+               browserFragment.handleSearchEvents(searchView);
+            } else {
+               playlistFragment.handleSearchEvents(searchView);
+            }
         }
 
-        public void goBack() {
-            firstFragment.goBack();
+        public boolean browserFragmentCanGoBack() {
+            return browserFragment.canGoBack();
+        }
+
+        public void browserFragmentBack() {
+            browserFragment.goBack();
         }
 
         @Override
         public Fragment getItem(int position) {
-            if (position == 1) {
-                Log.i(TAG, "Returning playlistFragment");
+            if (position == 0) {
+                if (browserFragment == null) {
+                    browserFragment = new BrowserFragment();
+                }
+                return browserFragment;
+            } else {
                 if (playlistFragment == null) {
-                    playlistFragment = new PlaylistFragment(searchView);
+                    playlistFragment = new PlaylistFragment();
                 }
                 return playlistFragment;
-
-            } else {
-                Log.i(TAG, "Returning firstFragment");
-                if (firstFragment == null) {
-                    firstFragment = new TestFragment(searchView);
-                }
-                return firstFragment;
             }
         }
 
         @Override
         public int getCount() {
-            return 2;
+            return NUM_FRAGMENTS;
         }
     }
 }

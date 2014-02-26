@@ -20,7 +20,6 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="1:00"
         android:layout_weight="1"
         android:id="@+id/songLength"
         android:layout_margin="12dp"
