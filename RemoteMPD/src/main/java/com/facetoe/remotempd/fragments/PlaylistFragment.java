@@ -40,6 +40,32 @@ public class PlaylistFragment extends AbstractListFragment implements StatusChan
     }
 
     @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        final Music song = (Music)adapter.getItem(position);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mpd.skipToId(song.getSongId());
+                } catch (MPDServerException e) {
+                    app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED, e.getMessage());
+                }
+            }
+        }).start();
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        Log.i(TAG, "Context menu");
+        return true;
+    }
+
+    @Override
+    public void setTitle() {
+        setTitle("Playlist");
+    }
+
+    @Override
     public void volumeChanged(MPDStatus mpdStatus, int oldVolume) {
 
     }
@@ -77,21 +103,5 @@ public class PlaylistFragment extends AbstractListFragment implements StatusChan
     @Override
     public void libraryStateChanged(boolean updating) {
 
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Music song = (Music)adapter.getItem(position);
-        try {
-            mpd.skipToId(song.getSongId());
-        } catch (MPDServerException e) {
-            app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED, e.getMessage());
-        }
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        Log.i(TAG, "Context menu");
-        return true;
     }
 }

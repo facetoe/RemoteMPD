@@ -15,8 +15,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.SearchView;
-import com.facetoe.remotempd.fragments.PlaylistFragment;
 import com.facetoe.remotempd.fragments.BrowserFragment;
+import com.facetoe.remotempd.fragments.PlaylistFragment;
 
 public class TestActivity extends FragmentActivity {
     private static final String TAG = RMPDApplication.APP_PREFIX + "TestActivity";
@@ -28,8 +28,10 @@ public class TestActivity extends FragmentActivity {
 
     // Call handleSearchEvents when we want the currently visible fragment
     // to handle search queries.
-    public interface OnSearchableFragmentVisible {
+    public interface OnFragmentVisible {
         void handleSearchEvents(SearchView searchView);
+
+        void setTitle();
     }
 
     @Override
@@ -142,10 +144,12 @@ public class TestActivity extends FragmentActivity {
         }
 
         public void setFragmentSearchView(int i) {
-            if(i == 0) {
-               browserFragment.handleSearchEvents(searchView);
+            if (i == 0) {
+                browserFragment.handleSearchEvents(searchView);
+                browserFragment.setTitle();
             } else {
-               playlistFragment.handleSearchEvents(searchView);
+                playlistFragment.handleSearchEvents(searchView);
+                playlistFragment.setTitle();
             }
         }
 
