@@ -9,6 +9,7 @@ import android.widget.TextView;
 import com.facetoe.remotempd.R;
 import org.a0z.mpd.Artist;
 import org.a0z.mpd.Item;
+import org.a0z.mpd.Music;
 
 import java.util.List;
 
@@ -16,9 +17,9 @@ import java.util.List;
  * RemoteMPD
  * Created by facetoe on 21/02/14.
  */
-public class ArtistAdapter extends AbstractMPDArrayAdapter<Artist> {
+public class ItemAdapter extends AbstractMPDArrayAdapter {
 
-    public ArtistAdapter(Context context, int itemLayoutID, List<Artist> items) {
+    public ItemAdapter(Context context, int itemLayoutID, List<Item> items) {
         super(context, itemLayoutID, items);
     }
 
@@ -26,10 +27,18 @@ public class ArtistAdapter extends AbstractMPDArrayAdapter<Artist> {
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = LayoutInflater.from(context);
         View rowView = inflater.inflate(itemLayoutID, parent, false);
-        TextView txtView = (TextView) rowView.findViewById(R.id.txtView);
-        Artist artist = getItem(position);
-        if (artist != null) {
-            txtView.setText(artist.getName());
+        TextView name = (TextView) rowView.findViewById(R.id.name);
+        TextView songLength = (TextView)rowView.findViewById(R.id.songLength);
+        Item item = getItem(position);
+        if(item instanceof Music) {
+            Music song = (Music)item;
+            name.setText(song.getTitle());
+            songLength.setText(song.getFormatedTime());
+
+        } else {
+            if (item != null) {
+                name.setText(item.getName());
+            }
         }
         return rowView;
     }

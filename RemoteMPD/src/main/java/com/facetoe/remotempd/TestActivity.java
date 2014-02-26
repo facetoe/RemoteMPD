@@ -1,38 +1,55 @@
 package com.facetoe.remotempd;
 
+
 import android.app.Activity;
-import android.app.FragmentTransaction;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.view.MenuItemCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.SearchView;
-import com.facetoe.remotempd.fragments.ArtistListFragment;
+import com.facetoe.remotempd.fragments.AbstractListFragment;
+import com.facetoe.remotempd.fragments.PlaylistFragment;
+import com.facetoe.remotempd.fragments.TestFragment;
+import org.a0z.mpd.Item;
 
-public class TestActivity extends Activity {
+public class TestActivity extends FragmentActivity {
     private static final String TAG = RMPDApplication.APP_PREFIX + "TestActivity";
     private final RMPDApplication app = RMPDApplication.getInstance();
-    private boolean shouldShowFragment = true;
     SearchView searchView;
     MenuItem menuItem;
-    ArtistListFragment listFragment;
+
+    ViewPager viewPager;
+    ListPagerAdapter pagerAdapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
+        viewPager = (ViewPager) findViewById(R.id.viewPager);
+    }
 
-        // If savedInstance state isn't null then showing the fragment will
-        // result in overlapping fragments.
-        if(savedInstanceState != null) {
-            shouldShowFragment = false;
+    @Override
+    public void onBackPressed() {
+        if (viewPager.getCurrentItem() == 0) {
+            if (pagerAdapter.canGoBack()) {
+                pagerAdapter.goBack();
+            } else {
+                super.onBackPressed();
+            }
+        } else {
+            viewPager.setCurrentItem(viewPager.getCurrentItem() - 1);
         }
     }
+
 
     @Override
     protected void onStart() {
@@ -59,33 +76,16 @@ public class TestActivity extends Activity {
         // Get the SearchView and set the searchable configuration
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         menuItem = menu.findItem(R.id.menu_search);
-        searchView = (SearchView)menuItem.getActionView();
+        searchView = (SearchView) menuItem.getActionView();
         searchView.setSearchableInfo(
                 searchManager.getSearchableInfo(getComponentName()));
 
-        // The reason for adding the fragment here is I need to be able to
-        // pass the search view in to perform filtering on search.
-        if(shouldShowFragment) {
-            showListFragment(searchView);
-        }
+        // This is created here as I need to pass the SearchView to the fragments in the pager.
+        pagerAdapter = new ListPagerAdapter(searchView, getSupportFragmentManager());
+        viewPager.setAdapter(pagerAdapter);
         return true;
     }
 
-    private void showListFragment(SearchView searchView) {
-        if (findViewById(R.id.filterableListContainer) != null) {
-
-            // Create a new Fragment to be placed in the activity layout
-            listFragment = new ArtistListFragment(searchView);
-
-            // Add the fragment to the 'fragment_container' FrameLayout
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
-            ft.add(R.id.filterableListContainer, listFragment);
-            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            ft.commit();
-        } else {
-            Log.e(TAG, "Couldn't find filterableListFragment");
-        }
-    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -107,12 +107,56 @@ public class TestActivity extends Activity {
         Log.i(TAG, "On activity result called");
         if (requestCode == RMPDApplication.REQUEST_ENABLE_BT) {
             if (resultCode == Activity.RESULT_OK) {
-                Log.d(TAG, "Bluetooth enabled");
+                Log.i(TAG, "Bluetooth enabled");
                 app.notifyEvent(RMPDApplication.Event.CONNECT);
             } else {
-                Log.d(TAG, "Bluetooth not enabled");
+                Log.i(TAG, "Bluetooth not enabled");
                 app.notifyEvent(RMPDApplication.Event.REFUSED_BT_ENABLE);
             }
+        }
+    }
+
+    public class ListPagerAdapter extends FragmentPagerAdapter {
+        private static final String TAG = RMPDApplication.APP_PREFIX + "ListPagerAdapter";
+        SearchView searchView;
+        TestFragment firstFragment;
+        PlaylistFragment playlistFragment;
+
+
+        public ListPagerAdapter(SearchView searchView, FragmentManager fm) {
+            super(fm);
+            this.searchView = searchView;
+        }
+
+        public boolean canGoBack() {
+            return firstFragment.canGoBack();
+        }
+
+        public void goBack() {
+            firstFragment.goBack();
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            if (position == 1) {
+                Log.i(TAG, "Returning playlistFragment");
+                if (playlistFragment == null) {
+                    playlistFragment = new PlaylistFragment(searchView);
+                }
+                return playlistFragment;
+
+            } else {
+                Log.i(TAG, "Returning firstFragment");
+                if (firstFragment == null) {
+                    firstFragment = new TestFragment(searchView);
+                }
+                return firstFragment;
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return 2;
         }
     }
 }

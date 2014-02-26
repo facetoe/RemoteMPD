@@ -1,12 +1,11 @@
 package com.facetoe.remotempd.fragments;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
@@ -14,6 +13,7 @@ import android.widget.*;
 import com.facetoe.remotempd.R;
 import com.facetoe.remotempd.RMPDApplication;
 import com.facetoe.remotempd.adapters.AbstractMPDArrayAdapter;
+import com.facetoe.remotempd.adapters.ItemAdapter;
 import org.a0z.mpd.*;
 import org.a0z.mpd.exception.MPDServerException;
 
@@ -24,14 +24,15 @@ import java.util.List;
  * RemoteMPD
  * Created by facetoe on 23/02/14.
  */
-abstract class AbstractListFragment extends Fragment implements AdapterView.OnItemClickListener,
+public abstract class AbstractListFragment extends Fragment
+        implements AdapterView.OnItemClickListener,
         SearchView.OnQueryTextListener {
     private static final String TAG = RMPDApplication.APP_PREFIX + "AbstractListFragment";
     final RMPDApplication app = RMPDApplication.getInstance();
     final MPD mpd = app.getMpd();
 
-    AbstractMPDArrayAdapter adapter;
-    final List entries = new ArrayList<Item>();
+    final List<Item> entries = new ArrayList<Item>();
+    ItemAdapter adapter;
     final SearchView searchView;
 
     private static final int ADD_ITEM = 1;
@@ -39,10 +40,7 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
     private static final int ADD_REPLACE_AND_PLAY = 3;
     private static final int ADD_AND_PLAY = 4;
     LinearLayout spinnerLayout;
-
-    abstract protected AbstractMPDArrayAdapter getAdapter();
-
-    abstract protected String getTitle();
+    ListView listItems;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -52,13 +50,13 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
 
         setTitle();
 
-        ListView listItems = (ListView) rootView.findViewById(R.id.listItems);
+        listItems = (ListView) rootView.findViewById(R.id.listItems);
         TextView emptyListMessage = (TextView) rootView.findViewById(R.id.txtEmptyFilterableList);
         listItems.setEmptyView(emptyListMessage);
         listItems.setOnItemClickListener(this);
         registerForContextMenu(listItems);
 
-        adapter = getAdapter();
+        adapter = new ItemAdapter(getActivity(), R.layout.song_list, entries);
         listItems.setAdapter(adapter);
 
         setRetainInstance(true);
@@ -76,7 +74,7 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
     private void setTitle() {
         Activity parentActivity = getActivity();
         if (parentActivity != null) {
-            parentActivity.setTitle(getTitle());
+            parentActivity.setTitle("Test");
         } else {
             Log.w(TAG, "parentActivity was null");
         }
@@ -162,7 +160,7 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
         return true;
     }
 
-    private void addItem(Item item, boolean replace, boolean play) {
+    protected void addItem(Item item, boolean replace, boolean play) {
         if (item instanceof Artist) {
             add((Artist) item, replace, play);
         } else if (item instanceof Album) {
@@ -174,7 +172,7 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
         }
     }
 
-    private void add(final Artist artist, final boolean replace, final boolean play) {
+    protected void add(final Artist artist, final boolean replace, final boolean play) {
         final Toast toast = Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.CENTER, 0, 0);
 
@@ -192,7 +190,7 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
         }).start();
     }
 
-    private void add(final Album album, final boolean replace, final boolean play) {
+    protected void add(final Album album, final boolean replace, final boolean play) {
         final Toast toast = Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.CENTER, 0, 0);
 
@@ -210,7 +208,7 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
         }).start();
     }
 
-    private void add(final Music song, final boolean replace, final boolean play) {
+    protected void add(final Music song, final boolean replace, final boolean play) {
         final Toast toast = Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.CENTER, 0, 0);
 
@@ -230,14 +228,14 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        Log.v(TAG, "TextChanged: " + newText);
+        Log.i(TAG, "TextChanged: " + newText);
         adapter.getFilter().filter(newText);
         return true;
     }
 
     @Override
     public boolean onQueryTextSubmit(String query) {
-        Log.v(TAG, "Search submitted: " + query);
+        Log.i(TAG, "Search submitted: " + query);
         hideSoftKeyboard();
         hideSearchView();
         return true;
@@ -280,25 +278,6 @@ abstract class AbstractListFragment extends Fragment implements AdapterView.OnIt
                     adapter.resetEntries(newItems);
                 }
             });
-        }
-    }
-
-    void replaceWithFragment(Fragment fragment) {
-        // Hide these when swapping fragments as otherwise they
-        // will hang around when the user clicks an item in the ListView
-        // while still in the process of searching
-        hideSearchView();
-        hideSoftKeyboard();
-
-        FragmentManager fragmentManager = getFragmentManager();
-        if (fragmentManager != null) {
-            FragmentTransaction ft = fragmentManager.beginTransaction();
-            ft.replace(R.id.filterableListContainer, fragment);
-            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            ft.addToBackStack(null);
-            ft.commit();
-        } else {
-            Log.w(TAG, "Fragment manager was null in replaceWithFragment()");
         }
     }
 }

@@ -1,18 +1,13 @@
 package com.facetoe.remotempd.fragments;
 
-import android.app.Activity;
-import android.app.Fragment;
-import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
-import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.*;
 import com.facetoe.remotempd.R;
 import com.facetoe.remotempd.RMPDApplication;
-import com.facetoe.remotempd.adapters.MusicAdapter;
+import com.facetoe.remotempd.adapters.AbstractMPDArrayAdapter;
+import com.facetoe.remotempd.adapters.ItemAdapter;
 import org.a0z.mpd.MPDPlaylist;
 import org.a0z.mpd.MPDStatus;
 import org.a0z.mpd.Music;
@@ -24,45 +19,28 @@ import org.a0z.mpd.exception.MPDServerException;
  * RemoteMPD
  * Created by facetoe on 11/02/14.
  */
-public class PlaylistFragment extends Fragment implements AdapterView.OnItemClickListener, StatusChangeListener {
-    private final RMPDApplication app = RMPDApplication.getInstance();
-    private final MPDPlaylist playlist = app.getMpd().getPlaylist();
-    private MusicAdapter musicAdapter;
+public class PlaylistFragment extends AbstractListFragment implements StatusChangeListener {
 
+    private final MPDPlaylist playlist = app.getMpd().getPlaylist();
     private final String TAG = RMPDApplication.APP_PREFIX + "PlaylistFragment";
 
+    public PlaylistFragment(SearchView searchView) {
+        super(searchView);
+    }
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.playlist, container, false);
-        assert rootView != null;
-        ListView listPlaylist = (ListView) rootView.findViewById(R.id.listPlaylist);
-        listPlaylist.setFastScrollEnabled(true);
-        listPlaylist.setFastScrollAlwaysVisible(true);
-        listPlaylist.setOnItemClickListener(this);
+    public void onStart() {
+        super.onStart();
         app.getAsyncHelper().addStatusChangeListener(this);
+        if(entries.size() == 0) {
+            updateEntries(playlist.getMusicList());
+        }
+    }
 
-        musicAdapter = new MusicAdapter(getActivity(), R.layout.song_list, playlist.getMusicList());
-        listPlaylist.setAdapter(musicAdapter);
-
-        EditText txtSearch = (EditText)rootView.findViewById(R.id.txtSearch);
-        txtSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                musicAdapter.getFilter().filter(s);
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
-
-        return rootView;
+    @Override
+    public void onStop() {
+        super.onStop();
+        app.getAsyncHelper().removeStatusChangeListener(this);
     }
 
     @Override
@@ -72,16 +50,7 @@ public class PlaylistFragment extends Fragment implements AdapterView.OnItemClic
 
     @Override
     public void playlistChanged(MPDStatus mpdStatus, int oldPlaylistVersion) {
-        Activity parentActivity = getActivity();
-        if (parentActivity != null) {
-            parentActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Log.d(TAG, "Updated playlist with " + playlist.size() + " songs");
-                    musicAdapter.resetEntries(playlist.getMusicList());
-                }
-            });
-        }
+        updateEntries(playlist.getMusicList());
     }
 
     @Override
@@ -116,11 +85,17 @@ public class PlaylistFragment extends Fragment implements AdapterView.OnItemClic
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Music song = musicAdapter.getItem(position);
+        Music song = (Music)adapter.getItem(position);
         try {
-            RMPDApplication.getInstance().getMpd().skipToId(song.getSongId());
+            mpd.skipToId(song.getSongId());
         } catch (MPDServerException e) {
             app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED, e.getMessage());
         }
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        Log.i(TAG, "Context menu");
+        return true;
     }
 }

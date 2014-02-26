@@ -19,19 +19,19 @@ import java.util.List;
  *
  * Base class for MPDArray adapters. Provides filtering.
  */
-public class AbstractMPDArrayAdapter<T extends Item> extends ArrayAdapter<T> {
+public class AbstractMPDArrayAdapter extends ArrayAdapter<Item> {
     protected Context context;
-    protected List<T> items;
-    protected List<T> storedItems;
+    protected List<Item> items;
+    protected List<Item> storedItems;
     protected int itemLayoutID;
     protected String TAG = RMPDApplication.APP_PREFIX + "AbstractMPDArrayAdapter";
 
-    public AbstractMPDArrayAdapter(Context context, int itemLayoutID, List<T> items) {
+    public AbstractMPDArrayAdapter(Context context, int itemLayoutID, List<Item> items) {
         super(context, itemLayoutID, items);
         this.context = context;
         this.itemLayoutID = itemLayoutID;
         this.items = items;
-        this.storedItems = new ArrayList<T>(items);
+        this.storedItems = new ArrayList<Item>(items);
     }
 
     @Override
@@ -40,7 +40,7 @@ public class AbstractMPDArrayAdapter<T extends Item> extends ArrayAdapter<T> {
     }
 
     @Override
-    public T getItem(int position) {
+    public Item getItem(int position) {
         if(items.size() == 0 || position >= items.size()) {
             Log.e(TAG, "Invalid position. Expected <= " + items.size() + " got " + position);
             return null;
@@ -54,7 +54,7 @@ public class AbstractMPDArrayAdapter<T extends Item> extends ArrayAdapter<T> {
         return items.size();
     }
 
-    public void resetEntries(List<T> newItems) {
+    public void resetEntries(List<? extends Item> newItems) {
         storedItems.clear();
         storedItems.addAll(newItems);
         notifyDataSetChanged();
@@ -66,22 +66,22 @@ public class AbstractMPDArrayAdapter<T extends Item> extends ArrayAdapter<T> {
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
                 FilterResults results = new FilterResults();
-
+                Log.i(TAG, "performFiltering");
                 if (constraint == null || constraint.length() == 0) {
                     // No filter implemented we return all the list
                     results.values = storedItems;
                     results.count = storedItems.size();
                 } else {
-                    List<T> matches = filterMatches(constraint);
+                    List<Item> matches = filterMatches(constraint);
                     results.values = matches;
                     results.count = matches.size();
                 }
                 return results;
             }
 
-            private List<T> filterMatches(CharSequence constraint) {
-                List<T> matches = new ArrayList<T>();
-                for (T item : storedItems) {
+            private List<Item> filterMatches(CharSequence constraint) {
+                List<Item> matches = new ArrayList<Item>();
+                for (Item item : storedItems) {
                     if (item.toString().toUpperCase().startsWith(constraint.toString().toUpperCase()))
                         matches.add(item);
                 }
@@ -91,11 +91,11 @@ public class AbstractMPDArrayAdapter<T extends Item> extends ArrayAdapter<T> {
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
                 if (results.count == 0) {
-                    Log.d(TAG, "No results");
+                    Log.d(TAG, "No results: " + items);
                     items = Collections.emptyList();
                 } else {
                     Log.d(TAG, "Got " + results.count + " results");
-                    items = (List<T>) results.values;
+                    items = (List<Item>) results.values;
                 }
                 notifyDataSetChanged();
             }
