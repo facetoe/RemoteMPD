@@ -12,14 +12,8 @@ import com.facetoe.remotempd.helpers.MPDAsyncHelper;
 import com.facetoe.remotempd.helpers.RMPDAlertDialogFragmentFactory;
 import com.facetoe.remotempd.helpers.SettingsHelper;
 import com.facetoe.remotempd.helpers.WifiConnectionAsyncTask;
-import com.facetoe.remotempd.listeners.MPDManagerChangeListener;
 import org.a0z.mpd.ConnectionListener;
 import org.a0z.mpd.MPD;
-import org.a0z.mpd.MPDStatus;
-import org.a0z.mpd.event.StatusChangeListener;
-import org.a0z.mpd.event.TrackPositionListener;
-
-import java.util.ArrayList;
 
 /**
  * Created by facetoe on 31/12/13.
@@ -123,7 +117,7 @@ public class RMPDApplication extends Application implements
 
     private void connect() {
         Log.i(TAG, "Connecting...");
-        if(!asyncHelper.isMonitorAlive()) {
+        if (!asyncHelper.isMonitorAlive()) {
             asyncHelper.startMonitor();
         }
         asyncHelper.connect();
@@ -139,6 +133,10 @@ public class RMPDApplication extends Application implements
     public void connectionFailed(String message) {
         Log.i(TAG, "Connection failed: " + message);
         maybeShowConnectionFailedDialog(message);
+
+        // If the connection failed, disconnect as otherwise the MPDIdleConnection will spam
+        // us with error messages.
+        disconnect();
     }
 
     @Override
@@ -224,8 +222,7 @@ public class RMPDApplication extends Application implements
 
     private void maybeShowConnectionFailedDialog(String message) {
         if (currentActivity == null
-                || currentActivity instanceof SettingsActivity
-                || asyncHelper.oMPD.isConnected()) {
+                || currentActivity instanceof SettingsActivity) {
             return;
         }
         DialogFragment dialog = RMPDAlertDialogFragmentFactory.getConnectionFailedDialog(message);
@@ -250,16 +247,18 @@ public class RMPDApplication extends Application implements
     }
 
     private void dismissDialog() {
-        FragmentTransaction ft = currentActivity.getFragmentManager().beginTransaction();
-        Fragment fragment = currentActivity.getFragmentManager().findFragmentByTag("dialog");
-        if (fragment != null) {
-            DialogFragment dialog = (DialogFragment) fragment;
-            if (dialog.getDialog() != null) {
-                dialog.getDialog().dismiss();
+        if(currentActivity != null) {
+            FragmentTransaction ft = currentActivity.getFragmentManager().beginTransaction();
+            Fragment fragment = currentActivity.getFragmentManager().findFragmentByTag("dialog");
+            if (fragment != null) {
+                DialogFragment dialog = (DialogFragment) fragment;
+                if (dialog.getDialog() != null) {
+                    dialog.getDialog().dismiss();
+                }
+                ft.remove(fragment);
             }
-            ft.remove(fragment);
+            ft.addToBackStack(null);
         }
-        ft.addToBackStack(null);
     }
 
     @Override

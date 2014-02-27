@@ -5,7 +5,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 import com.google.gson.Gson;
-import org.a0z.mpd.exception.NoBluetoothServerConnectionException;
+import org.a0z.mpd.exception.BluetoothServerException;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -46,10 +46,11 @@ public class BluetoothConnection {
 
     /**
      * Initialize and connect to the bluetooth server.
+     *
      * @param device The device to connect to
-     * @throws NoBluetoothServerConnectionException On failure to connect.
+     * @throws org.a0z.mpd.exception.BluetoothServerException On failure to connect.
      */
-    public BluetoothConnection(BluetoothDevice device) throws NoBluetoothServerConnectionException {
+    public BluetoothConnection(BluetoothDevice device) throws BluetoothServerException {
         bluetoothDevice = device;
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         connect();
@@ -58,14 +59,14 @@ public class BluetoothConnection {
     /**
      * Attempt to connect to the device and launch the BluetoothCommThread for managing the connection.
      */
-    public synchronized void connect() throws NoBluetoothServerConnectionException {
+    public synchronized void connect() throws BluetoothServerException {
         if (bluetoothAdapter == null) {
-            throw new NoBluetoothServerConnectionException("Bluetooth is not supported");
+            throw new BluetoothServerException("Bluetooth is not supported");
         }
 
         if (CURRENT_STATE == STATE_CONNECTING) {
             Log.w(TAG, "Connection was already in progress, canceling");
-            if(bluetoothCommThread != null) {
+            if (bluetoothCommThread != null) {
                 bluetoothCommThread.disconnect();
             }
         }
@@ -83,9 +84,9 @@ public class BluetoothConnection {
      * Attempt to connect to the remote device and open a BluetoothSocket.
      *
      * @return The connected BluetoothSocket
-     * @throws NoBluetoothServerConnectionException If we can't find the device (most likely) or other error.
+     * @throws org.a0z.mpd.exception.BluetoothServerException If we can't find the device (most likely) or other error.
      */
-    private BluetoothSocket getAndConnectBluetoothSocket() throws NoBluetoothServerConnectionException {
+    private BluetoothSocket getAndConnectBluetoothSocket() throws BluetoothServerException {
         BluetoothSocket socket;
         setState(STATE_CONNECTING);
         try {
@@ -98,30 +99,32 @@ public class BluetoothConnection {
             socket.connect();
         } catch (IOException e) {
             Log.e(TAG, "Bluetooth connection failed: " + e.getMessage());
-            throw new NoBluetoothServerConnectionException("Failed to connect to bluetooth server");
+            throw new BluetoothServerException("Failed to connect to bluetooth server");
         }
         return socket;
     }
 
     /**
      * Send a command to the Bluetooth server.
+     *
      * @param command The command to send.
-     * @throws NoBluetoothServerConnectionException On failure to send command.
+     * @throws org.a0z.mpd.exception.BluetoothServerException On failure to send command.
      */
-    void sendCommand(BTServerCommand command) throws NoBluetoothServerConnectionException {
+    void sendCommand(BTServerCommand command) throws BluetoothServerException {
         if (CURRENT_STATE != STATE_CONNECTED) {
-            throw new NoBluetoothServerConnectionException("No connection to Bluetooth Server");
+            throw new BluetoothServerException("No connection to Bluetooth Server");
         }
         try {
             String commandJSON = gson.toJson(command);
             bluetoothCommThread.write(commandJSON);
         } catch (IOException e) {
-            throw new NoBluetoothServerConnectionException("Failed to send command to Bluetooth server");
+            throw new BluetoothServerException("Failed to send command to Bluetooth server");
         }
     }
 
     /**
      * Sends a command and returns a Future<MPDResponse> object for use in the calling thread.
+     *
      * @param command The command to send.
      * @return A Future<MPDResponse> object.
      */
@@ -186,7 +189,6 @@ public class BluetoothConnection {
         public void run() {
             setName("BluetoothCommThread");
             String input;
-
             initStreams();
             setState(STATE_CONNECTED);
             while (!isCanceled) {
@@ -233,16 +235,24 @@ public class BluetoothConnection {
         /**
          * Handle the messages received from the bluetooth server and add them to
          * the appropriate queue.
+         *
          * @param message The message to send.
          */
         private void handleMessage(String message) {
             MPDResponse response = gson.fromJson(message, MPDResponse.class);
-            if (response.isSynchronous()) {
+
+            if (response.getResponseType() == MPDResponse.EVENT_ERROR) {
+                Log.e(TAG, "Error received from bluetooth server, adding to syncedResultQueue");
                 addToSyncedResultQueue(response);
+
+            } else if (response.isSynchronous()) {
+                addToSyncedResultQueue(response);
+
             } else if (response.getResponseType() == MPDResponse.EVENT_UPDATE_RAW_CHANGES) {
                 addToMpdIdleUpdateQueue(response);
+
             } else {
-                Log.w(TAG, "Received strange command: " + response.getResponseType());
+                Log.e(TAG, "Received strange command: " + response.getResponseType());
             }
         }
 
@@ -266,6 +276,7 @@ public class BluetoothConnection {
 
         /**
          * Send the data to the server. Note, the server expects messages to be terminated with a newline.
+         *
          * @param data The data to write.
          * @throws IOException On error.
          */

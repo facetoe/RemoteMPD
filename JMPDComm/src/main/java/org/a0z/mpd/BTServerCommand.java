@@ -97,6 +97,8 @@ public class BTServerCommand extends AbstractCommand {
     public static final String MPD_TAG_ALBUM_ARTIST = "albumartist";
     public static final String MPD_TAG_GENRE = "genre";
 
+    public static final String SERVER_CAN_PROCEED = "canProceed";
+
 
     protected static List<String> BULK_COMMANDS = Arrays.asList(MPD_CMD_START_BULK, MPD_CMD_START_BULK_OK, MPD_CMD_BULK_SEP, MPD_CMD_END_BULK);
 

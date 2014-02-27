@@ -34,6 +34,7 @@ public class MPDResponse implements Serializable {
     public static final int EVENT_GET_PLAYLIST_CHANGES = 20;
     public static final int SYNC_READ_WRITE = 21;
     public static final int EVENT_UPDATE_RAW_CHANGES = 22;
+    public static final int EVENT_ERROR = 23;
 
     private int responseType;
     private int numObjects;

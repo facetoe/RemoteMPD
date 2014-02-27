@@ -195,7 +195,12 @@ public class MPDStatusMonitor extends Thread implements Monitorable {
 					connectionState = Boolean.FALSE;
 					connectionLost = true;
 				} catch (MPDServerException e) {
-					e.printStackTrace();
+                    // For some reason this previously just printed a stacktrace instead of handling the error.
+                    // Not sure if there was a reason for this but I added the error handling here.
+
+                    connectionState = Boolean.FALSE;
+                    connectionLost = true;
+                    e.printStackTrace();
 				}
 			}
 			try {
