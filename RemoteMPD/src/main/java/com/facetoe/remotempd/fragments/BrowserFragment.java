@@ -10,6 +10,7 @@ import com.facetoe.remotempd.RMPDApplication;
 import org.a0z.mpd.*;
 import org.a0z.mpd.exception.MPDServerException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
@@ -269,6 +270,7 @@ public class BrowserFragment extends AbstractListFragment implements ConnectionL
         }
     }
 
+    // This method is necessary as MPD's add Artist command only seems to add the first album by the artist.
     protected void add(final Artist artist, final boolean replace, final boolean play) {
         final Toast toast = Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.CENTER, 0, 0);
@@ -277,7 +279,19 @@ public class BrowserFragment extends AbstractListFragment implements ConnectionL
             @Override
             public void run() {
                 try {
-                    mpd.add(artist, replace, play);
+                    if(replace) {
+                        mpd.getPlaylist().clear();
+                    }
+
+                    List<Music> songs = getSongsForArtist(artist);
+                    mpd.getPlaylist().addAll(songs);
+
+                    if(play) {
+                        if(songs.size() > 0) {
+                            Music firstSong = songs.get(0);
+                            mpd.skipToId(firstSong.getSongId());
+                        }
+                    }
                     toast.setText("Added " + artist.getName());
                     toast.show();
                 } catch (MPDServerException e) {
@@ -285,6 +299,18 @@ public class BrowserFragment extends AbstractListFragment implements ConnectionL
                 }
             }
         }).start();
+    }
+
+    // If this method turns out to be really slow it might be faster to queue up the commands
+    // and send them all at once.
+    private List<Music> getSongsForArtist(Artist artist) throws MPDServerException {
+        List<Album> albums = mpd.getAlbums(artist);
+        List<Music> songs = new ArrayList<Music>();
+        for (Album album : albums) {
+            Log.i(TAG, "Adding: " + album);
+            songs.addAll(mpd.getSongs(artist, album));
+        }
+        return songs;
     }
 
     protected void add(final Album album, final boolean replace, final boolean play) {

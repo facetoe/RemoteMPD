@@ -87,7 +87,7 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
     public void onStart() {
         super.onStart();
         asyncHelper.addStatusChangeListener(this);
-        if(mpd.isConnected()) {
+        if (mpd.isConnected()) {
             initializePlayerBar();
         }
     }
@@ -95,7 +95,7 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
     @Override
     public void onResume() {
         super.onResume();
-        if(mpd.isConnected()) {
+        if (mpd.isConnected()) {
             initializePlayerBar();
         }
     }
@@ -113,7 +113,7 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
                     updateRepeatRandomButtons(mpdStatus);
 
                 } catch (MPDServerException e) {
-                    e.printStackTrace();
+                    handleError(e);
                 }
             }
         }).start();
@@ -136,28 +136,34 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
 
     private void updateNowPlayingText(MPDStatus status) {
         final Music currentSong = getCurrentSong(status);
-        if (currentSong != null) {
-            Activity parentActivity = getActivity();
-            if (parentActivity != null) {
-                parentActivity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
+        Activity parentActivity = getActivity();
+        if (parentActivity != null) {
+            parentActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+                    // If currentSong is null then the playlist is empty, so nothing is "now playing"
+                    if(currentSong == null) {
+                        txtSong.setText("");
+                        txtAlbum.setText("");
+                        txtArtist.setText("");
+                    } else {
                         txtSong.setText(currentSong.getTitle());
                         txtAlbum.setText(currentSong.getAlbum());
                         txtArtist.setText(currentSong.getArtist());
                     }
-                });
-            }
+                }
+            });
         }
+
     }
 
     private Music getCurrentSong(MPDStatus status) {
-        Log.i(TAG, "getCurrentSong: " + mpd.getPlaylist().getByIndex(status.getSongPos()));
         return mpd.getPlaylist().getByIndex(status.getSongPos());
     }
 
     private void setState(String newState) {
-        if(newState.equals(playerState.toString())) {
+        if (newState.equals(playerState.toString())) {
             return;
         }
         String logMessage = "State changed from " + playerState + " to ";
@@ -210,7 +216,7 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
                         mpd.play();
                     }
                 } catch (MPDServerException e) {
-                    app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED, e.getMessage());
+                    handleError(e);
                 }
             }
         }).start();
