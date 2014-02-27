@@ -30,16 +30,20 @@ public class BrowserFragment extends AbstractListFragment implements ConnectionL
     private static final int ADD_AND_PLAY = 4;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
     public void onStart() {
+        Log.i(TAG, "onStart()");
         super.onStart();
         app.getAsyncHelper().addConnectionListener(this);
         if (mpd.isConnected()) {
             new PopulateListTask().execute(); // This will populate with artists.
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(getUserVisibleHint()) {
+            setTitle();
         }
     }
 
@@ -188,7 +192,6 @@ public class BrowserFragment extends AbstractListFragment implements ConnectionL
     }
 
     private void showArtists() {
-        setTitle(title);
         try {
             if (entries.size() == 0) {
                 List<Artist> artists = mpd.getArtists();

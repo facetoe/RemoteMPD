@@ -1,13 +1,16 @@
 package com.facetoe.remotempd.fragments;
 
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.MenuItem;
-import android.view.View;
+import android.view.*;
 import android.widget.*;
 import com.facetoe.remotempd.R;
 import com.facetoe.remotempd.RMPDApplication;
 import com.facetoe.remotempd.adapters.AbstractMPDArrayAdapter;
 import com.facetoe.remotempd.adapters.ItemAdapter;
+import org.a0z.mpd.Item;
 import org.a0z.mpd.MPDPlaylist;
 import org.a0z.mpd.MPDStatus;
 import org.a0z.mpd.Music;
@@ -24,12 +27,23 @@ public class PlaylistFragment extends AbstractListFragment implements StatusChan
     private final MPDPlaylist playlist = app.getMpd().getPlaylist();
     private final String TAG = RMPDApplication.APP_PREFIX + "PlaylistFragment";
 
+    private static final int REMOVE = 1;
+
     @Override
     public void onStart() {
         super.onStart();
+        Log.i(TAG, "onStart()");
         app.getAsyncHelper().addStatusChangeListener(this);
         if(entries.size() == 0) {
             updateEntries(playlist.getMusicList());
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(getUserVisibleHint()) {
+            setTitle();
         }
     }
 
@@ -55,9 +69,43 @@ public class PlaylistFragment extends AbstractListFragment implements StatusChan
     }
 
     @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        if (v.getId() == com.facetoe.remotempd.R.id.listItems) {
+            menu.add(Menu.NONE, REMOVE, Menu.NONE, "Remove");
+        }
+    }
+
+    @Override
     public boolean onContextItemSelected(MenuItem item) {
-        Log.i(TAG, "Context menu");
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        if (info == null) {
+            Log.e(TAG, "AdapterContextMenuInfo was null");
+            return true;
+        }
+
+        Item selectedItem = adapter.getItem(info.position);
+        if(item.getItemId() == REMOVE) {
+            Music song = (Music)selectedItem;
+            removeSong(song);
+        }
         return true;
+    }
+
+
+
+    private void removeSong(final Music song) {
+        final Toast toast = Toast.makeText(getActivity(), song.getTitle() + " removed", Toast.LENGTH_SHORT);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    playlist.removeById(song.getSongId());
+                    toast.show();
+                } catch (MPDServerException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     @Override

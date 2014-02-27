@@ -30,13 +30,14 @@ public abstract class AbstractListFragment extends Fragment
         TestActivity.OnFragmentVisible {
 
     private static final String TAG = RMPDApplication.APP_PREFIX + "AbstractListFragment";
+    protected static final String PREF_TITLE = "title";
+
     final RMPDApplication app = RMPDApplication.getInstance();
     final MPD mpd = app.getMpd();
 
     final List<Item> entries = new ArrayList<Item>();
     ItemAdapter adapter;
     LinearLayout spinnerLayout;
-    private ListView listItems;
     private SearchView searchView;
 
     @Override
@@ -45,15 +46,15 @@ public abstract class AbstractListFragment extends Fragment
         assert rootView != null;
         spinnerLayout = (LinearLayout) rootView.findViewById(R.id.filterableListSpinnerLayout);
 
-        listItems = (ListView) rootView.findViewById(R.id.listItems);
+        ListView listItems = (ListView) rootView.findViewById(R.id.listItems);
         TextView emptyListMessage = (TextView) rootView.findViewById(R.id.txtEmptyFilterableList);
         listItems.setEmptyView(emptyListMessage);
         listItems.setOnItemClickListener(this);
-        registerForContextMenu(listItems);
 
         adapter = new ItemAdapter(getActivity(), R.layout.song_list, entries);
         listItems.setAdapter(adapter);
 
+        registerForContextMenu(listItems);
         setRetainInstance(true);
 
         return rootView;

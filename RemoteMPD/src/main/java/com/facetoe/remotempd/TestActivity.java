@@ -26,14 +26,6 @@ public class TestActivity extends FragmentActivity {
     ViewPager viewPager;
     ListPagerAdapter pagerAdapter;
 
-    // Call handleSearchEvents when we want the currently visible fragment
-    // to handle search queries.
-    public interface OnFragmentVisible {
-        void handleSearchEvents(SearchView searchView);
-
-        void setTitle();
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,7 +42,7 @@ public class TestActivity extends FragmentActivity {
 
             @Override
             public void onPageSelected(int i) {
-                pagerAdapter.setFragmentSearchView(i);
+                pagerAdapter.onFragmentVisible(i);
             }
 
             @Override
@@ -73,7 +65,6 @@ public class TestActivity extends FragmentActivity {
         super.onStop();
         app.unregisterCurrentActivity();
     }
-
 
     @Override
     public void onBackPressed() {
@@ -100,7 +91,7 @@ public class TestActivity extends FragmentActivity {
                 searchManager.getSearchableInfo(getComponentName()));
 
         // Set the BrowserFragment to initially accept search events from the SearchView.
-        pagerAdapter.setFragmentSearchView(0);
+        pagerAdapter.onFragmentVisible(0);
         return true;
     }
 
@@ -134,6 +125,17 @@ public class TestActivity extends FragmentActivity {
         }
     }
 
+    // Call handleSearchEvents when we want the currently visible fragment
+    // to handle search queries.
+    public interface OnFragmentVisible {
+
+        // When a fragment becomes visible, handle all the search queries sent from the action bar.
+        void handleSearchEvents(SearchView searchView);
+
+        // Set the title to indicate what this fragment does.
+        void setTitle();
+    }
+
     private class ListPagerAdapter extends FragmentPagerAdapter {
         private static final int NUM_FRAGMENTS = 2;
         BrowserFragment browserFragment;
@@ -143,8 +145,8 @@ public class TestActivity extends FragmentActivity {
             super(fm);
         }
 
-        public void setFragmentSearchView(int i) {
-            if (i == 0) {
+        public void onFragmentVisible(int fragmentIndex) {
+            if (fragmentIndex == 0) {
                 browserFragment.handleSearchEvents(searchView);
                 browserFragment.setTitle();
             } else {
