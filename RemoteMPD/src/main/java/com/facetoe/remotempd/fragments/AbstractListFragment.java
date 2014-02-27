@@ -39,6 +39,8 @@ public abstract class AbstractListFragment extends Fragment
     ItemAdapter adapter;
     LinearLayout spinnerLayout;
     private SearchView searchView;
+    ListView listItems;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -46,7 +48,7 @@ public abstract class AbstractListFragment extends Fragment
         assert rootView != null;
         spinnerLayout = (LinearLayout) rootView.findViewById(R.id.filterableListSpinnerLayout);
 
-        ListView listItems = (ListView) rootView.findViewById(R.id.listItems);
+        listItems = (ListView) rootView.findViewById(R.id.listItems);
         TextView emptyListMessage = (TextView) rootView.findViewById(R.id.txtEmptyFilterableList);
         listItems.setEmptyView(emptyListMessage);
         listItems.setOnItemClickListener(this);

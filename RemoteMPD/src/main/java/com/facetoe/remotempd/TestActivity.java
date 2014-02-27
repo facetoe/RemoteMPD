@@ -132,8 +132,8 @@ public class TestActivity extends FragmentActivity {
         // When a fragment becomes visible, handle all the search queries sent from the action bar.
         void handleSearchEvents(SearchView searchView);
 
-        // Set the title to indicate what this fragment does.
-        void setTitle();
+        // Set up any other housekeeping for when the fragment becomes visible.
+        void onVisible();
     }
 
     private class ListPagerAdapter extends FragmentPagerAdapter {
@@ -148,10 +148,10 @@ public class TestActivity extends FragmentActivity {
         public void onFragmentVisible(int fragmentIndex) {
             if (fragmentIndex == 0) {
                 browserFragment.handleSearchEvents(searchView);
-                browserFragment.setTitle();
+                browserFragment.onVisible();
             } else {
                 playlistFragment.handleSearchEvents(searchView);
-                playlistFragment.setTitle();
+                playlistFragment.onVisible();
             }
         }
 

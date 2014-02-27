@@ -1,15 +1,13 @@
 package com.facetoe.remotempd.fragments;
 
-import android.content.SharedPreferences;
-import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.*;
-import android.widget.*;
-import com.facetoe.remotempd.R;
+import android.view.ContextMenu;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.Toast;
 import com.facetoe.remotempd.RMPDApplication;
-import com.facetoe.remotempd.adapters.AbstractMPDArrayAdapter;
-import com.facetoe.remotempd.adapters.ItemAdapter;
 import org.a0z.mpd.Item;
 import org.a0z.mpd.MPDPlaylist;
 import org.a0z.mpd.MPDStatus;
@@ -34,7 +32,7 @@ public class PlaylistFragment extends AbstractListFragment implements StatusChan
         super.onStart();
         Log.i(TAG, "onStart()");
         app.getAsyncHelper().addStatusChangeListener(this);
-        if(entries.size() == 0) {
+        if (entries.size() == 0) {
             updateEntries(playlist.getMusicList());
         }
     }
@@ -42,8 +40,8 @@ public class PlaylistFragment extends AbstractListFragment implements StatusChan
     @Override
     public void onResume() {
         super.onResume();
-        if(getUserVisibleHint()) {
-            setTitle();
+        if (getUserVisibleHint()) {
+            onVisible();
         }
     }
 
@@ -55,7 +53,7 @@ public class PlaylistFragment extends AbstractListFragment implements StatusChan
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        final Music song = (Music)adapter.getItem(position);
+        final Music song = (Music) adapter.getItem(position);
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -70,6 +68,7 @@ public class PlaylistFragment extends AbstractListFragment implements StatusChan
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+
         if (v.getId() == com.facetoe.remotempd.R.id.listItems) {
             menu.add(Menu.NONE, REMOVE, Menu.NONE, "Remove");
         }
@@ -77,6 +76,13 @@ public class PlaylistFragment extends AbstractListFragment implements StatusChan
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
+
+        // If this fragment is not visible, don't consume the event. Return false to let
+        // whichever fragment is currently visible deal with it.
+        if(!getUserVisibleHint()) {
+            return false;
+        }
+
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         if (info == null) {
             Log.e(TAG, "AdapterContextMenuInfo was null");
@@ -84,17 +90,16 @@ public class PlaylistFragment extends AbstractListFragment implements StatusChan
         }
 
         Item selectedItem = adapter.getItem(info.position);
-        if(item.getItemId() == REMOVE) {
-            Music song = (Music)selectedItem;
+        if (item.getItemId() == REMOVE) {
+            Music song = (Music) selectedItem;
             removeSong(song);
         }
         return true;
     }
 
 
-
     private void removeSong(final Music song) {
-        final Toast toast = Toast.makeText(getActivity(), song.getTitle() + " removed", Toast.LENGTH_SHORT);
+        final Toast toast = Toast.makeText(getActivity(), "Removed " + song.getTitle(), Toast.LENGTH_SHORT);
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -109,7 +114,7 @@ public class PlaylistFragment extends AbstractListFragment implements StatusChan
     }
 
     @Override
-    public void setTitle() {
+    public void onVisible() {
         setTitle("Playlist");
     }
 

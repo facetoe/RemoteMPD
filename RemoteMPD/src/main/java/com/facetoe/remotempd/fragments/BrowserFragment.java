@@ -1,7 +1,6 @@
 package com.facetoe.remotempd.fragments;
 
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.*;
 import android.widget.AdapterView;
@@ -43,7 +42,7 @@ public class BrowserFragment extends AbstractListFragment implements ConnectionL
     public void onResume() {
         super.onResume();
         if(getUserVisibleHint()) {
-            setTitle();
+            onVisible();
         }
     }
 
@@ -52,7 +51,7 @@ public class BrowserFragment extends AbstractListFragment implements ConnectionL
     }
 
     @Override
-    public void setTitle() {
+    public void onVisible() {
         setTitle(title);
     }
 
@@ -92,6 +91,14 @@ public class BrowserFragment extends AbstractListFragment implements ConnectionL
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
+
+        // If this fragment is not visible, don't consume the event. Return false to let
+        // whichever fragment is currently visible deal with it.
+        if(!getUserVisibleHint()) {
+            return false;
+        }
+
+
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         if (info == null) {
             Log.e(TAG, "AdapterContextMenuInfo was null");
@@ -223,7 +230,7 @@ public class BrowserFragment extends AbstractListFragment implements ConnectionL
         } catch (MPDServerException e) {
             Log.e(TAG, "Error", e);
         }
-        setTitle();
+        onVisible();
     }
 
     private void displayAndAddToBackstack(List<? extends Item> items, Item item) {

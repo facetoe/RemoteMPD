@@ -152,6 +152,7 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
     }
 
     private Music getCurrentSong(MPDStatus status) {
+        Log.i(TAG, "getCurrentSong: " + mpd.getPlaylist().getByIndex(status.getSongPos()));
         return mpd.getPlaylist().getByIndex(status.getSongPos());
     }
 
