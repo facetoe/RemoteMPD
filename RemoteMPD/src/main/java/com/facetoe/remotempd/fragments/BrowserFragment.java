@@ -1,6 +1,9 @@
 package com.facetoe.remotempd.fragments;
 
 import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.*;
 import android.widget.AdapterView;
@@ -13,6 +16,25 @@ import org.a0z.mpd.exception.MPDServerException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+
+
+class CachedItems {
+    private List<? extends Item> items;
+    private String title;
+
+    public CachedItems(List<? extends Item> items, String title) {
+        this.items = items;
+        this.title = title;
+    }
+
+    public List<? extends Item> getItems() {
+        return items;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+}
 
 /**
  * RemoteMPD
@@ -29,9 +51,15 @@ public class BrowserFragment extends AbstractListFragment implements ConnectionL
     private static final int ADD_REPLACE_AND_PLAY = 3;
     private static final int ADD_AND_PLAY = 4;
 
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Log.i(TAG, savedInstanceState == null ? "savedInstance state was null" : "savedInstance state was not null");
+    }
+
     @Override
     public void onStart() {
-        Log.i(TAG, "onStart()");
         super.onStart();
         app.getAsyncHelper().addConnectionListener(this);
         if (mpd.isConnected()) {
@@ -40,9 +68,17 @@ public class BrowserFragment extends AbstractListFragment implements ConnectionL
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        Log.i(TAG, "onPause()");
+        app.getAsyncHelper().removeConnectionListener(this);
+    }
+
+    @Override
     public void onResume() {
+        Log.i(TAG, "onResume()");
         super.onResume();
-        if(getUserVisibleHint()) {
+        if (getUserVisibleHint()) {
             onVisible();
         }
     }
@@ -95,7 +131,7 @@ public class BrowserFragment extends AbstractListFragment implements ConnectionL
 
         // If this fragment is not visible, don't consume the event. Return false to let
         // whichever fragment is currently visible deal with it.
-        if(!getUserVisibleHint()) {
+        if (!getUserVisibleHint()) {
             return false;
         }
 
@@ -240,24 +276,6 @@ public class BrowserFragment extends AbstractListFragment implements ConnectionL
         updateEntries(items);
     }
 
-    private class CachedItems {
-        private List<? extends Item> items;
-        private String title;
-
-        private CachedItems(List<? extends Item> items, String title) {
-            this.items = items;
-            this.title = title;
-        }
-
-        public List<? extends Item> getItems() {
-            return items;
-        }
-
-        public String getTitle() {
-            return title;
-        }
-    }
-
     protected void addItem(Item item, boolean replace, boolean play) {
         if (item instanceof Artist) {
             add((Artist) item, replace, play);
@@ -279,19 +297,23 @@ public class BrowserFragment extends AbstractListFragment implements ConnectionL
             @Override
             public void run() {
                 try {
-                    if(replace) {
+                    showActionbarProgressSpinner();
+                    hideKeyboardAndCollapseSearchView();
+
+                    if (replace) {
                         mpd.getPlaylist().clear();
                     }
 
-                    List<Music> songs = getSongsForArtist(artist);
-                    mpd.getPlaylist().addAll(songs);
+                    addAllSongsForArtist(artist);
 
-                    if(play) {
-                        if(songs.size() > 0) {
-                            Music firstSong = songs.get(0);
-                            mpd.skipToId(firstSong.getSongId());
-                        }
+                    if (replace && play) {
+                        mpd.play();
+
+                    } else if (play) {
+                        findFirstSongAndPlay(artist);
                     }
+
+                    hideActionbarProgressSpinner();
                     toast.setText("Added " + artist.getName());
                     toast.show();
                 } catch (MPDServerException e) {
@@ -301,16 +323,35 @@ public class BrowserFragment extends AbstractListFragment implements ConnectionL
         }).start();
     }
 
-    // If this method turns out to be really slow it might be faster to queue up the commands
-    // and send them all at once.
-    private List<Music> getSongsForArtist(Artist artist) throws MPDServerException {
+    private void addAllSongsForArtist(Artist artist) throws MPDServerException {
         List<Album> albums = mpd.getAlbums(artist);
         List<Music> songs = new ArrayList<Music>();
         for (Album album : albums) {
-            Log.i(TAG, "Adding: " + album);
-            songs.addAll(mpd.getSongs(artist, album));
+            songs.addAll(mpd.getSongs(artist, album)); //TODO this is slow, batch the commands to improve performance
         }
-        return songs;
+
+        for (Music song : songs) {
+            mpd.getMpdConnection().queueCommand(MPDPlaylist.MPD_CMD_PLAYLIST_ADD, song.getFullpath());
+        }
+        mpd.getMpdConnection().sendCommandQueue();
+    }
+
+    private void findFirstSongAndPlay(Artist artist) throws MPDServerException {
+        // Need to force a refresh here so we can find the first song.
+        // There is probably a better way to do this...
+        mpd.getPlaylist().refresh();
+
+        List<Music> playlistSongs = mpd.getPlaylist().getMusicList();
+        Music firstSong = null;
+        for (Music song : playlistSongs) {
+            if (song.getArtist().equals(artist.getName())) {
+                firstSong = song;
+                break;
+            }
+        }
+        if (firstSong != null) {
+            mpd.skipToId(firstSong.getSongId());
+        }
     }
 
     protected void add(final Album album, final boolean replace, final boolean play) {
@@ -321,9 +362,11 @@ public class BrowserFragment extends AbstractListFragment implements ConnectionL
             @Override
             public void run() {
                 try {
+                    showActionbarProgressSpinner();
                     mpd.add(album, replace, play);
                     toast.setText("Added " + album.getName());
                     toast.show();
+                    hideActionbarProgressSpinner();
                 } catch (MPDServerException e) {
                     app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED);
                 }
@@ -339,9 +382,11 @@ public class BrowserFragment extends AbstractListFragment implements ConnectionL
             @Override
             public void run() {
                 try {
+                    showActionbarProgressSpinner();
                     mpd.add(song, replace, play);
                     toast.setText("Added " + song.getName());
                     toast.show();
+                    hideActionbarProgressSpinner();
                 } catch (MPDServerException e) {
                     app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED);
                 }

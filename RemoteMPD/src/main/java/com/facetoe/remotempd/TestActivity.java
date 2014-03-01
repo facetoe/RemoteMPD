@@ -14,6 +14,9 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.inputmethod.EditorInfo;
 import android.widget.SearchView;
 import com.facetoe.remotempd.fragments.BrowserFragment;
 import com.facetoe.remotempd.fragments.PlaylistFragment;
@@ -29,6 +32,9 @@ public class TestActivity extends FragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        setProgressBarIndeterminateVisibility(true);
+
         setContentView(R.layout.activity_test);
         viewPager = (ViewPager) findViewById(R.id.viewPager);
 
@@ -176,6 +182,23 @@ public class TestActivity extends FragmentActivity {
                 }
                 return playlistFragment;
             }
+        }
+
+        // On orientation change the pager adapter saves the fragments and
+        // then recreates them, however it does not call getItem again so playlistFragment
+        // and browserFragment would both be null. By overriding this method
+        // we can retain our references to them on orientation change.
+        @Override
+        public Object instantiateItem(ViewGroup container, int position) {
+            Object fragment = super.instantiateItem(container, position);
+            if(fragment instanceof PlaylistFragment) {
+                playlistFragment = (PlaylistFragment)fragment;
+            } else if(fragment instanceof BrowserFragment) {
+                browserFragment = (BrowserFragment)fragment;
+            } else {
+                Log.w(TAG, "Unknown object type in instantiateItem: " + fragment.getClass().getSimpleName());
+            }
+            return fragment;
         }
 
         @Override

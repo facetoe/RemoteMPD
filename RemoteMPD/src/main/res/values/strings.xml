@@ -33,5 +33,7 @@
     <string name="connectionProgressDialogMessage">Connecting to MPD server...</string>
     <string name="title_activity_playlist">PlaylistActivity</string>
     <string name="artistFragmentTitle">Artists</string>
+    <string name="searchLabel">Search Label</string>
+    <string name="searchHint">Search Hint</string>
 
 </resources>

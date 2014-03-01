@@ -34,6 +34,7 @@
                        android:resource="@xml/searchable" />
 
             <intent-filter>
+                <action android:name="android.intent.action.SEARCH"/>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>

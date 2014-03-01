@@ -41,7 +41,6 @@ public abstract class AbstractListFragment extends Fragment
     private SearchView searchView;
     ListView listItems;
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.filterable_list, container, false);
@@ -74,12 +73,6 @@ public abstract class AbstractListFragment extends Fragment
         } else {
             Log.w(TAG, "Can't set title, activity was null");
         }
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setRetainInstance(true);
     }
 
     @Override
@@ -128,8 +121,29 @@ public abstract class AbstractListFragment extends Fragment
         if (parentActivity != null) {
             InputMethodManager inputMethodManager =
                     (InputMethodManager) parentActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
+
             inputMethodManager.hideSoftInputFromWindow(searchView.getWindowToken(), 0);
         }
+    }
+
+    protected void showActionbarProgressSpinner() {
+        final Activity parentActivity = getActivity();
+        parentActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                parentActivity.setProgressBarIndeterminateVisibility(true);
+            }
+        });
+    }
+
+    protected void hideActionbarProgressSpinner() {
+        final Activity parentActivity = getActivity();
+        parentActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                parentActivity.setProgressBarIndeterminateVisibility(false);
+            }
+        });
     }
 
     void updateEntries(final List<? extends Item> newItems) {
@@ -140,9 +154,7 @@ public abstract class AbstractListFragment extends Fragment
                 @Override
                 public void run() {
                     entries.clear();
-                    //noinspection unchecked
                     entries.addAll(newItems);
-                    //noinspection unchecked
                     adapter.resetEntries(newItems);
                 }
             });

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <searchable xmlns:android="http://schemas.android.com/apk/res/android"
-            android:label="Search Label"
-            android:hint="Search Hint">
+            android:label="@string/searchLabel"
+            android:hint="@string/searchHint"
+            android:imeOptions="actionSearch|flagNoExtractUi|flagNoFullscreen">
 </searchable>
 

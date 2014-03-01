@@ -185,7 +185,7 @@ public class MPDPlaylist extends AbstractStatusChangeListener {
 	 *            if an error occur while contacting server.
 	 * @return current playlist version.
 	 */
-	private int refresh() throws MPDServerException {
+	public int refresh() throws MPDServerException {
 		if (firstRefreash) {
 			// TODO should be atomic
 			MPDStatus status = this.mpd.getStatus();

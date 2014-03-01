@@ -93,6 +93,12 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        asyncHelper.removeStatusChangeListener(this);
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         if (mpd.isConnected()) {
@@ -119,18 +125,34 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
         }).start();
     }
 
-    private void updateRepeatRandomButtons(MPDStatus status) {
-        btnRepeat.setPressed(status.isRepeat());
-        btnRandom.setPressed(status.isRandom());
+    private void updateRepeatRandomButtons(final MPDStatus status) {
+        Activity parentActivity = getActivity();
+        if (parentActivity != null) {
+            parentActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    btnRepeat.setPressed(status.isRepeat());
+                    btnRandom.setPressed(status.isRandom());
+                }
+            });
+        }
     }
 
     private void setButtonPlayImage() {
-        if (playerState == PLAYER_STATE.PLAYING) {
-            btnPlay.setImageResource(R.drawable.ic_media_pause);
-        } else if (playerState == PLAYER_STATE.PAUSED || playerState == PLAYER_STATE.STOPPED) {
-            btnPlay.setImageResource(R.drawable.ic_media_play);
-        } else {
-            Log.w(TAG, "Unknown state: " + playerState);
+        Activity parentActivity = getActivity();
+        if (parentActivity != null) {
+            parentActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (playerState == PLAYER_STATE.PLAYING) {
+                        btnPlay.setImageResource(R.drawable.ic_media_pause);
+                    } else if (playerState == PLAYER_STATE.PAUSED || playerState == PLAYER_STATE.STOPPED) {
+                        btnPlay.setImageResource(R.drawable.ic_media_play);
+                    } else {
+                        Log.w(TAG, "Unknown state: " + playerState);
+                    }
+                }
+            });
         }
     }
 
