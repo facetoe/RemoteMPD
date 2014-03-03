@@ -35,5 +35,6 @@
     <string name="artistFragmentTitle">Artists</string>
     <string name="searchLabel">Search Label</string>
     <string name="searchHint">Search Hint</string>
+    <string name="removeSongs">Remove Songs</string>
 
 </resources>

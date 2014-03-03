@@ -25,7 +25,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/listItems"
         android:layout_gravity="center_horizontal"
-        android:choiceMode="singleChoice"
+        android:choiceMode="none"
         />
 
     <TextView

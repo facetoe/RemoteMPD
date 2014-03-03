@@ -77,7 +77,6 @@ public abstract class AbstractListFragment extends Fragment
 
     @Override
     public void handleSearchEvents(SearchView searchView) {
-        Log.i(TAG, "Setting query listener in PlaylistFragment");
         this.searchView = searchView;
         searchView.setOnQueryTextListener(this);
     }
