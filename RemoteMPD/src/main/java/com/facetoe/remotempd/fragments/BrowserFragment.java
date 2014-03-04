@@ -83,13 +83,13 @@ public class BrowserFragment extends AbstractListFragment implements ConnectionL
         }
     }
 
-    public boolean canGoBack() {
-        return !backStack.empty();
-    }
-
     @Override
     public void onVisible() {
         setTitle(title);
+    }
+
+    public boolean canGoBack() {
+        return !backStack.empty();
     }
 
     public void goBack() {

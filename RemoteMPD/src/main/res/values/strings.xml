@@ -36,5 +36,6 @@
     <string name="searchLabel">Search Label</string>
     <string name="searchHint">Search Hint</string>
     <string name="removeSongs">Remove Songs</string>
+    <string name="clearPlaylist">Clear Playlist</string>
 
 </resources>

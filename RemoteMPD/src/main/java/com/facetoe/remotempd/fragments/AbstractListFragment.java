@@ -30,7 +30,6 @@ public abstract class AbstractListFragment extends Fragment
         TestActivity.OnFragmentVisible {
 
     private static final String TAG = RMPDApplication.APP_PREFIX + "AbstractListFragment";
-    protected static final String PREF_TITLE = "title";
 
     final RMPDApplication app = RMPDApplication.getInstance();
     final MPD mpd = app.getMpd();
@@ -46,6 +45,8 @@ public abstract class AbstractListFragment extends Fragment
         View rootView = inflater.inflate(R.layout.filterable_list, container, false);
         assert rootView != null;
         spinnerLayout = (LinearLayout) rootView.findViewById(R.id.filterableListSpinnerLayout);
+        searchView = (SearchView)rootView.findViewById(R.id.searchView);
+        searchView.setOnQueryTextListener(this);
 
         listItems = (ListView) rootView.findViewById(R.id.listItems);
         TextView emptyListMessage = (TextView) rootView.findViewById(R.id.txtEmptyFilterableList);
@@ -73,12 +74,6 @@ public abstract class AbstractListFragment extends Fragment
         } else {
             Log.w(TAG, "Can't set title, activity was null");
         }
-    }
-
-    @Override
-    public void handleSearchEvents(SearchView searchView) {
-        this.searchView = searchView;
-        searchView.setOnQueryTextListener(this);
     }
 
     @Override

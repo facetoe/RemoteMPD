@@ -20,6 +20,15 @@
             />
     </LinearLayout>
 
+    <SearchView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/searchView"
+        android:iconifiedByDefault="false"
+        android:focusable="false"
+        android:queryHint="Filter items">
+    </SearchView>
+
     <ListView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"

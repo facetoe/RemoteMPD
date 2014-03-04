@@ -2,8 +2,6 @@ package com.facetoe.remotempd;
 
 
 import android.app.Activity;
-import android.app.SearchManager;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -16,15 +14,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.inputmethod.EditorInfo;
-import android.widget.SearchView;
 import com.facetoe.remotempd.fragments.BrowserFragment;
 import com.facetoe.remotempd.fragments.PlaylistFragment;
 
 public class TestActivity extends FragmentActivity {
     private static final String TAG = RMPDApplication.APP_PREFIX + "TestActivity";
     private final RMPDApplication app = RMPDApplication.getInstance();
-    SearchView searchView;
 
     ViewPager viewPager;
     ListPagerAdapter pagerAdapter;
@@ -88,16 +83,7 @@ public class TestActivity extends FragmentActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.test, menu);
-        // Get the SearchView and set the searchable configuration
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        MenuItem menuItem = menu.findItem(R.id.menu_search);
-        searchView = (SearchView) menuItem.getActionView();
-        searchView.setSearchableInfo(
-                searchManager.getSearchableInfo(getComponentName()));
-
-        // Set the BrowserFragment to initially accept search events from the SearchView.
-        pagerAdapter.onFragmentVisible(0);
+        getMenuInflater().inflate(R.menu.action_bar_menu, menu);
         return true;
     }
 
@@ -134,10 +120,6 @@ public class TestActivity extends FragmentActivity {
     // Call handleSearchEvents when we want the currently visible fragment
     // to handle search queries.
     public interface OnFragmentVisible {
-
-        // When a fragment becomes visible, handle all the search queries sent from the action bar.
-        void handleSearchEvents(SearchView searchView);
-
         // Set up any other housekeeping for when the fragment becomes visible.
         void onVisible();
     }
@@ -153,10 +135,8 @@ public class TestActivity extends FragmentActivity {
 
         public void onFragmentVisible(int fragmentIndex) {
             if (fragmentIndex == 0) {
-                browserFragment.handleSearchEvents(searchView);
                 browserFragment.onVisible();
             } else {
-                playlistFragment.handleSearchEvents(searchView);
                 playlistFragment.onVisible();
             }
         }
