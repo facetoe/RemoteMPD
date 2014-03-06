@@ -10,12 +10,10 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.ViewGroup;
-import android.view.Window;
+import android.view.*;
 import com.facetoe.remotempd.fragments.BrowserFragment;
 import com.facetoe.remotempd.fragments.PlaylistFragment;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 public class TestActivity extends FragmentActivity {
     private static final String TAG = RMPDApplication.APP_PREFIX + "TestActivity";
@@ -29,8 +27,46 @@ public class TestActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setProgressBarIndeterminateVisibility(true);
+        setContentView(R.layout.main_activity);
 
-        setContentView(R.layout.activity_test);
+
+        SlidingUpPanelLayout layout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
+        layout.setShadowDrawable(getResources().getDrawable(R.drawable.above_shadow));
+        layout.setAnchorPoint(0.3f);
+        layout.setPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+            @Override
+            public void onPanelSlide(View panel, float slideOffset) {
+                Log.i(TAG, "onPanelSlide, offset " + slideOffset);
+                if (slideOffset < 0.2) {
+                    if (getActionBar().isShowing()) {
+                        getActionBar().hide();
+                    }
+                } else {
+                    if (!getActionBar().isShowing()) {
+                        getActionBar().show();
+                    }
+                }
+            }
+
+            @Override
+            public void onPanelExpanded(View panel) {
+                Log.i(TAG, "onPanelExpanded");
+
+            }
+
+            @Override
+            public void onPanelCollapsed(View panel) {
+                Log.i(TAG, "onPanelCollapsed");
+
+            }
+
+            @Override
+            public void onPanelAnchored(View panel) {
+                Log.i(TAG, "onPanelAnchored");
+
+            }
+        });
+
         viewPager = (ViewPager) findViewById(R.id.viewPager);
 
         pagerAdapter = new ListPagerAdapter(getSupportFragmentManager());
@@ -134,6 +170,10 @@ public class TestActivity extends FragmentActivity {
         }
 
         public void onFragmentVisible(int fragmentIndex) {
+            if(browserFragment == null || playlistFragment == null) {
+                Log.e(TAG, "Error, fragments were null in onFragmentVisible");
+                return;
+            }
             if (fragmentIndex == 0) {
                 browserFragment.onVisible();
             } else {

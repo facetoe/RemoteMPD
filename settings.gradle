@@ -1,1 +1,1 @@
-include ':RemoteMPD', ':JMPDComm', ':JMPDComm'
+include ':RemoteMPD', ':JMPDComm', ':AndroidSlidingUpPanel:library'

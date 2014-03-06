@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.facetoe.remotempd.R;
 import com.facetoe.remotempd.RMPDApplication;
@@ -48,8 +49,9 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
 
 
     private TextView txtSong;
-    private TextView txtAlbum;
-    private TextView txtArtist;
+    private TextView txtArtistAlbum;
+    private RelativeLayout playerBarLayout;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -63,8 +65,9 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
         btnRandom = (ImageButton) rootView.findViewById(R.id.btnRandom);
 
         txtSong = (TextView) rootView.findViewById(R.id.txtSong);
-        txtAlbum = (TextView) rootView.findViewById(R.id.txtAlbum);
-        txtArtist = (TextView) rootView.findViewById(R.id.txtArtist);
+        txtArtistAlbum = (TextView) rootView.findViewById(R.id.txtAritstAlbum);
+
+        playerBarLayout = (RelativeLayout)rootView.findViewById(R.id.nowPlayingLayout);
 
         btnPlay.setOnClickListener(this);
         btnNext.setOnClickListener(this);
@@ -118,6 +121,13 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
                     updateNowPlayingText(mpdStatus);
                     updateRepeatRandomButtons(mpdStatus);
 
+                    Music currentSong = getCurrentSong(mpdStatus);
+                    if(currentSong == null) {
+                        playerBarLayout.setVisibility(View.GONE);
+                    } else {
+                        playerBarLayout.setVisibility(View.VISIBLE);
+                    }
+
                 } catch (MPDServerException e) {
                     handleError(e);
                 }
@@ -164,15 +174,13 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
                 @Override
                 public void run() {
 
-                    // If currentSong is null then the playlist is empty, so nothing is "now playing"
+                    // If currentSong is null then the playlist is empty, so nothing is "now playing".
                     if (currentSong == null) {
-                        txtSong.setText("");
-                        txtAlbum.setText("");
-                        txtArtist.setText("");
+                        playerBarLayout.setVisibility(View.GONE);
                     } else {
+                        playerBarLayout.setVisibility(View.VISIBLE);
                         txtSong.setText(currentSong.getTitle());
-                        txtAlbum.setText(currentSong.getAlbum());
-                        txtArtist.setText(currentSong.getArtist());
+                        txtArtistAlbum.setText(currentSong.getArtist() + " - " + currentSong.getAlbum());
                     }
                 }
             });

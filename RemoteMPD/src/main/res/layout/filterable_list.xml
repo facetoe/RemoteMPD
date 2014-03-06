@@ -26,7 +26,8 @@
         android:id="@+id/searchView"
         android:iconifiedByDefault="false"
         android:focusable="false"
-        android:queryHint="Filter items">
+        android:queryHint="Filter items"
+        android:imeOptions="flagNoExtractUi" >
     </SearchView>
 
     <ListView
