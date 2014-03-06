@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/AndroidSlidingUpPanel/AndroidSlidingUpPanel.iml" filepath="$PROJECT_DIR$/AndroidSlidingUpPanel/AndroidSlidingUpPanel.iml" />
+      <module fileurl="file://$PROJECT_DIR$/JMPDComm/JMPDComm.iml" filepath="$PROJECT_DIR$/JMPDComm/JMPDComm.iml" />
+      <module fileurl="file://$PROJECT_DIR$/RemoteMPD.iml" filepath="$PROJECT_DIR$/RemoteMPD.iml" />
+      <module fileurl="file://$PROJECT_DIR$/RemoteMPD/RemoteMPD-RemoteMPD.iml" filepath="$PROJECT_DIR$/RemoteMPD/RemoteMPD-RemoteMPD.iml" />
+      <module fileurl="file://$PROJECT_DIR$/AndroidSlidingUpPanel/library/library.iml" filepath="$PROJECT_DIR$/AndroidSlidingUpPanel/library/library.iml" />
+    </modules>
+  </component>
+</project>
+

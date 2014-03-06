@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="createEmptyContentRootDirectories" value="true" />
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/../JMPDCommRemote" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/../JMPDCommRemote" />
+            <option value="$PROJECT_DIR$/../JMPDCommRemote/RemoteMPD" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="createEmptyContentRootDirectories" value="true" />
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/AndroidSlidingUpPanel" />
+            <option value="$PROJECT_DIR$/AndroidSlidingUpPanel/library" />
+            <option value="$PROJECT_DIR$/JMPDComm" />
+            <option value="$PROJECT_DIR$/RemoteMPD" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="createEmptyContentRootDirectories" value="true" />
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="externalProjectPath" value="$USER_HOME$/git/AndroidSlidingUpPanel" />
+        <option name="gradleHome" value="$USER_HOME$/programs/gradle-1.9" />
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="createEmptyContentRootDirectories" value="true" />
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="externalProjectPath" value="$USER_HOME$/git/AndroidSlidingUpPanel/library" />
+        <option name="gradleHome" value="$USER_HOME$/programs/gradle-1.9" />
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="createEmptyContentRootDirectories" value="true" />
+        <option name="distributionType" value="WRAPPED" />
+        <option name="externalProjectPath" value="$USER_HOME$/study/coursera/handheldSystems/week4Lab/UserInterface" />
+        <option name="gradleHome" value="$USER_HOME$/programs/gradle-1.9" />
+        <option name="modules">
+          <set>
+            <option value="$USER_HOME$/study/coursera/handheldSystems/week4Lab/UserInterface" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>
+
