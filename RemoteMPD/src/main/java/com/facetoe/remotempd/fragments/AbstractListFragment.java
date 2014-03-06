@@ -13,7 +13,7 @@ import android.widget.*;
 import com.facetoe.remotempd.R;
 import com.facetoe.remotempd.RMPDApplication;
 import com.facetoe.remotempd.TestActivity;
-import com.facetoe.remotempd.adapters.ItemAdapter;
+import com.facetoe.remotempd.adapters.AbstractMPDArrayAdapter;
 import org.a0z.mpd.Item;
 import org.a0z.mpd.MPD;
 
@@ -35,10 +35,12 @@ public abstract class AbstractListFragment extends Fragment
     final MPD mpd = app.getMpd();
 
     final List<Item> entries = new ArrayList<Item>();
-    ItemAdapter adapter;
+    AbstractMPDArrayAdapter adapter;
     LinearLayout spinnerLayout;
     private SearchView searchView;
     ListView listItems;
+
+    abstract void initAdapter();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -53,7 +55,7 @@ public abstract class AbstractListFragment extends Fragment
         listItems.setEmptyView(emptyListMessage);
         listItems.setOnItemClickListener(this);
 
-        adapter = new ItemAdapter(getActivity(), R.layout.song_list, entries);
+        initAdapter();
         listItems.setAdapter(adapter);
 
         registerForContextMenu(listItems);

@@ -11,6 +11,8 @@ import android.widget.ListView;
 import android.widget.Toast;
 import com.facetoe.remotempd.R;
 import com.facetoe.remotempd.RMPDApplication;
+import com.facetoe.remotempd.adapters.AbstractMPDArrayAdapter;
+import com.facetoe.remotempd.adapters.PlaylistAdapter;
 import org.a0z.mpd.Item;
 import org.a0z.mpd.MPDPlaylist;
 import org.a0z.mpd.MPDStatus;
@@ -37,84 +39,8 @@ public class PlaylistFragment extends AbstractListFragment implements StatusChan
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        app.getAsyncHelper().addStatusChangeListener(this);
-        if (entries.size() == 0) {
-            updateEntries(playlist.getMusicList());
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (getUserVisibleHint()) {
-            onVisible();
-        }
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        app.getAsyncHelper().removeStatusChangeListener(this);
-    }
-
-    @Override
-    public void onVisible() {
-        setTitle("Playlist");
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.playlist_menu, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.clear_playlist:
-                clearPlaylist();
-                return true;
-        }
-        return false;
-    }
-
-    private void clearPlaylist() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-
-        builder.setTitle("Confirm");
-        builder.setMessage("Clear Playlist?");
-        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                // Do nothing but close the dialog
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            playlist.clear();
-                        } catch (MPDServerException e) {
-                            handleError(e);
-                        }
-                    }
-                }).start();
-                dialog.dismiss();
-            }
-        });
-
-        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-
-        AlertDialog alert = builder.create();
-        alert.show();
-    }
-
-    private void handleError(MPDServerException e) {
-        app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED, e.getMessage());
+    void initAdapter() {
+        adapter = new PlaylistAdapter(getActivity(), entries);
     }
 
     @Override
@@ -200,6 +126,86 @@ public class PlaylistFragment extends AbstractListFragment implements StatusChan
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        app.getAsyncHelper().addStatusChangeListener(this);
+        if (entries.size() == 0) {
+            updateEntries(playlist.getMusicList());
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (getUserVisibleHint()) {
+            onVisible();
+        }
+    }
+
+    @Override
+    public void onVisible() {
+        setTitle("Playlist");
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        app.getAsyncHelper().removeStatusChangeListener(this);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.playlist_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.clear_playlist:
+                clearPlaylist();
+                return true;
+        }
+        return false;
+    }
+
+    private void clearPlaylist() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+        builder.setTitle("Confirm");
+        builder.setMessage("Clear Playlist?");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            playlist.clear();
+                        } catch (MPDServerException e) {
+                            handleError(e);
+                        }
+                    }
+                }).start();
+                dialog.dismiss();
+            }
+        });
+
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    private void handleError(MPDServerException e) {
+        app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED, e.getMessage());
+    }
+
+    @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         final Music song = (Music) adapter.getItem(position);
         new Thread(new Runnable() {
@@ -208,7 +214,7 @@ public class PlaylistFragment extends AbstractListFragment implements StatusChan
                 try {
                     mpd.skipToId(song.getSongId());
                 } catch (MPDServerException e) {
-                    app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED, e.getMessage());
+                    handleError(e);
                 }
             }
         }).start();

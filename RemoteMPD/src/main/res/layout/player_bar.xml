@@ -38,47 +38,46 @@
     </RelativeLayout>
 
     <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="0">
+        android:gravity="center_horizontal">
 
         <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_width="62dp"
+            android:layout_height="62dp"
+            android:scaleType="centerInside"
             android:id="@+id/btnRandom"
-            android:src="@drawable/ic_media_random"
+            android:src="@drawable/ic_media_shuffle"
             android:background="?android:attr/actionBarItemBackground"/>
 
         <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_width="62dp"
+            android:layout_height="62dp"
+            android:scaleType="centerInside"
             android:id="@+id/btnPrev"
-            android:src="@drawable/ic_media_prev"
+            android:src="@drawable/ic_media_previous"
             android:background="?android:attr/actionBarItemBackground"/>
 
         <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_width="62dp"
+            android:layout_height="62dp"
+            android:scaleType="centerInside"
             android:id="@+id/btnPlay"
             android:src="@drawable/ic_media_play"
             android:background="?android:attr/actionBarItemBackground"/>
 
         <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_width="62dp"
+            android:layout_height="62dp"
+            android:scaleType="centerInside"
             android:id="@+id/btnNext"
             android:src="@drawable/ic_media_next"
             android:background="?android:attr/actionBarItemBackground"/>
 
         <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_width="62dp"
+            android:layout_height="62dp"
+            android:scaleType="centerInside"
             android:id="@+id/btnRepeat"
             android:src="@drawable/ic_media_repeat"
             android:background="?android:attr/actionBarItemBackground"/>

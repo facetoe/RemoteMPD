@@ -2,14 +2,15 @@ package com.facetoe.remotempd.fragments;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.Log;
 import android.view.*;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 import com.facetoe.remotempd.RMPDApplication;
+import com.facetoe.remotempd.adapters.BrowserAdapter;
+import com.facetoe.remotempd.R;
 import org.a0z.mpd.*;
 import org.a0z.mpd.exception.MPDServerException;
 
@@ -53,9 +54,21 @@ public class BrowserFragment extends AbstractListFragment implements ConnectionL
 
 
     @Override
+    void initAdapter() {
+        adapter = new BrowserAdapter(getActivity(), entries);
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.i(TAG, savedInstanceState == null ? "savedInstance state was null" : "savedInstance state was not null");
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = super.onCreateView(inflater, container, savedInstanceState);
+        listItems.setChoiceMode(AbsListView.CHOICE_MODE_NONE);
+        return view;
     }
 
     @Override

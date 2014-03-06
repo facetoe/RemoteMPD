@@ -134,7 +134,7 @@ public class RMPDApplication extends Application implements
         Log.i(TAG, "Connection failed: " + message);
         maybeShowConnectionFailedDialog(message);
 
-        // If the connection failed, disconnect as otherwise the MPDIdleConnection will spam
+        // If the connection failed, disconnect anyway as otherwise the MPDIdleConnection will spam
         // us with error messages.
         disconnect();
     }
@@ -201,7 +201,7 @@ public class RMPDApplication extends Application implements
 
     private void enableAndConnectWifi() {
         WifiConnectionAsyncTask task = new WifiConnectionAsyncTask(currentActivity);
-        task.execute((Void) null);
+        task.execute();
     }
 
     private void enableAndConnectBluetooth() {

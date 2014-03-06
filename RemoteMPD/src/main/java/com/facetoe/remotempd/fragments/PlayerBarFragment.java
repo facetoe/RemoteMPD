@@ -114,7 +114,7 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
                     mpdStatus = mpd.getStatus();
                     String state = mpdStatus.getState();
                     setState(state);
-                    setButtonPlayImage();
+                    setButtonPlayIcon();
                     updateNowPlayingText(mpdStatus);
                     updateRepeatRandomButtons(mpdStatus);
 
@@ -131,14 +131,14 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
             parentActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    btnRepeat.setPressed(status.isRepeat());
-                    btnRandom.setPressed(status.isRandom());
+                    setRepeatButtonIcon(status.isRepeat());
+                    setRandomButtonIcon(status.isRandom());
                 }
             });
         }
     }
 
-    private void setButtonPlayImage() {
+    private void setButtonPlayIcon() {
         Activity parentActivity = getActivity();
         if (parentActivity != null) {
             parentActivity.runOnUiThread(new Runnable() {
@@ -165,7 +165,7 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
                 public void run() {
 
                     // If currentSong is null then the playlist is empty, so nothing is "now playing"
-                    if(currentSong == null) {
+                    if (currentSong == null) {
                         txtSong.setText("");
                         txtAlbum.setText("");
                         txtArtist.setText("");
@@ -321,19 +321,35 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
     public void stateChanged(MPDStatus mpdStatus, String oldState) {
         this.mpdStatus = mpdStatus;
         setState(mpdStatus.getState());
-        setButtonPlayImage();
+        setButtonPlayIcon();
     }
 
     @Override
     public void repeatChanged(boolean repeating) {
         Log.d(TAG, "Repeat Changed: " + repeating);
-        btnRepeat.setPressed(repeating);
+        setRepeatButtonIcon(repeating);
+    }
+
+    private void setRepeatButtonIcon(boolean repeating) {
+        if(repeating) {
+            btnRepeat.setImageResource(R.drawable.ic_media_repeat_on);
+        } else {
+            btnRepeat.setImageResource(R.drawable.ic_media_repeat);
+        }
     }
 
     @Override
     public void randomChanged(boolean random) {
         Log.d(TAG, "Random changed: " + random);
-        btnRandom.setPressed(random);
+        setRandomButtonIcon(random);
+    }
+
+    private void setRandomButtonIcon(boolean random) {
+        if(random) {
+            btnRandom.setImageResource(R.drawable.ic_media_shuffle_on);
+        } else {
+            btnRandom.setImageResource(R.drawable.ic_media_shuffle);
+        }
     }
 
     @Override
