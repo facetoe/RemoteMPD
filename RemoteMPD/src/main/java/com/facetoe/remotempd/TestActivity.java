@@ -11,6 +11,9 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.*;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.Space;
 import com.facetoe.remotempd.fragments.BrowserFragment;
 import com.facetoe.remotempd.fragments.PlaylistFragment;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
@@ -26,49 +29,17 @@ public class TestActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+
         setProgressBarIndeterminateVisibility(true);
         setContentView(R.layout.main_activity);
 
-
-        SlidingUpPanelLayout layout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
-        layout.setShadowDrawable(getResources().getDrawable(R.drawable.above_shadow));
-        layout.setAnchorPoint(0.3f);
-        layout.setPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
-            @Override
-            public void onPanelSlide(View panel, float slideOffset) {
-                Log.i(TAG, "onPanelSlide, offset " + slideOffset);
-                if (slideOffset < 0.2) {
-                    if (getActionBar().isShowing()) {
-                        getActionBar().hide();
-                    }
-                } else {
-                    if (!getActionBar().isShowing()) {
-                        getActionBar().show();
-                    }
-                }
-            }
-
-            @Override
-            public void onPanelExpanded(View panel) {
-                Log.i(TAG, "onPanelExpanded");
-
-            }
-
-            @Override
-            public void onPanelCollapsed(View panel) {
-                Log.i(TAG, "onPanelCollapsed");
-
-            }
-
-            @Override
-            public void onPanelAnchored(View panel) {
-                Log.i(TAG, "onPanelAnchored");
-
-            }
-        });
+        SlidingUpPanelLayout slidingUpLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
+        RelativeLayout dragAnchor = (RelativeLayout)findViewById(R.id.dragAnchor);
+        slidingUpLayout.setDragView(dragAnchor);
+        slidingUpLayout.setPanelHeight(100);
 
         viewPager = (ViewPager) findViewById(R.id.viewPager);
-
         pagerAdapter = new ListPagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
         viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {

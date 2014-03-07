@@ -7,9 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.widget.*;
 import com.facetoe.remotempd.R;
 import com.facetoe.remotempd.RMPDApplication;
 import com.facetoe.remotempd.helpers.MPDAsyncHelper;
@@ -22,12 +20,12 @@ import org.a0z.mpd.exception.MPDServerException;
 /**
  * RemoteMPD
  * <p/>
- * PlayerBarFragment handles controlling the MPD player.
+ * PlayerControlFragment handles controlling the MPD player.
  */
-public class PlayerBarFragment extends Fragment implements View.OnClickListener,
+public class PlayerControlFragment extends Fragment implements View.OnClickListener,
         StatusChangeListener {
 
-    private static final String TAG = RMPDApplication.APP_PREFIX + "PlayerBarFragment";
+    private static final String TAG = RMPDApplication.APP_PREFIX + "PlayerControlFragment";
     private final RMPDApplication app = RMPDApplication.getInstance();
     private final MPD mpd = app.getMpd();
     private final MPDAsyncHelper asyncHelper = app.getAsyncHelper();
@@ -36,6 +34,13 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
     private ImageButton btnPrev;
     private ImageButton btnRandom;
     private ImageButton btnRepeat;
+
+    private TextView txtSong;
+    private TextView txtAlbumArtist;
+    private SeekBar seekTrack;
+    private SeekBar seekVolume;
+
+    private LinearLayout nowPlayingLayout;
 
     private enum PLAYER_STATE {
         PLAYING,
@@ -46,12 +51,6 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
 
     private PLAYER_STATE playerState = PLAYER_STATE.UNKNOWN;
     private MPDStatus mpdStatus;
-
-
-    private TextView txtSong;
-    private TextView txtArtistAlbum;
-    private RelativeLayout playerBarLayout;
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -64,10 +63,13 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
         btnRepeat = (ImageButton) rootView.findViewById(R.id.btnRepeat);
         btnRandom = (ImageButton) rootView.findViewById(R.id.btnRandom);
 
-        txtSong = (TextView) rootView.findViewById(R.id.txtSong);
-        txtArtistAlbum = (TextView) rootView.findViewById(R.id.txtAritstAlbum);
+        txtSong = (TextView)rootView.findViewById(R.id.txtSong);
+        txtAlbumArtist = (TextView)rootView.findViewById(R.id.txtAritstAlbum);
 
-        playerBarLayout = (RelativeLayout)rootView.findViewById(R.id.nowPlayingLayout);
+        seekTrack = (SeekBar)rootView.findViewById(R.id.seekTrackProgress);
+        seekVolume = (SeekBar)rootView.findViewById(R.id.seekVolume);
+
+        nowPlayingLayout = (LinearLayout)rootView.findViewById(R.id.nowPlayingLayout);
 
         btnPlay.setOnClickListener(this);
         btnNext.setOnClickListener(this);
@@ -118,15 +120,8 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
                     String state = mpdStatus.getState();
                     setState(state);
                     setButtonPlayIcon();
-                    updateNowPlayingText(mpdStatus);
                     updateRepeatRandomButtons(mpdStatus);
-
-                    Music currentSong = getCurrentSong(mpdStatus);
-                    if(currentSong == null) {
-                        playerBarLayout.setVisibility(View.GONE);
-                    } else {
-                        playerBarLayout.setVisibility(View.VISIBLE);
-                    }
+                    updateNowPlayingText(mpdStatus);
 
                 } catch (MPDServerException e) {
                     handleError(e);
@@ -176,11 +171,13 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
 
                     // If currentSong is null then the playlist is empty, so nothing is "now playing".
                     if (currentSong == null) {
-                        playerBarLayout.setVisibility(View.GONE);
+                        Log.i(TAG, "Current song was null");
+                        nowPlayingLayout.setVisibility(View.GONE);
                     } else {
-                        playerBarLayout.setVisibility(View.VISIBLE);
+                        Log.i(TAG, "Updating text");
+                        nowPlayingLayout.setVisibility(View.VISIBLE);
                         txtSong.setText(currentSong.getTitle());
-                        txtArtistAlbum.setText(currentSong.getArtist() + " - " + currentSong.getAlbum());
+                        txtAlbumArtist.setText(currentSong.getArtist() + " - " + currentSong.getAlbum());
                     }
                 }
             });
@@ -313,8 +310,8 @@ public class PlayerBarFragment extends Fragment implements View.OnClickListener,
     @Override
     public void playlistChanged(MPDStatus mpdStatus, int oldPlaylistVersion) {
         this.mpdStatus = mpdStatus;
-        Log.d(TAG, "Playlist changed");
         updateNowPlayingText(mpdStatus);
+        Log.d(TAG, "Playlist changed");
     }
 
     @Override

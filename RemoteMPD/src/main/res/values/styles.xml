@@ -1,17 +1,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Base application theme. -->
     <style name="RMPDAppTheme" parent="Theme.AppCompat">
-        <!-- <item name="android:windowActionBarOverlay">true</item> -->
+        <item name="android:windowActionBarOverlay">true</item>
     </style>
-
-    <!--<style name="RMPDAppTheme" parent="@android:style/Theme.Holo">-->
-        <!--<item name="repeatDisabled">@drawable/ic_media_repeat</item>-->
-        <!--<item name="repeatEnabled">@drawable/ic_media_repeat_on</item>-->
-    <!--</style>-->
-
-    <!--<style name="PlayerButton" parent="android:Widget.Holo.ImageButton">-->
-        <!--<item name="android:background">?android:attr/actionBarItemBackground</item>-->
-        <!--<item name="android:minHeight">@dimen/playerbutton_height</item>-->
-    <!--</style>-->
-
 </resources>

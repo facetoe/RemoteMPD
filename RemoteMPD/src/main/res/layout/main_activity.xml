@@ -4,7 +4,8 @@
     android:id="@+id/sliding_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="bottom">
+    android:gravity="bottom"
+    android:paddingTop="@dimen/abc_action_bar_default_height">
 
     <android.support.v4.view.ViewPager
         android:layout_width="match_parent"
@@ -12,12 +13,33 @@
         android:id="@+id/viewPager">
     </android.support.v4.view.ViewPager>
 
-    <fragment
-        class="com.facetoe.remotempd.fragments.PlayerBarFragment"
-        android:id="@+id/playerBarFragment"
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:id="@+id/nowPlayingLayout"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:layout="@layout/player_bar"/>
+        android:orientation="vertical">
 
+
+        <RelativeLayout
+            android:id="@+id/dragAnchor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:src="@drawable/btn_toggle_off"
+                android:layout_centerInParent="true"/>
+        </RelativeLayout>
+
+        <fragment
+            class="com.facetoe.remotempd.fragments.PlayerControlFragment"
+            android:id="@+id/playerBarFragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:layout="@layout/player_bar"/>
+    </LinearLayout>
 
 </com.sothree.slidinguppanel.SlidingUpPanelLayout>
