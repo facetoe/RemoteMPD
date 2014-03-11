@@ -52,8 +52,6 @@ public class PlayerControlFragment extends Fragment implements View.OnClickListe
     private SeekBar seekVolume;
 
     private LinearLayout nowPlayingLayout;
-    private long lastElapsedTime = 0;
-    private long lastSongTime = 0;
     private Handler handler;
 
     private enum State {
@@ -63,11 +61,10 @@ public class PlayerControlFragment extends Fragment implements View.OnClickListe
         UNKNOWN
     }
 
-    private State state = State.UNKNOWN;
+    private State currentState = State.UNKNOWN;
     private MPDStatus mpdStatus;
 
-    private Music currentSong;
-    Timer trackPositionTimer;
+    private Timer trackPositionTimer;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -198,7 +195,7 @@ public class PlayerControlFragment extends Fragment implements View.OnClickListe
                 try {
                     mpdStatus = mpd.getStatus();
                     String state = mpdStatus.getState();
-                    setState(state);
+                    setCurrentState(state);
                     setButtonPlayIcon();
                     updateRepeatRandomButtons(mpdStatus);
                     updateNowPlayingText(mpdStatus);
@@ -232,12 +229,12 @@ public class PlayerControlFragment extends Fragment implements View.OnClickListe
         handler.post(new Runnable() {
             @Override
             public void run() {
-                if (state == State.PLAYING) {
+                if (currentState == State.PLAYING) {
                     btnPlay.setImageResource(R.drawable.ic_media_pause);
-                } else if (state == State.PAUSED || state == State.STOPPED) {
+                } else if (currentState == State.PAUSED || currentState == State.STOPPED) {
                     btnPlay.setImageResource(R.drawable.ic_media_play);
                 } else {
-                    Log.w(TAG, "Unknown state: " + state);
+                    Log.w(TAG, "Unknown state: " + currentState);
                 }
             }
         });
@@ -249,11 +246,15 @@ public class PlayerControlFragment extends Fragment implements View.OnClickListe
             @Override
             public void run() {
                 // If currentSong is null then the playlist is empty.
-                if (currentSong == null) {
+                if (currentSong == null || mpd.getPlaylist().size() == 0) {
                     nowPlayingLayout.setVisibility(View.GONE);
+                    seekTrack.setEnabled(false);
                     seekTrack.setProgress(0);
+                    currentTrackTime.setText("00:00");
+                    totalTrackTime.setText("00:00");
                 } else {
                     nowPlayingLayout.setVisibility(View.VISIBLE);
+                    seekTrack.setEnabled(true);
                     txtSong.setText(currentSong.getTitle());
                     txtAlbum.setText(currentSong.getAlbum());
                     txtArtist.setText(currentSong.getArtist());
@@ -268,23 +269,23 @@ public class PlayerControlFragment extends Fragment implements View.OnClickListe
         return mpd.getPlaylist().getByIndex(status.getSongPos());
     }
 
-    private void setState(String newState) {
-        if (newState.equals(state.toString())) {
+    private void setCurrentState(String newState) {
+        if (newState.equals(currentState.toString())) {
             return;
         }
-        String logMessage = "State changed from " + state + " to ";
+        String logMessage = "State changed from " + currentState + " to ";
         if (newState.equals(MPDStatus.MPD_STATE_PLAYING)) {
-            state = State.PLAYING;
+            currentState = State.PLAYING;
         } else if (newState.equals(MPDStatus.MPD_STATE_PAUSED)) {
-            state = State.PAUSED;
+            currentState = State.PAUSED;
         } else if (newState.equals(MPDStatus.MPD_STATE_STOPPED)) {
-            state = State.STOPPED;
+            currentState = State.STOPPED;
         } else if (newState.equals(MPDStatus.MPD_STATE_UNKNOWN)) {
-            state = State.UNKNOWN;
+            currentState = State.UNKNOWN;
         } else {
             Log.w(TAG, "Invalid state passed to setState()");
         }
-        Log.d(TAG, logMessage + state);
+        Log.d(TAG, logMessage + currentState);
     }
 
     @Override
@@ -316,9 +317,9 @@ public class PlayerControlFragment extends Fragment implements View.OnClickListe
             @Override
             public void run() {
                 try {
-                    if (state == State.PLAYING) {
+                    if (currentState == State.PLAYING) {
                         mpd.pause();
-                    } else if (state == State.STOPPED || state == State.PAUSED) {
+                    } else if (currentState == State.STOPPED || currentState == State.PAUSED) {
                         mpd.play();
                     }
                 } catch (MPDServerException e) {
@@ -388,33 +389,31 @@ public class PlayerControlFragment extends Fragment implements View.OnClickListe
 
     @Override
     public void playlistChanged(MPDStatus mpdStatus, int oldPlaylistVersion) {
+        Log.i(TAG, "Playlist changed");
         this.mpdStatus = mpdStatus;
         updateNowPlayingText(mpdStatus);
-        Log.d(TAG, "Playlist changed");
     }
 
     @Override
     public void trackChanged(MPDStatus mpdStatus, int oldTrack) {
         Log.i(TAG, "Track changed");
         this.mpdStatus = mpdStatus;
-        currentSong = getCurrentSong(mpdStatus);
         updateNowPlayingText(mpdStatus);
         maybeStartTrackPositionTimer();
-    }
-
-    private void maybeStartTrackPositionTimer() {
-//        setVolumeAndTrackPosition();
-        if (state == State.PLAYING) {
-            startTrackPositionTimer();
-        } else if(state == State.PAUSED || state == State.STOPPED) {
-            stopTrackPositionTimer();
-        }
     }
 
     @Override
     public void trackPositionChanged(MPDStatus status) {
         this.mpdStatus = status;
         maybeStartTrackPositionTimer();
+    }
+
+    private void maybeStartTrackPositionTimer() {
+        if (currentState == State.PLAYING) {
+            startTrackPositionTimer();
+        } else if(currentState == State.PAUSED || currentState == State.STOPPED) {
+            stopTrackPositionTimer();
+        }
     }
 
     private void startTrackPositionTimer() {
@@ -458,7 +457,6 @@ public class PlayerControlFragment extends Fragment implements View.OnClickListe
                     currentTrackTime.setText(timeToString(elapsed));
                 }
             });
-            lastElapsedTime = elapsed;
         }
     }
 
@@ -481,7 +479,7 @@ public class PlayerControlFragment extends Fragment implements View.OnClickListe
     @Override
     public void stateChanged(MPDStatus mpdStatus, String oldState) {
         this.mpdStatus = mpdStatus;
-        setState(mpdStatus.getState());
+        setCurrentState(mpdStatus.getState());
         setButtonPlayIcon();
         maybeStartTrackPositionTimer();
     }

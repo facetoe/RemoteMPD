@@ -129,7 +129,6 @@ public class PlaylistFragment extends AbstractListFragment implements StatusChan
         super.onStart();
         app.getAsyncHelper().addStatusChangeListener(this);
         if (entries.size() == 0) {
-            Log.i(TAG, "onStart() entries 0");
             updateEntries(app.getMpd().getPlaylist().getMusicList());
         }
     }
