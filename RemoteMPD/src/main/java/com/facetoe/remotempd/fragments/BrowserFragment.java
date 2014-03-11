@@ -42,6 +42,7 @@ public class BrowserFragment extends AbstractListFragment implements ConnectionL
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i(TAG, savedInstanceState == null ? "savedInstance state was null" : "savedInstance state was not null");
     }
 
     @Override
@@ -63,11 +64,13 @@ public class BrowserFragment extends AbstractListFragment implements ConnectionL
     @Override
     public void onPause() {
         super.onPause();
+        Log.i(TAG, "onPause()");
         app.getAsyncHelper().removeConnectionListener(this);
     }
 
     @Override
     public void onResume() {
+        Log.i(TAG, "onResume()");
         super.onResume();
         if (getUserVisibleHint()) {
             onVisible();
@@ -119,6 +122,7 @@ public class BrowserFragment extends AbstractListFragment implements ConnectionL
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
+
         // If this fragment is not visible, don't consume the event. Return false to let
         // whichever fragment is currently visible deal with it.
         if (!getUserVisibleHint()) {

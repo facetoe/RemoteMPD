@@ -13,10 +13,7 @@ import com.facetoe.remotempd.R;
 import com.facetoe.remotempd.RMPDApplication;
 import com.facetoe.remotempd.adapters.AbstractMPDArrayAdapter;
 import com.facetoe.remotempd.adapters.PlaylistAdapter;
-import org.a0z.mpd.Item;
-import org.a0z.mpd.MPDPlaylist;
-import org.a0z.mpd.MPDStatus;
-import org.a0z.mpd.Music;
+import org.a0z.mpd.*;
 import org.a0z.mpd.event.StatusChangeListener;
 import org.a0z.mpd.exception.MPDServerException;
 
@@ -30,6 +27,8 @@ import java.util.Arrays;
  */
 public class PlaylistFragment extends AbstractListFragment implements StatusChangeListener {
     private final String TAG = RMPDApplication.APP_PREFIX + "PlaylistFragment";
+
+    private MPDStatus status;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -144,6 +143,15 @@ public class PlaylistFragment extends AbstractListFragment implements StatusChan
     @Override
     public void onVisible() {
         setTitle("Playlist");
+        if(status != null) {
+            setPlayingIcon(status);
+            listItems.post(new Runnable() {
+                @Override
+                public void run() {
+                    listItems.setSelection(status.getSongPos());
+                }
+            });
+        }
     }
 
     @Override
@@ -221,21 +229,28 @@ public class PlaylistFragment extends AbstractListFragment implements StatusChan
 
     @Override
     public void volumeChanged(MPDStatus mpdStatus, int oldVolume) {
-
+        status = mpdStatus;
     }
 
     @Override
     public void playlistChanged(MPDStatus mpdStatus, int oldPlaylistVersion) {
+        status = mpdStatus;
         updateEntries(app.getMpd().getPlaylist().getMusicList());
     }
 
     @Override
     public void trackChanged(MPDStatus mpdStatus, int oldTrack) {
+        setPlayingIcon(mpdStatus);
+    }
 
+    private void setPlayingIcon(MPDStatus mpdStatus) {
+        PlaylistAdapter playlistAdapter = (PlaylistAdapter)adapter;
+        playlistAdapter.setNowPlayingIcon(mpdStatus.getSongId());
     }
 
     @Override
     public void stateChanged(MPDStatus mpdStatus, String oldState) {
+        status = mpdStatus;
 
     }
 
