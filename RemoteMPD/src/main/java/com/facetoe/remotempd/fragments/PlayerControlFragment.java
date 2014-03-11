@@ -56,14 +56,14 @@ public class PlayerControlFragment extends Fragment implements View.OnClickListe
     private long lastSongTime = 0;
     private Handler handler;
 
-    private enum PLAYER_STATE {
+    private enum State {
         PLAYING,
         PAUSED,
         STOPPED,
         UNKNOWN
     }
 
-    private PLAYER_STATE playerState = PLAYER_STATE.UNKNOWN;
+    private State state = State.UNKNOWN;
     private MPDStatus mpdStatus;
 
     private Music currentSong;
@@ -96,22 +96,19 @@ public class PlayerControlFragment extends Fragment implements View.OnClickListe
         seekVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                Log.i(TAG, "progress changed: " + progress + " from user: " + fromUser);
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                Log.i(TAG, "progress stop: " + seekVolume.getProgress());
+                Log.i(TAG, "Volume set to: " + seekVolume.getProgress());
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
                         try {
-                            Log.i(TAG, "Adjusting volume");
                             mpd.setVolume(seekVolume.getProgress());
                         } catch (MPDServerException e) {
                             handleError(e);
@@ -135,16 +132,18 @@ public class PlayerControlFragment extends Fragment implements View.OnClickListe
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            mpd.seek((long) seekTrack.getProgress());
-                        } catch (MPDServerException e) {
-                            handleError(e);
+                if(getCurrentSong(mpdStatus) != null) {
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                mpd.seek((long) seekTrack.getProgress());
+                            } catch (MPDServerException e) {
+                                handleError(e);
+                            }
                         }
-                    }
-                }).start();
+                    }).start();
+                }
             }
         });
 
@@ -202,7 +201,6 @@ public class PlayerControlFragment extends Fragment implements View.OnClickListe
                     setState(state);
                     setButtonPlayIcon();
                     updateRepeatRandomButtons(mpdStatus);
-                    setVolumeAndTrackPosition();
                     updateNowPlayingText(mpdStatus);
                     maybeStartTrackPositionTimer();
 
@@ -234,12 +232,12 @@ public class PlayerControlFragment extends Fragment implements View.OnClickListe
         handler.post(new Runnable() {
             @Override
             public void run() {
-                if (playerState == PLAYER_STATE.PLAYING) {
+                if (state == State.PLAYING) {
                     btnPlay.setImageResource(R.drawable.ic_media_pause);
-                } else if (playerState == PLAYER_STATE.PAUSED || playerState == PLAYER_STATE.STOPPED) {
+                } else if (state == State.PAUSED || state == State.STOPPED) {
                     btnPlay.setImageResource(R.drawable.ic_media_play);
                 } else {
-                    Log.w(TAG, "Unknown state: " + playerState);
+                    Log.w(TAG, "Unknown state: " + state);
                 }
             }
         });
@@ -253,6 +251,7 @@ public class PlayerControlFragment extends Fragment implements View.OnClickListe
                 // If currentSong is null then the playlist is empty.
                 if (currentSong == null) {
                     nowPlayingLayout.setVisibility(View.GONE);
+                    seekTrack.setProgress(0);
                 } else {
                     nowPlayingLayout.setVisibility(View.VISIBLE);
                     txtSong.setText(currentSong.getTitle());
@@ -270,22 +269,22 @@ public class PlayerControlFragment extends Fragment implements View.OnClickListe
     }
 
     private void setState(String newState) {
-        if (newState.equals(playerState.toString())) {
+        if (newState.equals(state.toString())) {
             return;
         }
-        String logMessage = "State changed from " + playerState + " to ";
+        String logMessage = "State changed from " + state + " to ";
         if (newState.equals(MPDStatus.MPD_STATE_PLAYING)) {
-            playerState = PLAYER_STATE.PLAYING;
+            state = State.PLAYING;
         } else if (newState.equals(MPDStatus.MPD_STATE_PAUSED)) {
-            playerState = PLAYER_STATE.PAUSED;
+            state = State.PAUSED;
         } else if (newState.equals(MPDStatus.MPD_STATE_STOPPED)) {
-            playerState = PLAYER_STATE.STOPPED;
+            state = State.STOPPED;
         } else if (newState.equals(MPDStatus.MPD_STATE_UNKNOWN)) {
-            playerState = PLAYER_STATE.UNKNOWN;
+            state = State.UNKNOWN;
         } else {
             Log.w(TAG, "Invalid state passed to setState()");
         }
-        Log.d(TAG, logMessage + playerState);
+        Log.d(TAG, logMessage + state);
     }
 
     @Override
@@ -317,9 +316,9 @@ public class PlayerControlFragment extends Fragment implements View.OnClickListe
             @Override
             public void run() {
                 try {
-                    if (playerState == PLAYER_STATE.PLAYING) {
+                    if (state == State.PLAYING) {
                         mpd.pause();
-                    } else if (playerState == PLAYER_STATE.STOPPED || playerState == PLAYER_STATE.PAUSED) {
+                    } else if (state == State.STOPPED || state == State.PAUSED) {
                         mpd.play();
                     }
                 } catch (MPDServerException e) {
@@ -396,6 +395,7 @@ public class PlayerControlFragment extends Fragment implements View.OnClickListe
 
     @Override
     public void trackChanged(MPDStatus mpdStatus, int oldTrack) {
+        Log.i(TAG, "Track changed");
         this.mpdStatus = mpdStatus;
         currentSong = getCurrentSong(mpdStatus);
         updateNowPlayingText(mpdStatus);
@@ -403,10 +403,10 @@ public class PlayerControlFragment extends Fragment implements View.OnClickListe
     }
 
     private void maybeStartTrackPositionTimer() {
-        setVolumeAndTrackPosition();
-        if (playerState == PLAYER_STATE.PLAYING) {
+//        setVolumeAndTrackPosition();
+        if (state == State.PLAYING) {
             startTrackPositionTimer();
-        } else {
+        } else if(state == State.PAUSED || state == State.STOPPED) {
             stopTrackPositionTimer();
         }
     }
@@ -444,6 +444,12 @@ public class PlayerControlFragment extends Fragment implements View.OnClickListe
         public void run() {
             Date now = new Date();
             elapsed = start + ((now.getTime() - date.getTime()) / 1000);
+            if(elapsed >= mpdStatus.getTotalTime()) {
+                Log.i(TAG, "Song is finished, canceling task");
+                cancel();
+                return;
+            }
+
             seekTrack.setProgress((int) elapsed);
 
             handler.post(new Runnable() {

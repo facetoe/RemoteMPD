@@ -18,25 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-
-class CachedItems {
-    private List<? extends Item> items;
-    private String title;
-
-    public CachedItems(List<? extends Item> items, String title) {
-        this.items = items;
-        this.title = title;
-    }
-
-    public List<? extends Item> getItems() {
-        return items;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-}
-
 /**
  * RemoteMPD
  * Created by facetoe on 26/02/14.
@@ -256,7 +237,7 @@ public class BrowserFragment extends AbstractListFragment implements ConnectionL
                 updateEntries(artists);
             }
         } catch (MPDServerException e) {
-            app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED);
+            handleError(e);
         }
     }
 
@@ -267,7 +248,7 @@ public class BrowserFragment extends AbstractListFragment implements ConnectionL
             List<Album> albums = mpd.getAlbums(artist);
             displayAndAddToBackstack(albums, artist);
         } catch (MPDServerException e) {
-            Log.e(TAG, "Fail: ", e);
+            handleError(e);
         }
     }
 
@@ -278,7 +259,7 @@ public class BrowserFragment extends AbstractListFragment implements ConnectionL
             List<Music> songs = mpd.getSongs(album.getArtist(), album);
             displayAndAddToBackstack(songs, album);
         } catch (MPDServerException e) {
-            Log.e(TAG, "Error", e);
+            handleError(e);
         }
         onVisible();
     }
@@ -330,7 +311,7 @@ public class BrowserFragment extends AbstractListFragment implements ConnectionL
                     toast.setText("Added " + artist.getName());
                     toast.show();
                 } catch (MPDServerException e) {
-                    app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED);
+                    handleError(e);
                 }
             }
         }).start();
@@ -381,7 +362,7 @@ public class BrowserFragment extends AbstractListFragment implements ConnectionL
                     toast.show();
                     hideActionbarProgressSpinner();
                 } catch (MPDServerException e) {
-                    app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED);
+                    handleError(e);
                 }
             }
         }).start();
@@ -401,9 +382,31 @@ public class BrowserFragment extends AbstractListFragment implements ConnectionL
                     toast.show();
                     hideActionbarProgressSpinner();
                 } catch (MPDServerException e) {
-                    app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED);
+                    handleError(e);
                 }
             }
         }).start();
+    }
+
+    private void handleError(MPDServerException e) {
+        app.notifyEvent(RMPDApplication.Event.CONNECTION_FAILED, e.getMessage());
+    }
+
+    private static class CachedItems {
+        private List<? extends Item> items;
+        private String title;
+
+        public CachedItems(List<? extends Item> items, String title) {
+            this.items = items;
+            this.title = title;
+        }
+
+        public List<? extends Item> getItems() {
+            return items;
+        }
+
+        public String getTitle() {
+            return title;
+        }
     }
 }

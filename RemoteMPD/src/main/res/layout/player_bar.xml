@@ -91,8 +91,6 @@
                 android:id="@+id/seekProgress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/trackTime"
-                android:layout_marginTop="5dip"
                 android:max="100"
                 android:paddingLeft="30dip"
                 android:paddingRight="30dip"
@@ -115,7 +113,6 @@
                     android:maxLines="1"
                     android:ellipsize="end"
                     android:layout_gravity="center_horizontal"
-                    android:paddingTop="10dp"
                     android:paddingLeft="10dp"
                     android:paddingRight="10dp"/>
 
@@ -148,7 +145,6 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="10dip"
             android:layout_marginBottom="10dip">
 
             <SeekBar

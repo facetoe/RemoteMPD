@@ -29,7 +29,6 @@ import java.util.Arrays;
  * Created by facetoe on 11/02/14.
  */
 public class PlaylistFragment extends AbstractListFragment implements StatusChangeListener {
-    private final MPDPlaylist playlist = app.getMpd().getPlaylist();
     private final String TAG = RMPDApplication.APP_PREFIX + "PlaylistFragment";
 
     @Override
@@ -130,7 +129,8 @@ public class PlaylistFragment extends AbstractListFragment implements StatusChan
         super.onStart();
         app.getAsyncHelper().addStatusChangeListener(this);
         if (entries.size() == 0) {
-            updateEntries(playlist.getMusicList());
+            Log.i(TAG, "onStart() entries 0");
+            updateEntries(app.getMpd().getPlaylist().getMusicList());
         }
     }
 
@@ -180,7 +180,7 @@ public class PlaylistFragment extends AbstractListFragment implements StatusChan
                     @Override
                     public void run() {
                         try {
-                            playlist.clear();
+                            app.getMpd().getPlaylist().clear();
                         } catch (MPDServerException e) {
                             handleError(e);
                         }
@@ -227,7 +227,7 @@ public class PlaylistFragment extends AbstractListFragment implements StatusChan
 
     @Override
     public void playlistChanged(MPDStatus mpdStatus, int oldPlaylistVersion) {
-        updateEntries(playlist.getMusicList());
+        updateEntries(app.getMpd().getPlaylist().getMusicList());
     }
 
     @Override
